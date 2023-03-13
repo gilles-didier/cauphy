@@ -1,0 +1,25 @@
+Package: cauphy
+Version: 0.1
+Date: 2021-05-06
+Title: Evolution of a trait under a Cauchy process
+Author: Gilles Didier <gilles.didier@free.fr>
+Maintainer: Gilles Didier <gilles.didier@free.fr>
+Depends: 
+    R (>= 3.5),
+    ape (>= 5.5)
+Imports:
+    methods,
+    robustbase,
+    phylolm,
+    nloptr,
+    pracma,
+    foreach,
+    doParallel
+Suggests:
+    testthat (>= 3.0.0)
+Description: Evolution of a trait under a Cauchy process.
+License: GPL (>= 2)
+Encoding: UTF-8
+RoxygenNote: 7.2.3
+Config/testthat/edition: 3
+LazyData: true

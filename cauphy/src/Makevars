@@ -1,0 +1,3 @@
+#OBJECTS = RcppExports.o rcpp_functions.o $(SOURCES:.c=.o)
+#PKG_LIBS = $(R_home)/RcppExports.o $(R_home)/rcpp_functions.o $(R_home)/Rmath.o
+OBJECTS = Utils.o  StateTree.o Tree.o SimulateTrait.o Kahan.o ComplexLog.o Cauchy.o Cauchy_R.o init.o
