@@ -272,7 +272,7 @@ test_that("cauphylm lambda", {
   
   
   ## Regression
-  trait <- -3 + 2 * reg + simulateTipsCauchy(tree, 0, disp)
+  trait <- -3 + 2 * reg + rTraitCauchy(1, tree, "lambda", parameters = list(root.value = 0, disp = disp, lambda = 0.5))
   dat <- data.frame(trait = trait, reg = reg)
   
   reslmstart <- cauphylm(trait ~ reg, data = dat, phy = tree, model = "lambda", starting.value = list(lambda = 1))
