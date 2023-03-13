@@ -16,6 +16,7 @@ Imports:
     foreach,
     doParallel
 Suggests:
+    covr,
     testthat (>= 3.0.0)
 Description: Evolution of a trait under a Cauchy process.
 License: GPL (>= 2)
