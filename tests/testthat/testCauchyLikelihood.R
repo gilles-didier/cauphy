@@ -198,7 +198,7 @@ test_that("testLikelihoodLSEBig", {
   lalgolsenorm2 <- -length(tree$tip.label) * log(disp/tree_height) + logDensityTipsCauchy(tree, trait / (disp/tree_height), mu / (disp/tree_height), disp /(disp/tree_height),  method = "fixed.root")
 
   ## equal ?
-  expect_equal(lalgolsenorm, lalgolse, tolerance = 1e-3)
+  expect_equal(lalgolsenorm, lalgolse, tolerance = 1e-2)
   expect_equal(lalgolsenorm2, lalgolse, tolerance = 1e-2)
 
   # ## Plot

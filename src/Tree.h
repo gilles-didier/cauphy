@@ -87,8 +87,6 @@ int fillTips(int n, TypeTree *tree, int *tips);
 void reindexTree(TypeTree *tree, int *index);
 void reindexLeavesFirst(TypeTree *tree);
 
-void completeName(TypeTree *tree);
-
 double getMaximumLeafTime(TypeTree *tree);
 
 /*prune "tree" to keep only leaves in dict*/
@@ -114,10 +112,6 @@ int getRoot(TypeTree *tree);
 int getNumberChildren(int n, TypeTree *tree);
 /*returns the number of leaves of the n subtree of "tree"*/
 int countSubLeaves(int n, TypeTree *tree);
-/*name (numerote) leaves of tree*/
-char **nameBoth(char *prefixIntern, char *prefixLeaf, TypeTree *tree);
-/*name (numerote) leaves of tree*/
-char **nameLeaves(char *prefix, TypeTree *tree);
 /*return a standard feature*/
 //TypeStandardFeature *getBasicStandardFeature(TypeTree *tree);
 /*turn branch lengthes to absolute time*/

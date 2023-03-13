@@ -86,12 +86,6 @@ char *nextTag(char *s, char **tag, char **value) {
    }
 }
 
-
-
-void numprint(char *buffer, double val) {
-    sprintf(buffer, "%.2lf", val);
-}
-
 /*return a lexitree from tab name*/
 TypeLexiTree *getDictNameTab(char **name, int size) {
     int i;

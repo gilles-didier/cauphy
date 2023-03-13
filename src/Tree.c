@@ -27,26 +27,6 @@ static void printNodeDebug(FILE *f, int s, int depth, TypeTree *tree, char **nam
 static void setAbsentRec(int n, int *index, TypeTree *tree);
 static void fillTipsRec(int n, TypeTree *tree, int *tips, int *ntips);
 
-
-void completeName(TypeTree *tree) {
-	int n;
-	if(tree->name == NULL) {
-		tree->name = (char**) malloc(tree->sizeBuf*sizeof(char*));
-		for(n=0; n<tree->sizeBuf; n++) {
-			char tmp[100];
-			sprintf(tmp, "%d", n);
-			tree->name[n] = strdpl(tmp);
-		}
-	} else
-		for(n=0; n<tree->size; n++) {
-			if(tree->name[n] == NULL) {
-				char tmp[100];
-				sprintf(tmp, "%d", n);
-				tree->name[n] = strdpl(tmp);
-			}
-		}
-}
-
 double getMaximumLeafTime(TypeTree *tree) {
     int n;
     for(n=0; n<tree->size && (tree->node[n].child != NOSUCH || tree->time[n] == NO_TIME); n++);
@@ -442,87 +422,6 @@ int getRoot(TypeTree *tree) {
     for(n=0; n<tree->size && tree->parent[n]>=0; n++);
     return n;
 }
-/*name (numerote) leaves of tree*/
-char **nameBoth(char *prefixIntern, char *prefixLeaf, TypeTree *tree) {
-    int n, nLeaves = 1, nInterns = 1, currL = 1, currI = 1, lmax, imax;
-    char **name, buffer[200];
-    if(tree->size == 0)
-        return NULL;
-    name = (char**) malloc(tree->size*sizeof(char*));
-    for(n=0; n<tree->size; n++)
-        if(tree->node[n].child<0)
-            nLeaves++;
-        else
-            nInterns++;
-
-    lmax = (int) floor(log10((double)nLeaves));
-    imax = (int) floor(log10((double)nLeaves));
-    for(n=0; n<tree->size; n++)
-        if(tree->node[n].child<0) {
-            char *tmp = buffer;
-            int i;
-            if(prefixLeaf != NULL)
-                tmp += sprintf(tmp, "%s", prefixLeaf);
-            for(i=(int) floor(log10((double)currL)); i<lmax; i++)
-                tmp += sprintf(tmp, "0");
-            tmp += sprintf(tmp, "%d", currL);
-            name[n] = (char*) malloc((strlen(buffer)+1)*sizeof(char));
-            strcpy(name[n], buffer);
-            currL++;
-        } else {
-            char *tmp = buffer;
-            int i;
-            if(prefixIntern != NULL)
-                tmp += sprintf(tmp, "%s", prefixIntern);
-            for(i=(int) floor(log10((double)currI)); i<imax; i++)
-                tmp += sprintf(tmp, "0");
-            tmp += sprintf(tmp, "%d", currI);
-            name[n] = (char*) malloc((strlen(buffer)+1)*sizeof(char));
-            strcpy(name[n], buffer);
-            currI++;
-        }
-    return name;
-}
-
-/*name (numerote) leaves of tree*/
-char **nameLeaves(char *prefix, TypeTree *tree) {
-    int n, nLeaves = 1, curr = 1, lmax;
-    char **name, buffer[200];
-    if(tree->size == 0)
-        return NULL;
-    name = (char**) malloc(tree->sizeBuf*sizeof(char*));
-    for(n=0; n<tree->size; n++)
-        if(tree->node[n].child<0)
-            nLeaves++;
-    lmax = (int) floor(log10((double)nLeaves));
-    for(n=0; n<tree->size; n++)
-        if(tree->node[n].child<0) {
-            char *tmp = buffer;
-            int i;
-            if(prefix != NULL)
-                tmp += sprintf(tmp, "%s", prefix);
-            for(i=(int) floor(log10((double)curr)); i<lmax; i++)
-                tmp += sprintf(tmp, "0");
-            tmp += sprintf(tmp, "%d", curr);
-            name[n] = (char*) malloc((strlen(buffer)+1)*sizeof(char));
-            strcpy(name[n], buffer);
-            curr++;
-        } else
-            name[n] = NULL;
-    for(n=tree->size; n<tree->sizeBuf; n++)
-        name[n] = NULL;
-    return name;
-}
-
-/*return a standard feature
-TypeStandardFeature *getBasicStandardFeature(TypeTree *tree) {
-    TypeStandardFeature *res;
-    res = (TypeStandardFeature*) malloc(sizeof(TypeStandardFeature));
-    res->name = nameBoth("Node_", "Leaf_", tree);
-    res->comment = NULL;
-    res->info = NULL;
-    return res;
-}*/
 
 /*get the status from comments*/
 char *getSpecy(char *str) {
