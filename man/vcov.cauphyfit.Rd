@@ -30,9 +30,7 @@
 
 \item{k}{numeric, the penalty per parameter to be used; the default \code{k = 2} is the classical AIC.}
 
-\item{parm}{a specification of which parameters are to be given
-    confidence intervals, either a vector of numbers or a vector of
-    names.  If missing, all parameters are considered.}
+\item{parm}{a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.}
 
 \item{level}{the confidence level required.}
 }

@@ -224,7 +224,7 @@ logDensityTipsCauchy <- function(tree, tipTrait, start = NULL, disp, method = c(
   if (!is.null(rootTip)) {
     rootTip <- rootTip - 1
   } else {
-    rootTip <- which.min(colSums(vcv(tree))) - 1 #find_longest_tip_branch(tree) - 1
+    rootTip <- which.min(colSums(cophenetic.phylo(tree))) - 1 #find_longest_tip_branch(tree) - 1
   }
   # likelihood
 	res <-.Call("getLogDensityTipsCauchy", tree, tipTrait, names(tipTrait), start, disp, type, rootTip)

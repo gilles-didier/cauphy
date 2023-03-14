@@ -79,7 +79,7 @@ fitCauchy.internal <- function(phy, X, y,
   # root tip for reml
   rootTip <- NULL
   if (method == "reml") {
-    rootTip <- which.min(colSums(vcv(phy)))
+    rootTip <- which.min(colSums(cophenetic.phylo(phy)))
   }
 
   ## Actual fit
