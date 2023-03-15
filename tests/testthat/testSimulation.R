@@ -60,8 +60,6 @@ test_that("testrTraitCauchy", {
   traitkappa <- rTraitCauchy(n = Nrep, phy, model = "kappa", parameters = list(root.value = mu, disp = disp, kappa = 0.5))
   traitdelta <- rTraitCauchy(n = Nrep, phy, model = "delta", parameters = list(root.value = mu, disp = disp, delta = 0.5))
   
-  traitOU <- rTraitCauchy(n = Nrep, phy, model = "OU", parameters = list(root.value = mu, disp = disp, selection.strength = 0.5, optimal.value = 3))
-  
   set.seed(1289)
   trait1 <- rTraitCauchy(n = 1, phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
   set.seed(1289)

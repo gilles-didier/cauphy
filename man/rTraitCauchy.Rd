@@ -7,7 +7,7 @@
 rTraitCauchy(
   n = 1,
   phy,
-  model = c("cauchy", "OU", "lambda", "kappa", "delta"),
+  model = c("cauchy", "lambda", "kappa", "delta"),
   parameters = NULL
 )
 }
@@ -16,7 +16,7 @@ rTraitCauchy(
 
 \item{phy}{a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.}
 
-\item{model}{a phylogenetic model. Default is "cauchy", for the Cauchy process. Alternative are "OU", "lambda", "kappa", and "delta".}
+\item{model}{a phylogenetic model. Default is "cauchy", for the Cauchy process. Alternative are "lambda", "kappa", and "delta".}
 
 \item{parameters}{list of parameters for the model (see Details).}
 }
@@ -42,14 +42,11 @@ The default choice of parameters is as follow:
   \item{\code{model = delta}}{ 
   \code{root.value = 0}, \code{disp = 1}, \code{delta = 1}
   }
-  \item{\code{model = OU}}{ 
-  \code{root.value = 0}, \code{disp = 1}, \code{optimal.value = 0}, \code{selection.strength = 0}
-  }
 }
 }
 \examples{
 phy <- ape::rphylo(5, 0.1, 0)
-y = rTraitCauchy(n = 1, phy = phy, model = "lambda", parameters = list(root.value = 0, disp = 0.1))
+y = rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 0.1))
 
 }
 \seealso{

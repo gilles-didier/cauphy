@@ -34,6 +34,7 @@ printRTreeTest <- function(tree) {
 	res
 }
 
+#' @importFrom stats reorder
 
 #' @title Cauchy Trait Simulation
 #'
@@ -42,7 +43,7 @@ printRTreeTest <- function(tree) {
 #' 
 #' @param n number of independent replicates
 #' @param phy a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.
-#' @param model a phylogenetic model. Default is "cauchy", for the Cauchy process. Alternative are "OU", "lambda", "kappa", and "delta".
+#' @param model a phylogenetic model. Default is "cauchy", for the Cauchy process. Alternative are "lambda", "kappa", and "delta".
 #' @param parameters list of parameters for the model (see Details).
 #' 
 #' @return
@@ -64,23 +65,20 @@ printRTreeTest <- function(tree) {
 #'   \item{\code{model = delta}}{ 
 #'   \code{root.value = 0}, \code{disp = 1}, \code{delta = 1}
 #'   }
-#'   \item{\code{model = OU}}{ 
-#'   \code{root.value = 0}, \code{disp = 1}, \code{optimal.value = 0}, \code{selection.strength = 0}
-#'   }
 #' }
 #' 
 #' @seealso \code{\link[phylolm]{rTrait}}, \code{\link[ape]{rTraitCont}}
 #' 
 #' @examples
 #' phy <- ape::rphylo(5, 0.1, 0)
-#' y = rTraitCauchy(n = 1, phy = phy, model = "lambda", parameters = list(root.value = 0, disp = 0.1))
+#' y = rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 0.1))
 #' 
 #' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
 #' @export
 #' 
 rTraitCauchy <- function(n = 1, phy,
-                         model = c("cauchy", "OU", "lambda", "kappa", "delta"),
+                         model = c("cauchy", "lambda", "kappa", "delta"),
                          parameters = NULL) {
   ## Check parameters
   if (is.null(n) || length(n) > 1) stop("n needs to be an integer (number of replicates)")
@@ -91,9 +89,8 @@ rTraitCauchy <- function(n = 1, phy,
   phy <- reorder(phy, "pruningwise")
   ## Model and parameters
   model = match.arg(model)
-  parameters.default = c(0, 1, 0, 0, 1, 1, 1)
+  parameters.default = c(0, 1, 1, 1, 1)
   names(parameters.default) <- c("root.value", "disp", 
-                                 "optimal.value", "selection.strength",
                                  "lambda", "kappa", "delta")
   if (is.null(parameters)) {
     parameters <- parameters.default
@@ -104,32 +101,23 @@ rTraitCauchy <- function(n = 1, phy,
                                               paste(names(parameters)[is.na(match_params)], collapse = ", "),
                                               " are unknown."))
     specified <- !c(is.null(parameters$root.value), is.null(parameters$disp),
-                    is.null(parameters$optimal.value), is.null(parameters$selection.strength),
                     is.null(parameters$lambda), is.null(parameters$kappa), is.null(parameters$delta))
     parameters.user <- c(parameters$root.value, parameters$disp,
-                         parameters$optimal.value, parameters$selection.strength,
                          parameters$lambda, parameters$kappa, parameters$delta)
     parameters <- parameters.default
     parameters[specified] <- parameters.user
   }
   p <- as.list(parameters)
-  if (model == "OU" & p$selection.strength == 0) model <- "cauchy"
   if (model == "lambda" & p$lambda == 1) model <- "cauchy"
   if (model == "kappa" & p$kappa == 1) model <- "cauchy"
   if (model == "delta" & p$delta == 1) model <- "cauchy"
   # Simulations
-  if (model == "OU") {
-    sim <- vapply(seq_len(n),
-                  FUN = function(i) simulateTipsCauchyOU(tree = phy, start = p$root.value, disp = p$disp, str = p$selection.strength, mean = p$optimal.value),
-                  FUN.VALUE = rep(0.0, length(phy$tip.label)))
-  } else {
-    if (model %in% c("lambda", "kappa", "delta")) {
-      phy <- transf.branch.lengths(phy, model, parameters = p, check.pruningwise = F)$tree
-    }
-    sim <- vapply(seq_len(n),
-                  FUN = function(i) simulateTipsCauchy(tree = phy, start = p$root.value, disp = p$disp),
-                  FUN.VALUE = rep(0.0, length(phy$tip.label)))
+  if (model %in% c("lambda", "kappa", "delta")) {
+    phy <- transf.branch.lengths(phy, model, parameters = p, check.pruningwise = F)$tree
   }
+  sim <- vapply(seq_len(n),
+                FUN = function(i) simulateTipsCauchy(tree = phy, start = p$root.value, disp = p$disp),
+                FUN.VALUE = rep(0.0, length(phy$tip.label)))
   rownames(sim) <- phy$tip.label
   if (n == 1) {
     sim <- as.vector(sim)
@@ -157,27 +145,6 @@ rTraitCauchy <- function(n = 1, phy,
 #' 
 simulateTipsCauchy <- function(tree, start, disp) {
 	res <-.Call("SimulateTipsCauchy", tree, start, disp)
-	res
-}
-
-#' @title Simulate using the OU Cauchy Process
-#'
-#' @description
-#' Simulate tip values with a OU Cauchy process
-#' 
-#' @inheritParams simulateTipsCauchy
-#' @param str the selection strength of the OU.
-#' @param mean the optimal value of the OU.
-#' 
-#' @return a vector of simulated values.
-#' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
-#' 
-#' @keywords internal
-#' 
-#' 
-simulateTipsCauchyOU <- function(tree, start, disp, str, mean) {
-	res <-.Call("SimulateTipsCauchyOU", tree, start, disp, str, mean)
 	res
 }
 
