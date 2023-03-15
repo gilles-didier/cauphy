@@ -1,19 +1,11 @@
 #ifndef CauchyF
 #define CauchyF
-#include <stdlib.h>
-#include <stdio.h>
-#include "Utils.h"
-#include "StateTree.h"
+#include "Tree.h"
 #include "ComplexLog.h"
 
 typedef struct CAUCHY_PARAM {
 	double start, disp;
 } TypeCauchyParam;
-
-typedef struct OU_CAUCHY_PARAM {
-	double start, disp, str, mean;
-} TypeOUCauchyParam;
-
 
 typedef struct CAUCHY_INFO {
 	int sizeChild, *child;
@@ -21,6 +13,11 @@ typedef struct CAUCHY_INFO {
 	TypeComplex *A;
 } TypeCauchyInfo;
 
+
+#ifdef __cplusplus
+extern "C" {
+namespace Tree {
+#endif
 
 double getCauchyLogDensityStandard(double x,  double d);
 void fillCauchyInfo(int n, TypeTree *tree, double param, TypeCauchyInfo *cinf);
@@ -33,4 +30,10 @@ void fillCauchyAncestralPosteriorLogDensityREML(int n, double *dens, double *tab
 void fillCauchyIncrementPosteriorLogDensityNoStem(int n, double *dens, double *tabVal, int nVal, TypeTree *tree, double disp, double start);
 void fillCauchyIncrementPosteriorLogDensityStem(int n, double *dens, double *tabVal, int nVal, TypeTree *tree, double disp, double start);
 void fillCauchyIncrementPosteriorLogDensityREML(int n, double *dens, double *tabVal, int nVal, TypeTree *tree, double dis);
+
+#ifdef __cplusplus
+}
+}
+#endif
+
 #endif

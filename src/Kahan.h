@@ -1,5 +1,5 @@
-#ifndef DoubleF
-#define DoubleF
+#ifndef KahanF
+#define KahanF
 
 
 #define sign(x) ((x)/fabs((x)))
@@ -16,6 +16,7 @@ void initDoubleKahan(TypeDoubleKahan *ka);
 void sumDoubleKahan(double x, TypeDoubleKahan *ka);
 double totalDoubleKahan(TypeDoubleKahan *ka);
 double sumSignedLogTableKahan(double a[], int sign[], int size);
+
 #ifdef __cplusplus
 }
 #endif

@@ -27,38 +27,6 @@ https://informatique-mia.inra.fr/r4ciam/appelC.html
 #include "SimulateTrait.h"
 #include "Cauchy.h"
 
-#ifdef DO_PS
-#endif
-
-#define STRING_SIZE 300
-#define INC_CUT 5
-#define SEQ_SIZE 30
-#define EXT_OUTPUT "_added.phy"
-#define MAX_PRED 7.5E+07
-
-#define SIZE_BUFFER_CHAR 300
-#define INFTY 1E99
-#define RINFTY 1E99
-#define DEF 10
-#define MIN_VAL 0.000001
-#define DELTA 0.000001
-
-#define MINVAL 0.01
-#define TRIAL 10
-#define FIX_VAL(x) (((x)<=0)?MINVAL:(x))
-
-#define MAX_ITER 1000
-
-#define M_MAX 6
-#define M_MAX_F 4
-#define MIN_TREE 20
-#define PREFIX "table"
-#define MAX_TRIALS 1000
-
-
-static char **readList(FILE *f);
-
-
 SEXP getListElement(SEXP list, const char *str) {
     SEXP elmt = R_NilValue, names = getAttrib(list, R_NamesSymbol);
 
@@ -70,26 +38,11 @@ SEXP getListElement(SEXP list, const char *str) {
     return elmt;
 }
 
-
-SEXP Tree2Newick(TypeTree *tree) {
-	char *buf;
-	buf = (char*) malloc(tree->size*200*sizeof(char));
-	buf[0]= '\0';
-	//sprintTreeNewick(buf, tree);
-	SEXP res = PROTECT(allocVector(STRSXP, 1));
-	SET_STRING_ELT(res, 0, mkChar(buf));
-	free((void*)buf);
-	UNPROTECT(1);
-	return res;
-}
-
 SEXP Tree2Phylo(TypeTree *tree) {
 	SEXP phy;
-	int n, i, j, ind = 0;
-	double *bl;
+	int n, i, ind = 0;
 	SEXP tipLabel, edge, nNode, edgeLength, list_names;
-	SEXP dim;
-	int nrow, ncol, *tab, *edgeP;
+	int *edgeP;
 	double *edgeLengthP;
 	char *namesList[4] = {"edge", "Nnode", "tip.label", "edge.length"};
 	PROTECT(list_names = allocVector(STRSXP,4));
@@ -129,14 +82,13 @@ void inspect(SEXP x) {
 
 TypeTree *Phylo2Tree(SEXP phy) {
 	TypeTree *tree;
-	int n, i, j, *parent;
+	int n, i, *parent;
 	double *bl, *rl;
 	SEXP namesTip, edge;
 	SEXP dim;
 	SEXP rootEdge;
 	int nrow, ncol, *tab;
 
-	// Rprintf("n %d \n", INTEGER(getListElement(phy, "Nnode"))[0]);
 	n = INTEGER(getListElement(phy, "Nnode"))[0];
 	bl = REAL(getListElement(phy, "edge.length"));
 	edge = getListElement(phy, "edge");
@@ -145,10 +97,6 @@ TypeTree *Phylo2Tree(SEXP phy) {
 	if (!isNull(rootEdge)) {
 	  rl = REAL(rootEdge);
 	}
-	// inspect(dim);
-	// Rprintf("nrow %d \n", INTEGER(dim)[0]);
-	// Rprintf("ncol %d \n", INTEGER(dim)[1]);
-	// inspect(edge);
 	nrow = INTEGER(dim)[0];
 	ncol = INTEGER(dim)[1];
 	tab = INTEGER(edge);
@@ -199,8 +147,7 @@ TypeTree *Phylo2Tree(SEXP phy) {
 }
 
 SEXP printRTree(SEXP phy) {
-	const char *inputFileNameTree, *inputFileNameFossil, *outputFileNameOut, *outputFileNameInd;
-	FILE *fi, *fl, *ff, *fout, *find;
+	FILE *fout;
 	TypeTree *tree;
 	
 	tree = Phylo2Tree(phy);
@@ -211,54 +158,14 @@ SEXP printRTree(SEXP phy) {
 	return R_NilValue;
 }
 
-
 SEXP SimulateTipsCauchy(SEXP treeR, SEXP startR, SEXP dispR) {
 	TypeTree *tree;
 	double start, disp, *trait;
 	TypeCauchyStartSimulData data;
 	int n, nTips;
-	
 	tree = Phylo2Tree(treeR);
 	start = asReal(startR);
 	disp = asReal(dispR);
-	trait = (double*) malloc(tree->size*sizeof(double));
-	data.disp = disp;
-	data.start = start;
-	GetRNGstate();
-	simulTrait(trait, tree, cauchyInitStart, cauchyTransStart, (void*) &data);
-	PutRNGstate();
-	nTips = 0;
-	for(n=0; n<tree->size; n++)
-		if(tree->node[n].child == NOSUCH)
-			nTips++;
-	SEXP res = PROTECT(allocVector(REALSXP, nTips));
-	SEXP res_names = PROTECT(res_names = allocVector(STRSXP, nTips));    
-	double *rmat = REAL(res);
-	nTips = 0;
-	for(n=0; n<tree->size; n++)
-		if(tree->node[n].child == NOSUCH) {
-			rmat[nTips] = trait[n];
-			SET_STRING_ELT(res_names, nTips, mkChar(tree->name[n]));
-			nTips++;
-		}
-	setAttrib(res, R_NamesSymbol, res_names);
-	UNPROTECT(2);
-	freeTree(tree);
-	free((void*)trait);
-	return res;
-}
-
-SEXP SimulateTipsCauchyOU(SEXP treeR, SEXP startR, SEXP dispR, SEXP strR, SEXP meanR) {
-	TypeTree *tree;
-	double start, disp, str, mean, *trait;
-	TypeCauchyStartSimulData data;
-	int n, nTips;
-	
-	tree = Phylo2Tree(treeR);
-	start = asReal(startR);
-	disp = asReal(dispR);
-	str = asReal(strR);
-	mean = asReal(meanR);
 	trait = (double*) malloc(tree->size*sizeof(double));
 	data.disp = disp;
 	data.start = start;
@@ -290,10 +197,9 @@ SEXP getLogDensityTipsCauchy(SEXP treeR, SEXP tipTraitR, SEXP tipNamesR, SEXP st
 	TypeTree *tree;
 	double *trait, dens;
 	TypeCauchyInfo *cinf;
-	int n, nTips, type;
+	int n, type;
 	TypeLexiTree *dict;
 
-	// inspect(treeR);
 	tree = Phylo2Tree(treeR);
 	type = asInteger(typeR);
 	trait = (double*) malloc(tree->size*sizeof(double));
@@ -310,7 +216,6 @@ SEXP getLogDensityTipsCauchy(SEXP treeR, SEXP tipTraitR, SEXP tipNamesR, SEXP st
 		tmp = findWordLexi((char*)CHAR(STRING_ELT(tipNamesR, n)), dict);
 		if(tmp != NOSUCH)
 			trait[tmp] = REAL(tipTraitR)[n];
-		//Rprintf("%d\t%s\t%d\n", n, (char*)CHAR(STRING_ELT(tipNamesR, n)), tmp);
 	}
 	freeLexiTree(dict);
 	tree->info = (void*) trait;
@@ -359,7 +264,7 @@ SEXP getLogDensityTipsCauchy(SEXP treeR, SEXP tipTraitR, SEXP tipNamesR, SEXP st
 SEXP getPosteriorLogDensityAncestralCauchy(SEXP nodeR, SEXP tabValR, SEXP treeR, SEXP tipTraitR, SEXP tipNamesR, SEXP startR, SEXP dispR, SEXP typeR) {
 	TypeTree *tree;
 	double *trait, *dens, *tabVal;
-	int n, nTips, node, nVal, i, j, type;
+	int n, node, nVal, i, type;
 	TypeLexiTree *dict;
 	
 	type = asInteger(typeR);
@@ -410,7 +315,7 @@ SEXP getPosteriorLogDensityAncestralCauchy(SEXP nodeR, SEXP tabValR, SEXP treeR,
 SEXP getPosteriorLogDensityIncrementCauchy(SEXP nodeR, SEXP tabValR, SEXP treeR, SEXP tipTraitR, SEXP tipNamesR, SEXP startR, SEXP dispR, SEXP typeR) {
 	TypeTree *tree;
 	double *trait, *dens, *tabVal;
-	int n, nTips, node, nVal, i, j, type;
+	int n, node, nVal, i, type;
 	TypeLexiTree *dict;
 	
 	type = asInteger(typeR);

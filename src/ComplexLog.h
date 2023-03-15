@@ -15,6 +15,11 @@ typedef struct COMPLEX_KAHAN {
 	TypeComplex sum, c, cc, cs, ccs;
 } TypeComplexKahan;
 
+#ifdef __cplusplus
+extern "C" {
+namespace Tree {
+#endif
+
 void initComplexKahan(TypeComplexKahan *ka);
 void sumComplexKahan(TypeComplex x, TypeComplexKahan *ka);
 TypeComplex totalComplexKahan(TypeComplexKahan *ka);
@@ -34,4 +39,10 @@ double getRealComplex(TypeComplex a);
 double getImagComplex(TypeComplex a);
 double getRealLogComplex(TypeComplex a);
 double getImagLogComplex(TypeComplex a);
+
+#ifdef __cplusplus
+}
+}
+#endif
+
 #endif

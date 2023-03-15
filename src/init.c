@@ -14,7 +14,6 @@ extern SEXP getPosteriorLogDensityAncestralCauchy(SEXP, SEXP, SEXP, SEXP, SEXP, 
 extern SEXP getPosteriorLogDensityIncrementCauchy(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP printRTree(SEXP);
 extern SEXP SimulateTipsCauchy(SEXP, SEXP, SEXP);
-extern SEXP SimulateTipsCauchyOU(SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"getLogDensityTipsCauchy",               (DL_FUNC) &getLogDensityTipsCauchy,               7},
@@ -22,7 +21,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"getPosteriorLogDensityIncrementCauchy", (DL_FUNC) &getPosteriorLogDensityIncrementCauchy, 8},
     {"printRTree",                            (DL_FUNC) &printRTree,                            1},
     {"SimulateTipsCauchy",                    (DL_FUNC) &SimulateTipsCauchy,                    3},
-    {"SimulateTipsCauchyOU",                  (DL_FUNC) &SimulateTipsCauchyOU,                  5},
     {NULL, NULL, 0}
 };
 

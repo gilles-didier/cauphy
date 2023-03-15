@@ -1,6 +1,8 @@
+#include <stdlib.h>
 #include <limits.h>
 #include <string.h>
 #include <math.h>
+#include "Utils.h"
 #include "Kahan.h"
 #include "Cauchy.h"
 
@@ -20,11 +22,11 @@ void freeCauchyInfo(int n, TypeTree *tree, TypeCauchyInfo *cinf) {
 
 void fillCauchyInfo(int n, TypeTree *tree, double param, TypeCauchyInfo *cinf) {
   	if(tree->node[n].child == NOSUCH) {
-		if(isUnknown(n, tree)) {
+		if(isnan(((double*)tree->info)[n]) || !isfinite(((double*)tree->info)[n])) {
 			if(tree->name && tree->name[n])
-				error("Unknown leaf %s\n", tree->name[n]);
+				error("Value of %s is not a valid number (%le).\n", tree->name[n], ((double*)tree->info)[n]);
 			else
-				error("Unknown leaf n %d\n", n);
+				error("Value of %s is not a valid number (%le).\n", n, ((double*)tree->info)[n]);
 		}
 		cinf[n].sizeChild = 1;
 		cinf[n].child = (int*) malloc(cinf[n].sizeChild*sizeof(int));
