@@ -8,6 +8,7 @@
 \alias{AIC.cauphylm}
 \alias{predict.cauphylm}
 \alias{confint.cauphylm}
+\alias{coef.cauphylm}
 \title{Generic Methods for cauphylm}
 \usage{
 \method{vcov}{cauphylm}(object, ...)
@@ -23,6 +24,8 @@
 \method{predict}{cauphylm}(object, newdata = NULL, ...)
 
 \method{confint}{cauphylm}(object, parm, level = 0.95, ...)
+
+\method{coef}{cauphylm}(object, ...)
 }
 \arguments{
 \item{object}{an object of class \code{"phylolm"}.}

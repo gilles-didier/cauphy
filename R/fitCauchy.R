@@ -249,6 +249,9 @@ AIC.cauphyfit <- phylolm::AIC.phylolm
 #' @rdname vcov.cauphyfit
 confint.cauphyfit <- function(object, parm, level = 0.95, ...){
   message("Approximated asymptotic confidence interval using the Hessian.")
+  if (is.null(object$vcov)) {
+    object <- compute_vcov.cauphyfit(object)
+  }
   ses <- sqrt(diag(vcov.cauphyfit(object)))
   pnames <- names(ses)
   cf <- object$all_params
@@ -264,3 +267,47 @@ confint.cauphyfit <- function(object, parm, level = 0.95, ...){
   ci[] <- cf[parm] + ses[parm] %o% fac
   ci
 }
+#' @importFrom stats reorder
+#' @export
+#' @method coef cauphyfit
+#' @rdname vcov.cauphyfit
+coef.cauphyfit <- function(object, ...){
+  ## Regression matrix for fixed root
+  X <- NULL
+  if (is.null(X) && object$method == "fixed.root") {
+    X <- matrix(rep(1, length(object$y)), nrow = length(object$y))
+    colnames(X) <- "coef1"
+  }
+  # parameters
+  param_names <- getParamNames(object$model, X)
+  all_params_names <- sub("coef1", "x0", param_names)
+  all_params <- object$disp
+  if (object$method == "fixed.root") all_params <- c(object$x0, all_params)
+  if (object$model == "lambda") all_params <- c(all_params, object$lambda)
+  names(all_params) <- all_params_names
+  return(all_params)
+}
+# #' @export
+# #' @inheritParams MASS::profile.glm
+# #' @method profile cauphyfit
+# #' @rdname vcov.cauphyfit
+# profile.cauphyfit <- function(object, which = 1:p, alpha = 0.01, maxsteps = 10,
+#                               del = zmax/5, trace = FALSE, ...){
+#   object <- compute_vcov(object)
+#   obj <- new("mle",
+#              call = object$call,
+#              coef = coef(object),
+#              fullcoef = coef(object),
+#              vcov = vcov(object),
+#              min = -object$logLik,
+#              details = list(),
+#              minuslogl = minuslogl,
+#              nobs = if(missing(nobs)) NA_integer_ else nobs,
+#              method = method)
+#   
+#   Pnames <- names(B0 <- coef(object))
+#   nonA <- !is.na(B0)
+#   pv0 <- t(as.matrix(B0))
+#   p <- length(Pnames)
+#   if (is.character(which)) which <- match(which, Pnames)
+# }

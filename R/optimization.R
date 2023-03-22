@@ -43,6 +43,8 @@ fitCauchy.internal <- function(phy, X, y,
   
   y <- checkTraitTree(y, phy)
   
+  checkDuplicates(y, phy)
+  
   model <- match.arg(model)
   method <- match.arg(method)
   
@@ -697,4 +699,20 @@ do_optim <- function(minus_like, start.values, lower.values, upper.values,
   # names(sol) <- param_names
   # opt <- opt_fun(optim.algo[[best_algo]], xtol_rel = 1e-8, x0 = sol)
   # opt <- opt_fun("NLOPT_LN_BOBYQA", xtol_rel = 1e-08, x0 = opt_global$solution)
+}
+
+#' @title Check For Duplicated Entries
+#'
+#' @description
+#' Check that the trait are compatible with the tree. Throws an error if not.
+#' Assumes that the trait and tree tips are in the same order, using function 
+#' \code{\link{checkTraitTree}}.
+#'
+#' @param trait (named) vector or matrix of traits being tested.
+#' @param tree phylogenetic tree.
+#'
+#' @keywords internal
+#'
+checkDuplicates <- function(trait, tree) {
+  if (anyDuplicated(trait + diag(vcv(tree)))) stop("The trait vector has duplicated entries on tips that are equidistant from the root. The algorithm cannot currently handle this case. Please consider adding some noise to the tip trait values.")
 }

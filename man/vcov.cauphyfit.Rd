@@ -7,6 +7,7 @@
 \alias{AIC.logLik.cauphyfit}
 \alias{AIC.cauphyfit}
 \alias{confint.cauphyfit}
+\alias{coef.cauphyfit}
 \title{Generic Methods for cauphyfit}
 \usage{
 \method{vcov}{cauphyfit}(object, ...)
@@ -20,6 +21,8 @@
 \method{AIC}{cauphyfit}(object, k = 2, ...)
 
 \method{confint}{cauphyfit}(object, parm, level = 0.95, ...)
+
+\method{coef}{cauphyfit}(object, ...)
 }
 \arguments{
 \item{object}{an object of class \code{"phylolm"}.}

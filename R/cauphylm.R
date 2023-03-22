@@ -244,6 +244,9 @@ predict.cauphylm <- phylolm::predict.phylolm
 #' @rdname vcov.cauphylm
 confint.cauphylm <- function(object, parm, level = 0.95, ...){
   message("Approximated asymptotic confidence interval using the Hessian.")
+  if (is.null(object$vcov)) {
+    object <- compute_vcov.cauphylm(object)
+  }
   cf <- object$all_params
   ses <- sqrt(diag(vcov.cauphylm(object)))
   pnames <- names(ses)
@@ -258,4 +261,16 @@ confint.cauphylm <- function(object, parm, level = 0.95, ...){
   ci <- array(NA_real_, dim = c(length(parm), 2L), dimnames = list(parm, pct))
   ci[] <- cf[parm] + ses[parm] %o% fac
   ci
+}
+#' @export
+#' @method coef cauphylm
+#' @rdname vcov.cauphylm
+coef.cauphylm <- function(object, ...){
+  ## Regression matrix for fixed root
+  param_names <- getParamNames(object$model, object$X)
+  all_params_names <- c(names(object$coefficients), param_names[!grepl("coef", param_names)])
+  all_params <- c(object$coefficients, object$disp)
+  if (object$model == "lambda") all_params <- c(all_params, object$lambda)
+  names(all_params) <- all_params_names
+  return(all_params)
 }
