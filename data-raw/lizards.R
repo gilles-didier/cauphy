@@ -4,11 +4,11 @@
 ## Dryad, Dataset, https://doi.org/10.5061/dryad.9g182
 
 ## Phylogenetic Tree
-phy <- read.tree(file = file.path("data-raw", "GA_Anolis_MCC.tre"))
+phy <- read.tree(file = file.path("data-raw", "Mahler_et_al_2013_Data", "GA_Anolis_MCC.tre"))
 ## Data
-dat <- read.csv(file = file.path("data-raw", "GA_Anolis_traits.csv"))
+dat <- read.csv(file = file.path("data-raw", "Mahler_et_al_2013_Data", "GA_Anolis_traits.csv"))
 ## ecomorphs
-ecomorphs <- read.csv(file.path("data-raw", "GA_Anolis_trad_ecomorph_class.csv"),
+ecomorphs <- read.csv(file.path("data-raw", "Mahler_et_al_2013_Data", "GA_Anolis_trad_ecomorph_class.csv"),
                       header = FALSE)
 ecomorphs <- ecomorphs[match(phy$tip.label, ecomorphs[, 1]), ]
 ecomorphs <- factor(ecomorphs[, 2])
@@ -24,7 +24,7 @@ ecomorphs <- factor(ecomorphs, level = sort(levels(ecomorphs)))
 ## Keep only svl
 svl <- dat[, "AVG.SVL"]
 names(svl) <- dat$species
-svl <- CauPhy:::checkTraitTree(svl, phy)
+svl <- suppressWarnings(cauphy:::checkTraitTree(svl, phy))
 
 ## Dataset
 lizards <- list(phy = phy,
