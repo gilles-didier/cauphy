@@ -1,0 +1,40 @@
+navbar:
+  left:
+  - text: Example Analysis
+    href: articles/lizards.html
+  - text: Reference
+    href: reference/index.html
+
+reference:
+  - title: "Fitting the Cauchy Process"
+    desc: "Functions to fit the Cauchy process."
+    contents: 
+      - fitCauchy
+      - vcov.cauphyfit
+      - compute_vcov
+  - title: "Ancestral Reconstruction"
+    desc: "Functions to perform ancestral state and increment reconstruction."
+    contents: 
+      - ancestral
+      - increment
+      - plot.ancestralCauchy
+      - plot_asr
+  - title: "Simulation"
+    desc: "Function to simulate a Cauchy process."
+    contents: 
+      - rTraitCauchy
+  - title: "Datasets"
+    desc: "Example datasets"
+    contents:
+      - lizards
+  - title: "Cauchy Phylogenetic Regression"
+    desc: "Functions to fit a Cauchy Process phylogenetic regression."
+    contents: 
+      - cauphylm
+      - vcov.cauphylm
+  - title: "Densities"
+    desc: "Functions to compute likelihood and posterior densities."
+    contents: 
+      - logDensityTipsCauchy
+      - posteriorDensityAncestral
+      - posteriorDensityIncrement
