@@ -287,27 +287,144 @@ coef.cauphyfit <- function(object, ...){
   names(all_params) <- all_params_names
   return(all_params)
 }
-# #' @export
-# #' @inheritParams MASS::profile.glm
-# #' @method profile cauphyfit
-# #' @rdname vcov.cauphyfit
-# profile.cauphyfit <- function(object, which = 1:p, alpha = 0.01, maxsteps = 10,
-#                               del = zmax/5, trace = FALSE, ...){
-#   object <- compute_vcov(object)
-#   obj <- new("mle",
-#              call = object$call,
-#              coef = coef(object),
-#              fullcoef = coef(object),
-#              vcov = vcov(object),
-#              min = -object$logLik,
-#              details = list(),
-#              minuslogl = minuslogl,
-#              nobs = if(missing(nobs)) NA_integer_ else nobs,
-#              method = method)
-#   
-#   Pnames <- names(B0 <- coef(object))
-#   nonA <- !is.na(B0)
-#   pv0 <- t(as.matrix(B0))
-#   p <- length(Pnames)
-#   if (is.character(which)) which <- match(which, Pnames)
-# }
+
+#' @title Method for Profiling \code{cauphyfit} Objects
+#'
+#' @method profile cauphyfit
+#' 
+#' @description
+#' Investigates the profile log-likelihood function for a fitted model of class \code{cauphyfit}.
+#' 
+#' @param fitted the \code{cauphyfit} fitted model object.
+#' @param which the original model parameters which should be profiled. This can be a numeric or character vector. By default, all parameters are profiled.
+#' @param level highest confidence level for parameters intervals, computed using the approximated Hessian (see \code{\link{compute_vcov}}).
+#' @param npoints number of points to profile the likelihood for each parameter.
+#' @param ... further arguments passed to or from other methods.
+#' 
+#' @details 
+#' This function computes a confidence interval for the parameters using \code{\link{confint.cauphyfit}},
+#' and then compute the likelihood function between the bounds of the interval, for each parameter,
+#' all other parameters being fixed.
+#'
+#' @return An object of class \code{profile.cauphyfit}, which is a list with an element for each parameter being profiled.
+#' The elements are data-frames with two variables
+#'  * par.vals a matrix of parameter values for each fitted model.
+#'  * profLogLik	the profile log likelihood.
+#' 
+#' @examples
+#' phy <- ape::rphylo(5, 0.1, 0)
+#' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
+#' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
+#' pr <- profile(fit)
+#' plot(pr)
+#' 
+#' @seealso \code{\link{fitCauchy}}, \code{\link{profile}}, \code{\link{plot.profile.cauphyfit}}
+#' 
+#' @export
+#'
+profile.cauphyfit <- function(fitted, which = 1:npar, level = 0.80, npoints = 100, ...){
+  # Fitted object
+  fitted <- compute_vcov(fitted)
+  ci <- suppressMessages(confint.cauphyfit(fitted, level = level))
+  ci["disp", 1] <- max(0, ci["disp", 1]) # make sure lower bound is larger than 0
+  estim <- fitted$all_params
+  names_params <- names(estim)
+
+  # likelihood
+  X <- NULL
+  if (is.null(X) && fitted$method == "fixed.root") {
+    X <- matrix(rep(1, length(fitted$y)), nrow = length(fitted$y))
+    colnames(X) <- "coef1"
+  }
+  minus_like <- switch(fitted$method,
+                       reml = minusLikelihoodREML,
+                       fixed.root = minusLikelihoodFixedRoot(X),
+                       random.root = minusLikelihoodRandomRoot)
+  like_untransformed <- function(param, param_names, ...) {
+    names(param) <- param_names
+    param <- transform_values(param)
+    return(- minus_like(param, param_names, ...))
+  }
+
+  # select params
+  npar <- length(names_params)
+  if (is.character(which)) {
+    whichind <- match(which, names_params)
+    if (anyNA(whichind)) message(paste0("Parameters ",
+                                        paste0(which[is.na(whichind)], collapse = ", "),
+                                        " are not in the fitted object, and will be ignored."))
+    which <- whichind[!is.na(whichind)]
+  }
+  if (any(which > npar)) {
+    message(paste0("Parameters with indexes ",
+                   paste0(which[which > npar], collapse = ", "),
+                   " are not in the fitted object, and will be ignored."))
+    which <- which[which <= npar]
+  }
+  
+  # result
+  par.vals.estim <- rep(1, npoints + 1) %*% t(estim)
+  par.vals.estim <- as.data.frame(par.vals.estim)
+  res <- list()
+  for (param in which) {
+    grid <- seq(ci[param, 1], ci[param, 2], length.out = npoints)
+    grid <- c(grid, estim[param])
+    grid <- sort(grid)
+    par.vals <- par.vals.estim
+    par.vals[, param] <- grid
+    profLogLik <- apply(par.vals, 1, like_untransformed,
+                        param_names = names_params,
+                        tree = fitted$phy, trait = fitted$trait, Xdesign = X, model = fitted$model, rootTip = fitted$root_tip_reml)
+    res[[names_params[param]]] <- list(par.vals = par.vals,
+                                       profLogLik = profLogLik)
+  }
+  class(res) <- "profile.cauphyfit"
+  return(res)
+}
+
+#' @importFrom graphics abline
+NULL
+
+##
+#' @title Plot for class \code{profile.cauphyfit}
+#'
+#' @description
+#' This function takes an object of class code{\link{profile.cauphyfit}},
+#' and plots the profile likelihood for each parameter.
+#'
+#' @param x an object of class \code{profile.cauphyfit}
+#' @param n.col the number of columns on which to display the plot. Can be left blank.
+#' @param ... further arguments to be passed to \code{\link{plot}}.
+#' 
+#' @return
+#' NULL
+#' 
+#' @examples
+#' phy <- ape::rphylo(5, 0.1, 0)
+#' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
+#' fit <- fitCauchy(phy, dat, model = "cauchy", method = "fixed.root")
+#' pr <- profile(fit)
+#' plot(pr)
+#' 
+#' @seealso \code{\link{profile.cauphyfit}}, \code{\link{fitCauchy}}
+#' 
+#' @export
+#'
+plot.profile.cauphyfit <- function(x, n.col, ...){
+  nparams <- length(x)
+  if (missing(n.col)) {
+    n.col <- ifelse(nparams <= 3, nparams, 3)
+  }
+  n.lines <- (nparams %/% n.col) + ifelse(nparams %% n.col == 0, 0, 1)
+  y_lab <- "Profile Log Likelihood"
+  scr <- split.screen(c(n.lines, n.col))
+  on.exit(close.screen(all.screens = TRUE))
+  for (i in seq_len(nparams)) {
+    screen(scr[i])
+    plot(x[[i]]$par.vals[, names(x)[i]],
+         x[[i]]$profLogLik,
+         xlab = names(x)[i],
+         ylab = y_lab, type = 'l', ...)
+    abline(v = x[[i]]$par.vals[which.max(x[[i]]$profLogLik), names(x)[i]], lty = 2)
+  }
+}

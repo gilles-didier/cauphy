@@ -350,6 +350,45 @@ test_that("cauphylm helper functions", {
   
 })
 
+test_that("profile likelihood", {
+  set.seed(1289)
+  
+  ## parameters
+  ntips <- 20
+  rateTest <- 0.1
+  
+  ## Tree
+  tree <- rphylo(ntips, 0.1, 0)
+  tree$edge.length <-  tree$edge.length / max(vcv(tree))
+  tree_lambda <- phylolm::transf.branch.lengths(tree, model = "lambda", parameters = list(lambda = 0.6))$tree
+  
+  ## root.value
+  mu <- 1
+  disp <- 0.1
+  
+  ## Sim
+  trait <- simulateTipsCauchy(tree_lambda, mu, disp)
+  
+  ## Fit
+  fit <- fitCauchy(tree, trait, model = "lambda", method = "fixed.root")
+  
+  ## Profile
+  expect_message(pr <- profile(fit, which = c("x0", "disp", "blob")),
+                 "Parameters blob are not in the fitted object, and will be ignored.")
+  expect_message(pr <- profile(fit, which = c(1, 2, 5)),
+                 "Parameters with indexes 5 are not in the fitted object, and will be ignored.")
+  
+  pr <- profile(fit)
+  
+  expect_equal(max(pr$lambda$profLogLik), fit$logLik)
+  expect_true(mean(pr$x0$profLogLik) <= fit$logLik)
+  expect_true(mean(pr$disp$profLogLik) <= fit$logLik)
+  expect_true(mean(pr$lambda$profLogLik) <= fit$logLik)
+  
+  plot(pr)
+  
+})
+
 # test_that("testFitBig", {
 #   
 #   ## Parameters

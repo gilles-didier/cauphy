@@ -55,6 +55,18 @@ numerical computation of the Hessian.
 confint(cauchy_reml)
 ```
 
+We can also plot the profile likelihood around the infered parameter value,
+in order to check that the numerical optimization went well, and that the
+likelihood computation did not encounter some numerical robustness issues.
+
+```{r, label="reml_prl_plot", fig.show='hold', fig.height=4, fig.width=7, warning=FALSE, message=FALSE}
+prl <- profile(cauchy_reml)
+plot(prl)
+```
+
+Here, the likelihood is smooth, and has a clear maximum in the estimated
+dispersion value.
+
 ## Cauchy Process Fit - ML
 
 It is also possible to directly fit the maximum likelihood, instead of the REML,
@@ -74,6 +86,15 @@ confint(cauchy_ml)
 
 Note that in this case with many tips, the difference between the ML and REML estimates
 of the dispersion are small.
+
+Finally, we can also plot the profile log-likelihood in both estimated parameters
+(the other parameter being fixed to its optimal value).
+Here again, the likelihood surface seems to be smooth and have a clear maximum.
+
+```{r, label="ml_prl_plot", fig.show='hold', fig.height=4, fig.width=7, warning=FALSE, message=FALSE}
+prl <- profile(cauchy_ml)
+plot(prl)
+```
 
 ## Model Selection
 
