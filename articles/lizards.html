@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Paul
 Bastide</h4>
             
-            <h4 data-toc-skip class="date">2023-03-23</h4>
+            <h4 data-toc-skip class="date">2023-03-24</h4>
       
       
       <div class="hidden name"><code>lizards.Rmd</code></div>
@@ -117,13 +117,23 @@ through the numerical computation of the Hessian.</p>
 <span><span class="co">#&gt; Approximated asymptotic confidence interval using the Hessian.</span></span>
 <span><span class="co">#&gt;            2.5 %      97.5 %</span></span>
 <span><span class="co">#&gt; disp 0.003178267 0.005773856</span></span></code></pre></div>
+<p>We can also plot the profile likelihood around the infered parameter
+value, in order to check that the numerical optimization went well, and
+that the likelihood computation did not encounter some numerical
+robustness issues.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/profile.html" class="external-link">profile</a></span><span class="op">(</span><span class="va">cauchy_reml</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">prl</span><span class="op">)</span></span></code></pre></div>
+<p><img src="lizards_files/figure-html/reml_prl_plot-1.png" width="672"></p>
+<p>Here, the likelihood is smooth, and has a clear maximum in the
+estimated dispersion value.</p>
 </div>
 <div class="section level2">
 <h2 id="cauchy-process-fit---ml">Cauchy Process Fit - ML<a class="anchor" aria-label="anchor" href="#cauchy-process-fit---ml"></a>
 </h2>
 <p>It is also possible to directly fit the maximum likelihood, instead
 of the REML, in this case with a fixed root.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cauchy_ml</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fitCauchy.html">fitCauchy</a></span><span class="op">(</span><span class="va">phy</span>, <span class="va">svl</span>, model <span class="op">=</span> <span class="st">"cauchy"</span>, method <span class="op">=</span> <span class="st">"fixed.root"</span><span class="op">)</span></span>
 <span><span class="va">cauchy_ml</span></span>
 <span><span class="co">#&gt; Call:</span></span>
@@ -138,7 +148,7 @@ of the REML, in this case with a fixed root.</p>
 <p>In this case, both the root value and the dispersion are estimated
 using ML, and their confidence interval can also be approximated using
 the Hessian.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">cauchy_ml</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Approximated asymptotic confidence interval using the Hessian.</span></span>
 <span><span class="co">#&gt;            2.5 %      97.5 %</span></span>
@@ -146,6 +156,14 @@ the Hessian.</p>
 <span><span class="co">#&gt; disp 0.003207639 0.005809221</span></span></code></pre></div>
 <p>Note that in this case with many tips, the difference between the ML
 and REML estimates of the dispersion are small.</p>
+<p>Finally, we can also plot the profile log-likelihood in both
+estimated parameters (the other parameter being fixed to its optimal
+value). Here again, the likelihood surface seems to be smooth and have a
+clear maximum.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/profile.html" class="external-link">profile</a></span><span class="op">(</span><span class="va">cauchy_ml</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">prl</span><span class="op">)</span></span></code></pre></div>
+<p><img src="lizards_files/figure-html/ml_prl_plot-1.png" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="model-selection">Model Selection<a class="anchor" aria-label="anchor" href="#model-selection"></a>
@@ -156,7 +174,7 @@ value of the Cauchy fit with those of Gaussian models.</p>
 an ML estimate (with fixed root). We only compare the CP with the BM, OU
 and EB without measurement error for simplicity, but results for other
 Gaussian models are similar.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/lamho86/phylolm" class="external-link">phylolm</a></span><span class="op">)</span></span>
 <span><span class="va">bm_ml</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phylolm/man/phylolm.html" class="external-link">phylolm</a></span><span class="op">(</span><span class="va">svl</span> <span class="op">~</span> <span class="fl">1</span>, phy <span class="op">=</span> <span class="va">phy</span>, model <span class="op">=</span> <span class="st">"BM"</span><span class="op">)</span></span>
 <span><span class="va">ou_ml</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phylolm/man/phylolm.html" class="external-link">phylolm</a></span><span class="op">(</span><span class="va">svl</span> <span class="op">~</span> <span class="fl">1</span>, phy <span class="op">=</span> <span class="va">phy</span>, model <span class="op">=</span> <span class="st">"OUfixedRoot"</span><span class="op">)</span></span>
@@ -174,13 +192,13 @@ Gaussian models are similar.</p>
 <div class="section level2">
 <h2 id="ancestral-trait-reconstruction">Ancestral Trait Reconstruction<a class="anchor" aria-label="anchor" href="#ancestral-trait-reconstruction"></a>
 </h2>
-<p>For ancestral trait reconstruction, we compte the posterior trait
+<p>For ancestral trait reconstruction, we compute the posterior trait
 density conditionally on the tip values, given a fitted object.</p>
 <p>To do ancestral state reconstruction, we use the REML fitted object.
 The ML fitted object could also be used, and would give similar results,
 except for the root, which can be reconstructed in the REML case, but is
 fixed in the ML case.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anc_reml</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancestral.html">ancestral</a></span><span class="op">(</span><span class="va">cauchy_reml</span>, n_values <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></code></pre></div>
 <p>We reconstruct the posterior density of each internal node on a grid
 of values. A default grid with <span class="math inline">\(100\)</span>
@@ -192,7 +210,7 @@ internal nodes, but a subset of nodes of interest can be specified.</p>
 Here, node <span class="math inline">\(151\)</span> exhibits a bi-modal
 behavior, between “large” and “small” values of the trait at this
 internal node, representing two possible evolutionary scenarios.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anc_reml</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="lizards_files/figure-html/reml_anc_plot-1.png" width="672"></p>
 </div>
@@ -206,18 +224,18 @@ branch increments can be associated with shifts on the trait value.</p>
 computationally more expensive. A built-in option can allow for
 parallelization of these computations. To avoid long run times, we only
 reconstruct the increment on a few chosen branches here.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">inc_reml</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/increment.html">increment</a></span><span class="op">(</span><span class="va">cauchy_reml</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span>, <span class="fl">157</span><span class="op">)</span>, n_cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>We recover here a behaviour that is complementary to the node
+<p>We recover here a behavior that is complementary to the node
 reconstruction, with the edge ending at node <span class="math inline">\(151\)</span> being bi-modal, with modes around
 <span class="math inline">\(0\)</span> (no change on the edge) and <span class="math inline">\(1\)</span> (shift in the log trait space).</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">inc_reml</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="lizards_files/figure-html/reml_inc_plot-1.png" width="672"></p>
 <p>We can then plot these schematics of these reconstructions on the
 tree, using thermo plots. To avoid any clutter, we only plot a few of
 them here.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_asr.html">plot_asr</a></span><span class="op">(</span><span class="va">cauchy_reml</span>, anc <span class="op">=</span> <span class="va">anc_reml</span>, inc <span class="op">=</span> <span class="va">inc_reml</span>,</span>
 <span>         show.tip.label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>         width.node <span class="op">=</span> <span class="fl">0.8</span>, height.node <span class="op">=</span> <span class="fl">1.8</span>,</span>
