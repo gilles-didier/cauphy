@@ -10,7 +10,7 @@ find_longest_tip_branch(tree)
 \item{tree}{a phylogenetic tree.}
 }
 \value{
-tip with the longuest branch.
+tip with the longest branch.
 }
 \description{
 Find tip with longuest branch

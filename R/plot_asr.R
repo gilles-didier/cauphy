@@ -286,7 +286,7 @@ plot_asr <- function(x,
 #' @title Find the p values of increments
 #' 
 #' @description 
-#' This function fits a standard BM on the tree, and then use the infered variance
+#' This function fits a standard BM on the tree, and then use the inferred variance
 #' to detect "abnormal" increments.
 #' For each branch i, the "pvalue" of a mode is given by the probability of observing
 #' the absolute value of this mode or higher assuming a Gaussian distribution

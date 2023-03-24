@@ -98,7 +98,7 @@ Here, the Cauchy Process is clearly selected by the AIC score.
 
 ## Ancestral Trait Reconstruction
 
-For ancestral trait reconstruction, we compte the posterior trait density
+For ancestral trait reconstruction, we compute the posterior trait density
 conditionally on the tip values, given a fitted object.
 
 To do ancestral state reconstruction, we use the REML fitted object.
@@ -137,7 +137,7 @@ To avoid long run times, we only reconstruct the increment on a few chosen branc
 inc_reml <- increment(cauchy_reml, node = c(142, 151, 157), n_cores = 1)
 ```
 
-We recover here a behaviour that is complementary to the node reconstruction,
+We recover here a behavior that is complementary to the node reconstruction,
 with the edge ending at node $151$ being bi-modal, with modes around $0$ (no change on the edge)
 and $1$ (shift in the log trait space).
 

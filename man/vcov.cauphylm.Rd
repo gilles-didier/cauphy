@@ -39,7 +39,9 @@
 \item{newdata}{an optional data frame to provide the predictor values
   at which predictions should be made. If omitted, the fitted values are used. Currently, predictions are made for new species whose placement in the tree is unknown. Only their covariate information is used. The prediction for the trend model is not currently implemented.}
 
-\item{parm}{a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.}
+\item{parm}{a specification of which parameters are to be given
+    confidence intervals, either a vector of numbers or a vector of
+    names.  If missing, all parameters are considered.}
 
 \item{level}{the confidence level required.}
 }

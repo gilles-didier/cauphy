@@ -325,6 +325,7 @@ test_that("cauphylm helper functions", {
   expect_true(cc[1, 1] <= mu && cc[1, 2] >= mu)
   expect_true(cc[2, 1] <= disp && cc[2, 2] >= disp)
   expect_true(cc[3, 1] <= 1.0 && cc[3, 2] >= 1.0)
+  expect_equal(coef(reslmdat), reslmdat$all_params)
   
   ## No Hessian
   reslmdatbis <- cauphylm(tt ~ 1, data = dat, phy = tree, model = "lambda", hessian = FALSE)
@@ -335,6 +336,7 @@ test_that("cauphylm helper functions", {
   expect_equal(vcov(resfitcau), vcov(reslmdat), ignore_attr = TRUE, tolerance = 1e-2)
   expect_equal(vcov(compute_vcov(fitCauchy(tree, trait, model = "lambda", method = "fixed.root", hessian = FALSE))),
                vcov(resfitcau))
+  expect_equal(coef(resfitcau), resfitcau$all_params)
   
   ## Functions fitCauchy
   resfitcau

@@ -17,7 +17,7 @@ get_p_value_thermo(x, thermo_inc, edge_inc)
 a new thermo object, with signed pvalues as values.
 }
 \description{
-This function fits a standard BM on the tree, and then use the infered variance
+This function fits a standard BM on the tree, and then use the inferred variance
 to detect "abnormal" increments.
 For each branch i, the "pvalue" of a mode is given by the probability of observing
 the absolute value of this mode or higher assuming a Gaussian distribution

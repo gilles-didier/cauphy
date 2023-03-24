@@ -203,7 +203,7 @@ logDensityTipsCauchy <- function(tree, tipTrait, start = NULL, disp, method = c(
 #' 
 #' @param tree a phylogenetic tree.
 #' 
-#' @return tip with the longuest branch.
+#' @return tip with the longest branch.
 #' 
 #' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
