@@ -11,6 +11,8 @@ reference:
   contents:
   - fitCauchy
   - vcov.cauphyfit
+  - profile.cauphyfit
+  - plot.profile.cauphyfit
   - compute_vcov
 - title: Ancestral Reconstruction
   desc: Functions to perform ancestral state and increment reconstruction.
