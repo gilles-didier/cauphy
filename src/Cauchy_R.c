@@ -163,8 +163,10 @@ SEXP printRTree(SEXP phy) {
     numbytes = ftell(fout);
     fseek(fout, 0L, SEEK_SET);
     buffer = (char*)calloc(numbytes+1, sizeof(char));
-    fread(buffer, sizeof(char), numbytes, fout);
+    int size_read = fread(buffer, sizeof(char), numbytes, fout);
     fclose(fout);
+    
+    if (size_read != numbytes) error("Temporary file reading failed.");
     
     buffer[numbytes] = '\0';
     

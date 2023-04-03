@@ -19,7 +19,7 @@ test_that("optim", {
   ## Opt
   res <- fitCauchy(tree, trait, method = "fixed.root")
   res
-  print(res)
+  capture_output(print(res))
   
   ## Change init
   expect_equal(res$logLik,
@@ -73,7 +73,7 @@ test_that("optim, random root", {
   ## Opt
   res <- fitCauchy(tree, trait, method = 'random.root', root.edge = root.edge)
   res
-  print(res)
+  capture_output(print(res))
   
   ## Change init
   expect_equal(res$logLik,
@@ -96,7 +96,7 @@ test_that("optim, random root", {
   
   ## lambda
   reslam <- fitCauchy(tree, trait, method = 'random.root', root.edge = root.edge, model = "lambda")
-  print(reslam)
+  capture_output(print(reslam))
   expect_true(reslam$logLik > res$logLik)
   
   ## vcov
@@ -133,7 +133,7 @@ test_that("optim, reml", {
   ## Opt
   res <- fitCauchy(tree, trait, method = 'reml')
   res
-  print(res)
+  capture_output(print(res))
   
   ## Change init
   expect_equal(res$logLik,
@@ -200,7 +200,7 @@ test_that("cauphylm", {
   reslm <- cauphylm(trait ~ 1, phy = tree)
   reslmdat <- cauphylm(tt ~ 1, data = dat, phy = tree)
   res <- fitCauchy(tree, trait, method = "fixed.root")
-  print(res)
+  capture_output(print(res))
   
   ## Compare fits
   expect_equal(res$logLik, reslm$logLik)
@@ -252,7 +252,7 @@ test_that("cauphylm lambda", {
   reslm <- cauphylm(trait ~ 1, phy = tree, model = "lambda")
   reslmdat <- cauphylm(tt ~ 1, data = dat, phy = tree, model = "lambda")
   res <- fitCauchy(tree, trait, method = "fixed.root", model = "lambda")
-  print(reslm)
+  capture_output(print(reslm))
   
   ## Compare fits
   expect_equal(reslmdat$logLik, reslm$logLik)
@@ -478,5 +478,43 @@ test_that("Errors with species names", {
                "The trait vector has duplicated entries on tips that are equidistant from the root")
   tree$edge.length[tree$edge[, 2] == 1] <- 1.0
   expect_no_error(checkDuplicates(y_data, tree))
+  
+  ## Tree phylo
+  y_data <- rnorm(ntips)
+  names(y_data) <- tree$tip.label
+  ## class
+  class(tree_wrong) <- NULL
+  expect_error(fitCauchy(tree_wrong, y_data),
+               "object \"phy\" is not of class \"phylo\".")
+  expect_error(cauphylm(y_data ~ 1, phy = tree_wrong),
+               "object \"phy\" is not of class \"phylo\".")
+  expect_error(rTraitCauchy(1, phy = tree_wrong),
+               "object \"phy\" is not of class \"phylo\".")
+  ## branch lengths
+  tree_wrong <- tree
+  tree_wrong$edge.length <- NULL
+  expect_error(fitCauchy(tree_wrong, y_data),
+               "the tree has no branch lengths.")
+  expect_error(cauphylm(y_data ~ 1, phy = tree_wrong),
+               "the tree has no branch lengths.")
+  expect_error(rTraitCauchy(1, phy = tree_wrong),
+               "the tree has no branch lengths.")
+  ## tip labels
+  tree_wrong <- tree
+  tree_wrong$tip.label <- NULL
+  expect_error(fitCauchy(tree_wrong, y_data),
+               "the tree has no tip labels.")
+  expect_error(cauphylm(y_data ~ 1, phy = tree_wrong),
+               "the tree has no tip labels.")
+  expect_error(rTraitCauchy(1, phy = tree_wrong),
+               "the tree has no tip labels.")
+  ## binary tree
+  tree_wrong <- tree
+  tree_wrong$edge.length[4] <- 0
+  tree_wrong <- di2multi(tree_wrong)
+  expect_error(fitCauchy(tree_wrong, y_data),
+               "The tree must be binary.")
+  expect_error(cauphylm(y_data ~ 1, phy = tree_wrong),
+               "The tree must be binary.")
   
 })

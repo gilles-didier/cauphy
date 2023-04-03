@@ -64,6 +64,11 @@ cauphylm <- function(formula, data = list(), phy,
                      starting.value = list(disp = NULL,
                                            lambda = NULL),
                      hessian = FALSE) {
+  # Checks
+  if (!inherits(phy, "phylo")) stop("object \"phy\" is not of class \"phylo\".")
+  if (is.null(phy$edge.length)) stop("the tree has no branch lengths.")
+  if (is.null(phy$tip.label)) stop("the tree has no tip labels.")
+  if (!is.binary(phy)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
   ## Model matrix
   mf <- model.frame(formula = formula, data = data)
   mf <- checkTraitTree(mf, phy)
