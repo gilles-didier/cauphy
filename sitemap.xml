@@ -4,7 +4,7 @@
     <loc>https://gilles-didier.github.io/cauphy/404.html</loc>
   </url>
   <url>
-    <loc>https://gilles-didier.github.io/cauphy/LICENSE-text.html</loc>
+    <loc>https://gilles-didier.github.io/cauphy/LICENSE.html</loc>
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/articles/index.html</loc>
@@ -35,15 +35,6 @@
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/do_optim.html</loc>
-  </url>
-  <url>
-    <loc>https://gilles-didier.github.io/cauphy/reference/dots.html</loc>
-  </url>
-  <url>
-    <loc>https://gilles-didier.github.io/cauphy/reference/find_closest.html</loc>
-  </url>
-  <url>
-    <loc>https://gilles-didier.github.io/cauphy/reference/find_longest_tip_branch.html</loc>
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/find_modes.html</loc>
@@ -77,9 +68,6 @@
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/getStartingValuesLambda.html</loc>
-  </url>
-  <url>
-    <loc>https://gilles-didier.github.io/cauphy/reference/get_p_value_thermo.html</loc>
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/increment.html</loc>
