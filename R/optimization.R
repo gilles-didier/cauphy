@@ -591,7 +591,7 @@ getParamNames <- function(model, X) {
 #'
 #' @keywords internal
 #'
-checkTraitTree <- function(trait, tree, name = "trait", transpose = FALSE) {
+checkTraitTree <- function(trait, tree, name = "trait") {
   N <- length(tree$tip.label)
   if (is.null(dim(trait))) { # trait is a vector
     if (length(trait) != N) {

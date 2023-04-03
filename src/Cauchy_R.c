@@ -147,16 +147,33 @@ TypeTree *Phylo2Tree(SEXP phy) {
 }
 
 SEXP printRTree(SEXP phy) {
-	FILE *fout;
-	TypeTree *tree;
-	
-	tree = Phylo2Tree(phy);
-	if((fout = fopen("Arbre_lu.txt", "w"))) {
-		fprintTreeNewick(fout, tree);
-		fclose(fout);
-	}
-	return R_NilValue;
-}
+  FILE *fout;
+  TypeTree *tree;
+  long numbytes;
+  char *buffer;
+  
+  tree = Phylo2Tree(phy);
+  if (tree->time[tree->root] == NO_TIME) {
+    tree->time[tree->root] = 0; 
+  }
+  
+  if((fout = tmpfile())) {
+    fprintTreeNewick(fout, tree);
+    fseek(fout, 0L, SEEK_END);
+    numbytes = ftell(fout);
+    fseek(fout, 0L, SEEK_SET);
+    buffer = (char*)calloc(numbytes+1, sizeof(char));
+    fread(buffer, sizeof(char), numbytes, fout);
+    fclose(fout);
+    
+    buffer[numbytes] = '\0';
+    
+    SEXP res = Rf_mkString(buffer);
+    free(buffer);
+    return res;
+  }
+  return R_NilValue;
+} 
 
 SEXP SimulateTipsCauchy(SEXP treeR, SEXP startR, SEXP dispR) {
 	TypeTree *tree;

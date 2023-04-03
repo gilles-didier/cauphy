@@ -19,6 +19,7 @@ test_that("optim", {
   ## Opt
   res <- fitCauchy(tree, trait, method = "fixed.root")
   res
+  print(res)
   
   ## Change init
   expect_equal(res$logLik,
@@ -72,6 +73,7 @@ test_that("optim, random root", {
   ## Opt
   res <- fitCauchy(tree, trait, method = 'random.root', root.edge = root.edge)
   res
+  print(res)
   
   ## Change init
   expect_equal(res$logLik,
@@ -94,6 +96,7 @@ test_that("optim, random root", {
   
   ## lambda
   reslam <- fitCauchy(tree, trait, method = 'random.root', root.edge = root.edge, model = "lambda")
+  print(reslam)
   expect_true(reslam$logLik > res$logLik)
   
   ## vcov
@@ -130,6 +133,7 @@ test_that("optim, reml", {
   ## Opt
   res <- fitCauchy(tree, trait, method = 'reml')
   res
+  print(res)
   
   ## Change init
   expect_equal(res$logLik,
@@ -196,6 +200,7 @@ test_that("cauphylm", {
   reslm <- cauphylm(trait ~ 1, phy = tree)
   reslmdat <- cauphylm(tt ~ 1, data = dat, phy = tree)
   res <- fitCauchy(tree, trait, method = "fixed.root")
+  print(res)
   
   ## Compare fits
   expect_equal(res$logLik, reslm$logLik)
@@ -247,6 +252,7 @@ test_that("cauphylm lambda", {
   reslm <- cauphylm(trait ~ 1, phy = tree, model = "lambda")
   reslmdat <- cauphylm(tt ~ 1, data = dat, phy = tree, model = "lambda")
   res <- fitCauchy(tree, trait, method = "fixed.root", model = "lambda")
+  print(reslm)
   
   ## Compare fits
   expect_equal(reslmdat$logLik, reslm$logLik)
@@ -410,3 +416,67 @@ test_that("profile likelihood", {
 #   expect_equal(res$logLik, reslm$logLik)
 #   
 # })
+
+test_that("Errors with species names", {
+  set.seed(12891026)
+  ## Tree
+  ntips <- 20
+  tree <- ape::rphylo(ntips, 0.1, 0)
+  mat_tree <- ape::vcv(tree)
+  
+  ## data
+  # no names
+  y_data <- rnorm(ntips)
+  expect_error(checkTraitTree(y_data, tree, name = "trait"),
+               "`trait` and/or the tips of the phylogeny are not named.")
+  # wrong order
+  names(y_data) <- sample(tree$tip.label, ntips)
+  expect_warning(trait1 <- checkTraitTree(y_data, tree, name = "trait"),
+                 "trait` was not sorted in the correct order")
+  y_data <- y_data[match(tree$tip.label, names(y_data))]
+  trait2 <- checkTraitTree(y_data, tree, name = "trait")
+  expect_equal(trait1, trait2)
+  # wrong names
+  names(y_data)[1] <- "moustache"
+  expect_error(checkTraitTree(y_data, tree, name = "trait"),
+               "Species 't1' are in the tree but not in trait.")
+  # Correct name and order
+  names(y_data) <- tree$tip.label
+  # wrong names tree
+  tree_wrong <- tree
+  tree_wrong$tip.label[1] <- "moustache"
+  expect_error(checkTraitTree(y_data, tree_wrong, name = "trait"),
+               "Species 'moustache' are in the tree but not in trait.")
+  
+  ## Design
+  design <- matrix(1, nrow = ntips, ncol = 2)
+  design[sample(1:ntips, floor(ntips / 2)), 2] <- 0
+  # wrong dimension
+  expect_error(checkTraitTree(t(design), tree, name = "design"),
+               "`design` should have as many rows as the number of taxa in the tree.")
+  # no names
+  expect_error(checkTraitTree(design, tree, name = "design"),
+               "`design` and/or the tips of the phylogeny are not named.")
+  # wrong order
+  rownames(design) <- sample(tree$tip.label, ntips)
+  expect_warning(res1 <- checkTraitTree(design, tree, name = "design"),
+                 "`design` was not sorted in the correct order, when compared with the tips label.")
+  design <- design[match(tree$tip.label, rownames(design)), , drop = FALSE]
+  res2 <- checkTraitTree(design, tree, name = "design")
+  expect_equal(res1, res2)
+  # wrong names
+  rownames(design)[1] <- "moustache"
+  expect_error(checkTraitTree(design, tree, name = "design"),
+               "Species 't1' are in the tree but not in design.")
+  rownames(design) <- tree$tip.label
+  expect_error(checkTraitTree(design, tree_wrong, name = "design"),
+               "Species 'moustache' are in the tree but not in design")
+  
+  ## Duplicates
+  y_data[1] <- y_data[2]
+  expect_error(checkDuplicates(y_data, tree),
+               "The trait vector has duplicated entries on tips that are equidistant from the root")
+  tree$edge.length[tree$edge[, 2] == 1] <- 1.0
+  expect_no_error(checkDuplicates(y_data, tree))
+  
+})

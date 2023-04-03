@@ -4,7 +4,7 @@
 \alias{checkTraitTree}
 \title{Check Matrix Parameter}
 \usage{
-checkTraitTree(trait, tree, name = "trait", transpose = FALSE)
+checkTraitTree(trait, tree, name = "trait")
 }
 \arguments{
 \item{trait}{(named) vector or matrix of traits being tested.}

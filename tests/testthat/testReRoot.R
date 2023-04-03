@@ -71,3 +71,32 @@ test_that("reRootTree bigger", {
   
 })
 
+test_that("read tree", {
+  
+  set.seed(1289)
+  ntips <- 10
+  tree <- rphylo(ntips, 0.1, 0)
+  
+  ## no root edge
+  
+  prtree <- printRTreeTest(tree)
+  prtree <- substring(prtree, 1, nchar(prtree)-1)
+  tree2 <- ape::read.tree(text = prtree)
+  tree2$tip.label <- sub("'", "", tree2$tip.label)
+  tree2$tip.label <- sub("'", "", tree2$tip.label)
+  
+  expect_true(all.equal(tree, tree2, tolerance = 1e-4))
+  
+  ## with root edge
+  tree$root.edge <- 10
+  
+  prtree <- printRTreeTest(tree)
+  prtree <- substring(prtree, 1, nchar(prtree)-1)
+  tree2 <- ape::read.tree(text = prtree)
+  tree2$tip.label <- sub("'", "", tree2$tip.label)
+  tree2$tip.label <- sub("'", "", tree2$tip.label)
+  
+  expect_true(all.equal(tree, tree2, tolerance = 1e-4))
+  
+})
+

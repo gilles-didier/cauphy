@@ -198,26 +198,6 @@ logDensityTipsCauchy <- function(tree, tipTrait, start = NULL, disp, method = c(
 	return(res)
 }
 
-
-#' @title Find tip with longuest branch
-#' 
-#' @param tree a phylogenetic tree.
-#' 
-#' @return tip with the longest branch.
-#' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
-#' 
-#' @keywords internal
-#' 
-#' 
-find_longest_tip_branch <- function(tree) {
-  n_tips <- length(tree$tip.label)
-  tip_branches <- tree$edge[tree$edge[, 2] <= n_tips, ]
-  tip_lengths <- tree$edge.length[tree$edge[, 2] <= n_tips]
-  rootTip <- tip_branches[which.max(tip_lengths), 2]
-  return(rootTip)
-}
-
 #' @importFrom foreach %dopar% %do%
 NULL
 

@@ -19,22 +19,6 @@ plot.invisible <- function(...){
   res
 }
 
-#' @title Capture dot arguments
-#'
-#' @description Capture dot arguments
-#' 
-#' @details See: http://adv-r.had.co.nz/Computing-on-the-language.html#capturing-dots
-#'
-#' @param ... dots arguments to be captured
-#'
-#' @return a named list of the arguments in ...
-#'
-#' @keywords internal
-#'
-dots <- function(...) {
-  eval(substitute(alist(...)))
-}
-
 #' @title Re root tree at a tip
 #'
 #' @description Re root tree at a tip, taking care of the root length.
@@ -91,18 +75,6 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) 
 slog1p <- Vectorize(function(x) {
   # if (x > 0) return(log(1 + x))
   # if (x < 0) return(-log(1 - x))
-  # return(0)
-  return(x)
-})
-
-slog <- Vectorize(function(x) {
-  if (x >= 0) return(-log(x))
-  if (x < 0) return(log(-x))
-})
-
-sexp1p <- Vectorize(function(x) {
-  # if (x > 0) return(exp(x) - 1)
-  # if (x < 0) return(-exp(-x) + 1)
   # return(0)
   return(x)
 })

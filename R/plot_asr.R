@@ -122,13 +122,13 @@ plot_asr <- function(x,
     thermo_inc <- find_modes(inc, node_inc, mode_proba_method)
     values_inc <- as.numeric(colnames(inc))
     edge_inc <- sapply(node_inc, function(nn) which(x$phy$edge[, 2] == nn))
-    if (increment.proba) {
-      trans_vals <- pracma::logit
-      trans_inv_vals <- pracma::sigmoid
-      thermo_inc <- get_p_value_thermo(x, thermo_inc, edge_inc)
-      values_inc <-  as.numeric(colnames(thermo_inc))
-      # codes_inc <- get_p_value_code(x, thermo_inc, edge_inc)
-    }
+    # if (increment.proba) {
+    #   trans_vals <- pracma::logit
+    #   trans_inv_vals <- pracma::sigmoid
+    #   thermo_inc <- get_p_value_thermo(x, thermo_inc, edge_inc)
+    #   values_inc <-  as.numeric(colnames(thermo_inc))
+    #   # codes_inc <- get_p_value_code(x, thermo_inc, edge_inc)
+    # }
   } else {
     common_colorscale <- TRUE
   }
@@ -248,108 +248,6 @@ plot_asr <- function(x,
 
 }
 
-
-# #' @title Find the p values of increments
-# #' 
-# #' @description 
-# #' This function fits a standard BM on the tree, and then use the infered variance
-# #' to detect "abnormal" increments.
-# #' For each branch i, the "pvalue" of a mode is given by the probability of observing
-# #' the absolute value of this mode or higher assuming a Gaussian distribution
-# #' with mean 0 and variance sigma_BM * t_i.
-# #' The pvalue is signed to the sign of the mode.
-# #'
-# #' @param x a cauchy fitted object
-# #' @param thermo_inc a thermo object
-# #' @param edge_inc matching edges
-# #'
-# #' @return a new thermo object, with signed pvalues as values.
-# #' 
-# #' @keywords internal
-# #'
-# get_p_value_thermo <- function(x, inc, edge_inc) {
-#   browser()
-#   thermo_inc_pval <- matrix(0, ncol = 1001, nrow = nrow(inc))
-#   pval_grid <- seq(0, 1, length.out = 1001)
-#   colnames(thermo_inc_pval) <- pval_grid
-#   for (i in seq_len(nrow(inc))) {
-#     tt <- inc[i, ]
-#     modes <- as.numeric(names(tt[tt > 0]))
-#     scale_branch  <- x$disp * x$phy$edge.length[edge_inc[i]]
-#     pvals <- stats::pcauchy(tt, location = 0, scale = scale_branch, lower.tail = TRUE)
-#     pval_ind <- findInterval(pvals, pval_grid)
-#     thermo_inc_pval[i, pval_ind] <- tt[tt > 0]
-#   }
-#   return(thermo_inc_pval)
-#  }
-
-#' @title Find the p values of increments
-#' 
-#' @description 
-#' This function fits a standard BM on the tree, and then use the inferred variance
-#' to detect "abnormal" increments.
-#' For each branch i, the "pvalue" of a mode is given by the probability of observing
-#' the absolute value of this mode or higher assuming a Gaussian distribution
-#' with mean 0 and variance sigma_BM * t_i.
-#' The pvalue is signed to the sign of the mode.
-#'
-#' @param x a cauchy fitted object
-#' @param thermo_inc a thermo object
-#' @param edge_inc matching edges
-#'
-#' @return a new thermo object, with signed pvalues as values.
-#' 
-#' @keywords internal
-#'
-get_p_value_thermo <- function(x, thermo_inc, edge_inc) {
-  thermo_inc_pval <- matrix(0, ncol = 1000, nrow = nrow(thermo_inc))
-  pval_grid <- seq(0, 1, length.out = 1002)
-  pval_grid <- pval_grid[-c(1, length(pval_grid))]
-  colnames(thermo_inc_pval) <- pval_grid
-  for (i in seq_len(nrow(thermo_inc))) {
-    tt <- thermo_inc[i, ]
-    modes <- as.numeric(names(tt[tt > 0]))
-    disp_cau <- x$disp * x$phy$edge.length[edge_inc[i]]
-    pvals <- stats::pcauchy(modes, location = 0, scale = disp_cau, lower.tail = TRUE)
-    pval_ind <- findInterval(pvals, pval_grid)
-    thermo_inc_pval[i, pval_ind] <- tt[tt > 0]
-  }
-  return(thermo_inc_pval)
-}
-
-# get_p_value_thermo <- function(x, thermo_inc, edge_inc) {
-#   sigma2 <- phylolm::phylolm(x$y ~ 1, phy = x$phy)$sigma2
-#   thermo_inc_pval <- matrix(0, ncol = 1000, nrow = nrow(thermo_inc))
-#   pval_grid <- seq(-1, 1, length.out = 1001)
-#   pval_grid <- pval_grid[-501]
-#   colnames(thermo_inc_pval) <- pval_grid
-#   for (i in seq_len(nrow(thermo_inc))) {
-#     tt <- thermo_inc[i, ]
-#     modes <- as.numeric(names(tt[tt > 0]))
-#     var_bm <- sigma2 * x$phy$edge.length[edge_inc[i]]
-#     pvals <- stats::pnorm(abs(modes), mean = 0, sd = sqrt(var_bm), lower.tail = FALSE) * sign(modes)
-#     pval_ind <- findInterval(pvals, pval_grid)
-#     thermo_inc_pval[i, pval_ind] <- tt[tt > 0]
-#   }
-# return(thermo_inc_pval)
-# }
-
-get_p_value_code <- function(x, thermo_inc, edge_inc) {
-  codesignif <- c("***", "**", "*", ".", " ")
-  codesignifvals <- c(0, 0.001, 0.01, 0.05, 0.1, 1)
-  sigma2 <- phylolm::phylolm(x$y ~ 1, phy = x$phy)$sigma2
-  all_codes <- rep(NA, length(edge_inc))
-  names(all_codes) <- edge_inc
-  for (i in seq_len(nrow(thermo_inc))) {
-    tt <- thermo_inc[i, ]
-    modes <- as.numeric(names(tt[tt > 0]))
-    var_bm <- sigma2 * x$phy$edge.length[edge_inc[i]]
-    pvals <- stats::pnorm(abs(modes), mean = 0, sd = sqrt(var_bm), lower.tail = FALSE)
-    all_codes[i] <- codesignif[findInterval(min(pvals), codesignifvals, left.open = TRUE)]
-  }
-  return(all_codes)
-}
-
 #' @title Find modes of a distribution
 #'
 #' @param anc an object of class \code{ancestralCauchy}
@@ -387,17 +285,4 @@ findmaxsgrid <- function(dens, values) {
   return(list(opt_vals = pp[, 2],
               dens_vals = pp[, 1],
               proba_vals = proba_vals))
-}
-
-#' @title Find closest value in a vector
-#'
-#' @param a a value to be matched
-#' @param v a vector of grid values
-#'
-#' @return the index of the closest values of a in v.
-#' 
-#' @keywords internal
-#'
-find_closest <- function(a, v){
-  which.min(abs(v-a))
 }
