@@ -18,17 +18,21 @@
 \item{...}{further arguments passed to or from other methods.}
 }
 \value{
-An object of class \code{profile.cauphyfit}, which is a list with an element for each parameter being profiled.
-The elements are data-frames with two variables
- * par.vals a matrix of parameter values for each fitted model.
- * profLogLik	the profile log likelihood.
+An object of class \code{profile.cauphyfit}, 
+which is a list with an element for each parameter being profiled.
+The elements are data-frames with two variables:
+\itemize{
+\item{\code{par.vals}:}{ a matrix of parameter values for each fitted model.}
+\item{\code{profLogLik}:}{ the profile log likelihood.}
+}
 }
 \description{
 Investigates the profile log-likelihood function for a fitted model of class \code{cauphyfit}.
 }
 \details{
 This function computes a confidence interval for the parameters using \code{\link{confint.cauphyfit}},
-and then compute the likelihood function between the bounds of the interval, for each parameter,
+and then computes the likelihood function on a grid with \code{npoints} values
+evenly spaced between the bounds of the interval, for each parameter one by one,
 all other parameters being fixed.
 }
 \examples{
@@ -40,5 +44,5 @@ plot(pr)
 
 }
 \seealso{
-\code{\link{fitCauchy}}, \code{\link{profile}}, \code{\link{plot.profile.cauphyfit}}
+\code{\link{fitCauchy}}, \code{\link{plot.profile.cauphyfit}}, \code{\link{profile}}.
 }

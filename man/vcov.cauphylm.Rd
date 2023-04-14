@@ -3,19 +3,16 @@
 \name{vcov.cauphylm}
 \alias{vcov.cauphylm}
 \alias{logLik.cauphylm}
-\alias{print.logLik.cauphylm}
 \alias{AIC.logLik.cauphylm}
 \alias{AIC.cauphylm}
 \alias{predict.cauphylm}
 \alias{confint.cauphylm}
 \alias{coef.cauphylm}
-\title{Generic Methods for cauphylm}
+\title{Generic Methods for S3 class \code{cauphylm}.}
 \usage{
 \method{vcov}{cauphylm}(object, ...)
 
 \method{logLik}{cauphylm}(object, ...)
-
-\method{print}{logLik.cauphylm}(x, ...)
 
 \method{AIC}{logLik.cauphylm}(object, k = 2, ...)
 
@@ -28,11 +25,9 @@
 \method{coef}{cauphylm}(object, ...)
 }
 \arguments{
-\item{object}{an object of class \code{"phylolm"}.}
+\item{object}{an object of class \code{cauphylm}.}
 
 \item{...}{further arguments to methods.}
-
-\item{x}{an object of class \code{"phylolm"}.}
 
 \item{k}{numeric, the penalty per parameter to be used; the default \code{k = 2} is the classical AIC.}
 
@@ -46,5 +41,10 @@
 \item{level}{the confidence level required.}
 }
 \description{
-Generic Methods for cauphylm
+Generic Methods for S3 class \code{cauphylm}.
+}
+\seealso{
+\code{\link{cauphylm}}
+
+\code{\link[phylolm]{predict.phylolm}}
 }

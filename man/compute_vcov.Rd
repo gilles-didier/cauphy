@@ -7,17 +7,18 @@
 compute_vcov(obj)
 }
 \arguments{
-\item{obj}{a fitted object, either with \code{\link{cauphylm}} or \code{\link{fitCauchy}}}
+\item{obj}{a fitted object, either with \code{\link{fitCauchy}} or \code{\link{cauphylm}}.}
 }
 \value{
 The same object, with added vcov entry.
 }
 \description{
-Find the approximated vcov matrix of the parameters.
+Find the approximated variance covariance matrix of the parameters.
 }
 \details{
-This function uses the numerical inverse of the Hessian of the likelihood at the optimal value
+This function computes the numerical Hessian of the likelihood at the optimal value
+using function \code{\link[pracma]{hessian}}, and then uses its inverse 
 to approximate the variance covariance matrix.
 It can be used to compute confidence intervals with functions \code{\link{confint.cauphylm}}
-or \code{\link{confint.cauphyfit}}
+or \code{\link{confint.cauphyfit}}.
 }

@@ -30,7 +30,7 @@ NULL
 fitCauchy.internal <- function(phy, X, y, 
                                model = c("cauchy", "lambda"),
                                method = c("reml", "random.root", "fixed.root"),
-                               starting.value = list(mu = NULL, disp = NULL, lambda = NULL),
+                               starting.value = list(x0 = NULL, disp = NULL, lambda = NULL),
                                lower.bound = list(disp = 0, lambda = 0), 
                                upper.bound = list(disp = Inf, lambda = 1),
                                root.edge = 100,
@@ -217,7 +217,7 @@ minusLikelihoodRandomRoot <- function(param, param_names, tree, trait, Xdesign, 
   names(param) <- param_names
   param <- back_transform_values(param)
   phy_trans <- transformBranchLengths(tree, model, param)
-  return(-logDensityTipsCauchy(phy_trans, trait, start = 0.0, disp = param["disp"], method = "random.root"))
+  return(-logDensityTipsCauchy(phy_trans, trait, root.value = 0.0, disp = param["disp"], method = "random.root"))
 }
 
 #' @title Minus REML function for a Cauchy model
@@ -236,8 +236,8 @@ minusLikelihoodREML <- function(param, param_names, tree, trait, Xdesign, model,
   param <- back_transform_values(param)
   phy_trans <- transformBranchLengths(tree, model, param)
   # tree_height <- max(node.depth.edgelength(phy_trans))
-  # return((length(phy_trans$tip.label) - 1) * log(param["disp"] * 1000 / tree_height) - logDensityTipsCauchy(tree = phy_trans, tipTrait = trait / param["disp"] / 1000 * tree_height, start = NULL, disp = 0.001 * tree_height, method = "reml", rootTip = rootTip))  
-  return(-logDensityTipsCauchy(tree = phy_trans, tipTrait = trait, start = NULL, disp = param["disp"], method = "reml", rootTip = rootTip))
+  # return((length(phy_trans$tip.label) - 1) * log(param["disp"] * 1000 / tree_height) - logDensityTipsCauchy(tree = phy_trans, tipTrait = trait / param["disp"] / 1000 * tree_height, root.value = NULL, disp = 0.001 * tree_height, method = "reml", rootTip = rootTip))  
+  return(-logDensityTipsCauchy(tree = phy_trans, tipTrait = trait, root.value = NULL, disp = param["disp"], method = "reml", rootTip = rootTip))
 }
 
 # fitCauchyREMLOld <- function(tree, trait, start.values, rootTip = 1) {
@@ -247,8 +247,8 @@ minusLikelihoodREML <- function(param, param_names, tree, trait, Xdesign, model,
 #   retree <- reroottip(tree, tip)
 #   
 #   # root value
-#   start <- trait[tipName]
-#   tipTraitBis <- trait[names(trait) != tipName] - start
+#   root.value <- trait[tipName]
+#   tipTraitBis <- trait[names(trait) != tipName] - root.value
 #   
 #   ## Force integers
 #   stopifnot(all.equal(matrix(as.integer(retree$edge), ncol = 2), retree$edge))
@@ -257,7 +257,7 @@ minusLikelihoodREML <- function(param, param_names, tree, trait, Xdesign, model,
 #   # Opt function
 #   minus_like <- function(param, tree, trait) {
 #     # return(-logREMLTipsCauchy(tree, trait, disp = exp(param[1]), ultrametric = ape::is.ultrametric(tree), lse = TRUE, rootTip = rootTip))
-#     return(-logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, start = 0.0, disp = exp(param[1]), method = "random.root"))
+#     return(-logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, root.value = 0.0, disp = exp(param[1]), method = "random.root"))
 #   }
 #   # local around init
 #   opt <- nloptr::nloptr(x0 = start.values, eval_f = minus_like,
@@ -441,11 +441,11 @@ getStartingValuesCauchy <- function(phy, X, y, starting.value, method.init.disp,
   if (!is.null(X)) {
     # intercept only
     if (ncol(X) == 1 && all.equal(sum(X), nrow(X))) {
-      if (is.null(starting.value$mu)) {
+      if (is.null(starting.value$x0)) {
         start.coef <- initPositionParameter(y)
       } else {
-        start.coef <- starting.value$mu
-        if (!(is.null(dim(start.coef)) & length(start.coef) == 1 & is.numeric(start.coef))) stop("Starting value for mu should be a real number.")
+        start.coef <- starting.value$x0
+        if (!(is.null(dim(start.coef)) & length(start.coef) == 1 & is.numeric(start.coef))) stop("Starting value for x0 should be a real number.")
       }
     } else {
       start.coef <- robustbase::lmrob.S(X, y, control = robustbase::lmrob.control())$coefficients

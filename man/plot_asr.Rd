@@ -77,9 +77,16 @@ the node annotation use \code{\link[ape]{nodelabels}}, and the
 tip data plot use \code{\link[ape]{phydataplot}}.
 Please refer to these functions for the details of the parameters.
 
-Note that the thermo plot do not dive the true probabilities of each mode values.
-Instead, they are simply proportional to the height of each mode, re-scaled so that the scores sum to one.
-For an exact representation of a node posterior density, please plot it separately, using function \code{\link{ancestral}}.
+The width of each color in the thermo plots approximately represents the 
+weight of each node of the distribution, that is estimated by numerically 
+integrating the density function around each mode.
+Function \code{\link[pracma]{findpeaks}} is first used to find the modes and
+estimate their starting and ending points.
+Then function \code{\link[pracma]{trapz}} estimates the integral of the density
+around the mode.
+
+For an exact representation of a node posterior density, please plot it separately,
+ using function \code{\link{plot.ancestralCauchy}}.
 }
 \seealso{
 \code{\link{cauphylm}}, \code{\link{fitCauchy}}, \code{\link{ancestral}}, \code{\link{increment}},

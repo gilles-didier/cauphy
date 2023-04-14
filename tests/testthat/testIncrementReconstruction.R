@@ -15,14 +15,14 @@ test_that("testTwoTipsTree", {
   treerr <- tree
   treerr$root.edge <- root.edge
   
-  expect_equal(sum(posteriorDensityIncrement(3, 20:25, treerr, trait, start = 0, disp = disp, method = "random.root")), 0.0)
+  expect_equal(sum(posteriorDensityIncrement(3, 20:25, treerr, trait, root.value = 0, disp = disp, method = "random.root")), 0.0)
   
-  fun <- function(x) posteriorDensityIncrement(3, x, treerr, trait, start = 0, disp = disp, method = "random.root")
+  fun <- function(x) posteriorDensityIncrement(3, x, treerr, trait, root.value = 0, disp = disp, method = "random.root")
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
   treerr$root.edge <- 0.01
-  fun <- function(x) -posteriorDensityIncrement(3, x, treerr, trait, start = 0, disp = disp, method = "random.root")
+  fun <- function(x) -posteriorDensityIncrement(3, x, treerr, trait, root.value = 0, disp = disp, method = "random.root")
   MAP <- optim(0.0, fun, method = "Brent", lower = -5, upper = 5)
   expect_equal(MAP$par,  0.5, tolerance = 1e-1)
   
@@ -47,114 +47,114 @@ test_that("testLikelihoodThreeTipsTree", {
   treerr$root.edge <- root.edge
   
   ## Errors
-  expect_error(posteriorDensityIncrement(7, 1, tree, trait, start = mu, disp = disp, method = "fixed.root"),
+  expect_error(posteriorDensityIncrement(7, 1, tree, trait, root.value = mu, disp = disp, method = "fixed.root"),
                "This node does not exist in the tree.")
-  expect_error(posteriorDensityIncrement(4, 1, tree, trait,start = mu, disp = disp, method = "fixed.root"),
+  expect_error(posteriorDensityIncrement(4, 1, tree, trait,root.value = mu, disp = disp, method = "fixed.root"),
                "Ancestral increment reconstruction is not allowed for the root branch with the fixed root model.")
-  expect_error(posteriorDensityIncrement(4, 1, tree, trait,start = mu, disp = disp, method = "reml"),
+  expect_error(posteriorDensityIncrement(4, 1, tree, trait,root.value = mu, disp = disp, method = "reml"),
                "Ancestral increment reconstruction is not allowed for the root branch with the reml model.")
-  # expect_error(posteriorDensityIncrement(5, 1, tree, trait,start = mu, disp = disp, method = "reml"),
+  # expect_error(posteriorDensityIncrement(5, 1, tree, trait,root.value = mu, disp = disp, method = "reml"),
   #              "Ancestral increment reconstruction is not allowed for branches connected to the root with the reml model.")
-  expect_error(posteriorDensityIncrement(5, 1, tree, trait,start = NULL, disp = disp, method = "fixed.root"),
+  expect_error(posteriorDensityIncrement(5, 1, tree, trait,root.value = NULL, disp = disp, method = "fixed.root"),
                "Starting value must be specified for root node in the `fixed.root` method.")
-  expect_error(posteriorDensityIncrement(5, 1, tree, trait,start = NULL, disp = disp, method = "random.root"),
+  expect_error(posteriorDensityIncrement(5, 1, tree, trait,root.value = NULL, disp = disp, method = "random.root"),
                "Starting value must be specified for root node in the `random.root` method.")
-  expect_error(posteriorDensityIncrement(4, 1, tree, trait, start = 0.0, disp = disp, method = "random.root"),
+  expect_error(posteriorDensityIncrement(4, 1, tree, trait, root.value = 0.0, disp = disp, method = "random.root"),
                "In the random root model, the `root.edge` must be non NULL and non zero.")
-  expect_error(posteriorDensityIncrement(4, 1, tree, trait, start = 0.0, disp = disp, method = "random.root"),
+  expect_error(posteriorDensityIncrement(4, 1, tree, trait, root.value = 0.0, disp = disp, method = "random.root"),
                "In the random root model, the `root.edge` must be non NULL and non zero.")
-  expect_error(posteriorDensityIncrement(2, 1, tree, trait, start = mu, disp = disp, method = "reml"),
-               "In the reml model, `start` cannot be specified.")
+  expect_error(posteriorDensityIncrement(2, 1, tree, trait, root.value = mu, disp = disp, method = "reml"),
+               "In the reml model, `root.value` cannot be specified.")
   
   ## Fixed root
-  expect_equal(posteriorDensityIncrement(5, 20, tree, trait, start = mu, disp = disp, method = "fixed.root"), 0.0)
-  expect_equal(posteriorDensityIncrement(1, 1, tree, trait, start = mu, disp = disp, method = "fixed.root"), 0.06531257, tolerance = 1e-3)
-  expect_equal(posteriorDensityIncrement(2, 1, tree, trait, start = mu, disp = disp, method = "fixed.root"), 0.2420315, tolerance = 1e-3)
+  expect_equal(posteriorDensityIncrement(5, 20, tree, trait, root.value = mu, disp = disp, method = "fixed.root"), 0.0)
+  expect_equal(posteriorDensityIncrement(1, 1, tree, trait, root.value = mu, disp = disp, method = "fixed.root"), 0.06531257, tolerance = 1e-3)
+  expect_equal(posteriorDensityIncrement(2, 1, tree, trait, root.value = mu, disp = disp, method = "fixed.root"), 0.2420315, tolerance = 1e-3)
   # dirac
   expect_warning(expect_equal(
-    posteriorDensityIncrement(3, c(-10, 0.75, 1, trait[3] - mu), tree, trait, start = mu, disp = disp, method = "fixed.root"),
+    posteriorDensityIncrement(3, c(-10, 0.75, 1, trait[3] - mu), tree, trait, root.value = mu, disp = disp, method = "fixed.root"),
     c(0, 0, 0, 1)),
     "This branch ends at a tip, and the root is fixed: the posterior increment density is a Dirac in 0.8.")
 
   # Sum to 1
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(5, x, tree, trait, start = mu, disp = disp, method = "fixed.root")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(5, x, tree, trait, root.value = mu, disp = disp, method = "fixed.root")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(2, x, tree, trait, start = mu, disp = disp, method = "fixed.root")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(2, x, tree, trait, root.value = mu, disp = disp, method = "fixed.root")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(1, x, tree, trait, start = mu, disp = disp, method = "fixed.root")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(1, x, tree, trait, root.value = mu, disp = disp, method = "fixed.root")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
 
   # MAP
-  fun <- Vectorize(function(x) {-posteriorDensityIncrement(5, x, tree, trait, start = mu, disp = disp, method = "fixed.root")})
+  fun <- Vectorize(function(x) {-posteriorDensityIncrement(5, x, tree, trait, root.value = mu, disp = disp, method = "fixed.root")})
   MAP <- optim(1.0, fun, method = "Brent", lower = -10, upper = 10)
   expect_equal(MAP$par,  3.0, tolerance = 1e-2)
 
   ## Random root
-  expect_equal(posteriorDensityIncrement(5, 25, treerr, trait, start = mu, disp = disp, method = "random.root"), 0.0)
+  expect_equal(posteriorDensityIncrement(5, 25, treerr, trait, root.value = mu, disp = disp, method = "random.root"), 0.0)
 
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(5, x, treerr, trait, start = mu, disp = disp, method = "random.root")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(5, x, treerr, trait, root.value = mu, disp = disp, method = "random.root")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(4, x, treerr, trait, start = mu, disp = disp, method = "random.root")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(4, x, treerr, trait, root.value = mu, disp = disp, method = "random.root")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(3, x, treerr, trait, start = mu, disp = disp, method = "random.root")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(3, x, treerr, trait, root.value = mu, disp = disp, method = "random.root")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(2, x, treerr, trait, start = mu, disp = disp, method = "random.root")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(2, x, treerr, trait, root.value = mu, disp = disp, method = "random.root")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(1, x, treerr, trait, start = mu, disp = disp, method = "random.root")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(1, x, treerr, trait, root.value = mu, disp = disp, method = "random.root")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
 
   treerr$root.edge <- 0.001
-  fun <- Vectorize(function(x) {-posteriorDensityIncrement(4, x, treerr, trait, start = mu, disp = disp, method = "random.root")})
+  fun <- Vectorize(function(x) {-posteriorDensityIncrement(4, x, treerr, trait, root.value = mu, disp = disp, method = "random.root")})
   MAP <- optim(1.0, fun, method = "Brent", lower = -10, upper = 10)
   expect_equal(MAP$par,  0.0, tolerance = 1e-4)
 
   ## reml
-  expect_equal(posteriorDensityIncrement(2, 20, tree, trait, start = NULL, disp = disp, method = "reml"), 0.0, tolerance = 1e-5)
+  expect_equal(posteriorDensityIncrement(2, 20, tree, trait, root.value = NULL, disp = disp, method = "reml"), 0.0, tolerance = 1e-5)
   
-  expect_equal(posteriorDensityIncrement(2, 0.4, tree, trait, start = NULL, disp = disp, method = "reml"),
-               posteriorDensityIncrement(2, 0.4, reroottip(tree, 3), trait[-3], start = trait[3], disp = disp, method = "random.root"),
+  expect_equal(posteriorDensityIncrement(2, 0.4, tree, trait, root.value = NULL, disp = disp, method = "reml"),
+               posteriorDensityIncrement(2, 0.4, reroottip(tree, 3), trait[-3], root.value = trait[3], disp = disp, method = "random.root"),
                tolerance = 1e-5)
   
-  expect_equal(posteriorDensityIncrement(2, 0.4, tree, trait, start = NULL, disp = disp, method = "reml"),
-               posteriorDensityIncrement(1, 0.4, reroottip(tree, 1), trait[-1], start = trait[1], disp = disp, method = "random.root"),
+  expect_equal(posteriorDensityIncrement(2, 0.4, tree, trait, root.value = NULL, disp = disp, method = "reml"),
+               posteriorDensityIncrement(1, 0.4, reroottip(tree, 1), trait[-1], root.value = trait[1], disp = disp, method = "random.root"),
                tolerance = 1e-5)
   
-  expect_equal(posteriorDensityIncrement(1, 0.4, tree, trait, start = NULL, disp = disp, method = "reml"),
-               posteriorDensityIncrement(1, 0.4, reroottip(tree, 3), trait[-3], start = trait[3], disp = disp, method = "random.root"),
+  expect_equal(posteriorDensityIncrement(1, 0.4, tree, trait, root.value = NULL, disp = disp, method = "reml"),
+               posteriorDensityIncrement(1, 0.4, reroottip(tree, 3), trait[-3], root.value = trait[3], disp = disp, method = "random.root"),
                tolerance = 1e-5)
   
-  expect_equal(posteriorDensityIncrement(5, c(0.1, 0.4), tree, trait, start = NULL, disp = disp, method = "reml"),
-               c(posteriorDensityIncrement(5, 0.1, tree, trait, start = NULL, disp = disp, method = "reml"),
-                 posteriorDensityIncrement(5, 0.4, tree, trait, start = NULL, disp = disp, method = "reml")),
+  expect_equal(posteriorDensityIncrement(5, c(0.1, 0.4), tree, trait, root.value = NULL, disp = disp, method = "reml"),
+               c(posteriorDensityIncrement(5, 0.1, tree, trait, root.value = NULL, disp = disp, method = "reml"),
+                 posteriorDensityIncrement(5, 0.4, tree, trait, root.value = NULL, disp = disp, method = "reml")),
                tolerance = 1e-5)
 
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(2, x, tree, trait, start = NULL, disp = disp, method = "reml")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(2, x, tree, trait, root.value = NULL, disp = disp, method = "reml")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(1, x, tree, trait, start = NULL, disp = disp, method = "reml")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(1, x, tree, trait, root.value = NULL, disp = disp, method = "reml")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(3, x, tree, trait, start = NULL, disp = disp, method = "reml")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(3, x, tree, trait, root.value = NULL, disp = disp, method = "reml")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(5, x, tree, trait, start = NULL, disp = disp, method = "reml")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(5, x, tree, trait, root.value = NULL, disp = disp, method = "reml")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
@@ -182,8 +182,8 @@ test_that("testAncestralIncrementFit", {
   ## ASR - fixed root
   fitfr <- fitCauchy(tree, trait, method = "fixed.root")
   expect_equal(unname(as.vector(t(increment(fitfr, c(12, 13), c(-0.3, 0.1))))),
-               c(posteriorDensityIncrement(12, c(-0.3, 0.1), tree, trait, start = fitfr$x0, disp = fitfr$disp, method = "fixed.root"),
-                 posteriorDensityIncrement(13, c(-0.3, 0.1), tree, trait, start = fitfr$x0, disp = fitfr$disp, method = "fixed.root")))
+               c(posteriorDensityIncrement(12, c(-0.3, 0.1), tree, trait, root.value = fitfr$x0, disp = fitfr$disp, method = "fixed.root"),
+                 posteriorDensityIncrement(13, c(-0.3, 0.1), tree, trait, root.value = fitfr$x0, disp = fitfr$disp, method = "fixed.root")))
 
   anc_all <- increment(fitfr)
   expect_equal(dim(anc_all), c(18, 100))
@@ -211,8 +211,8 @@ test_that("testAncestralIncrementFit", {
   ## ASR - random root
   fitrr <- fitCauchy(tree, trait, method = "random.root", root.edge = root.edge)
   expect_equal(unname(as.vector(t(increment(fitrr, c(12, 13), c(-0.3, 0.1))))),
-               c(posteriorDensityIncrement(12, c(-0.3, 0.1), treerr, trait, start = 0.0, disp = fitrr$disp, method = "random.root"),
-                 posteriorDensityIncrement(13, c(-0.3, 0.1), treerr, trait, start = 0.0, disp = fitrr$disp, method = "random.root")))
+               c(posteriorDensityIncrement(12, c(-0.3, 0.1), treerr, trait, root.value = 0.0, disp = fitrr$disp, method = "random.root"),
+                 posteriorDensityIncrement(13, c(-0.3, 0.1), treerr, trait, root.value = 0.0, disp = fitrr$disp, method = "random.root")))
   
   anc_all <- increment(fitrr)
   expect_equal(dim(anc_all), c(19, 100))
@@ -225,18 +225,18 @@ test_that("testAncestralIncrementFit", {
   ## ASR - reml
   fitreml <- fitCauchy(tree, trait, method = "reml")
   expect_equal(unname(as.vector(t(increment(fitreml, c(14, 1, 10), c(-0.3, 0.1, 2))))),
-               c(posteriorDensityIncrement(14, c(-0.3, 0.1, 2), tree, trait, start = fitreml$x0, disp = fitreml$disp, method = "reml"),
-                 posteriorDensityIncrement(1, c(-0.3, 0.1, 2), tree, trait, start = fitreml$x0, disp = fitreml$disp, method = "reml"),
-                 posteriorDensityIncrement(10, c(-0.3, 0.1, 2), tree, trait, start = fitreml$x0, disp = fitreml$disp, method = "reml")))
+               c(posteriorDensityIncrement(14, c(-0.3, 0.1, 2), tree, trait, root.value = fitreml$x0, disp = fitreml$disp, method = "reml"),
+                 posteriorDensityIncrement(1, c(-0.3, 0.1, 2), tree, trait, root.value = fitreml$x0, disp = fitreml$disp, method = "reml"),
+                 posteriorDensityIncrement(10, c(-0.3, 0.1, 2), tree, trait, root.value = fitreml$x0, disp = fitreml$disp, method = "reml")))
 
   anc_all <- increment(fitreml)
   expect_equal(dim(anc_all), c(18, 100))
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(10, x, tree, trait, start = NULL, disp = disp, method = "reml")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(10, x, tree, trait, root.value = NULL, disp = disp, method = "reml")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   
-  fun <- Vectorize(function(x) {posteriorDensityIncrement(13, x, tree, trait, start = NULL, disp = disp, method = "reml")})
+  fun <- Vectorize(function(x) {posteriorDensityIncrement(13, x, tree, trait, root.value = NULL, disp = disp, method = "reml")})
   total_mass <- unname(integrate(fun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
   expect_equal(total_mass, 1.0)
   

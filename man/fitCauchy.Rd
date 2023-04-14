@@ -2,14 +2,14 @@
 % Please edit documentation in R/fitCauchy.R
 \name{fitCauchy}
 \alias{fitCauchy}
-\title{Maximum Likelihood estimator for a Cauchy model}
+\title{Model fitting for a Cauchy Process}
 \usage{
 fitCauchy(
   phy,
   trait,
   model = c("cauchy", "lambda"),
   method = c("reml", "random.root", "fixed.root"),
-  starting.value = list(mu = NULL, disp = NULL, lambda = NULL),
+  starting.value = list(x0 = NULL, disp = NULL, lambda = NULL),
   lower.bound = list(disp = 0, lambda = 0),
   upper.bound = list(disp = Inf, lambda = NULL),
   root.edge = 100,
@@ -23,81 +23,138 @@ fitCauchy(
 
 \item{trait}{named vector of traits at the tips.}
 
-\item{model}{a model for the trait evolution. Only \code{"cauchy"} is allowed.}
+\item{model}{a model for the trait evolution. One of \code{"cauchy"} or \code{"lambda"} (see Details).}
 
-\item{method}{the method used to fit the process. One of \code{reml} (the default), \code{random.root} or \code{fixed.root}.
-See details.}
+\item{method}{the method used to fit the process.
+One of \code{reml} (the default), \code{fixed.root} or \code{random.root}.
+See Details.}
 
 \item{starting.value}{starting value for the parameters of the Cauchy.
-This should be a named list, with \code{mu} and \code{disp} the ancestral central and dispersion parameters.
-The default initial values are computed from standard statistics used on (independent) Cauchy variables, see details.}
+This should be a named list, with \code{x0} and \code{disp} the root starting value and the dispersion parameter.
+The default initial values are computed from standard statistics used on (independent) Cauchy variables, see Details.}
 
-\item{lower.bound}{named list with lower bound values for the parameters.}
+\item{lower.bound}{named list with lower bound values for the parameters. See Details for the default values.}
 
-\item{upper.bound}{named list with upper bound values for the parameters. See Details.}
+\item{upper.bound}{named list with upper bound values for the parameters. See Details for the default values.}
 
 \item{root.edge}{multiplicative factor for the root dispersion, equal to the length of the root edge. Ignored if \code{method!=random.root}.}
 
 \item{hessian}{if \code{TRUE}, then the numerical hessian is computed, for confidence interval computations. See \code{\link{compute_vcov}}.}
 
-\item{optim}{if "local", only a local optimization around the initial parameter values is performed (the default). If "global", a global maximization is attempted using the "MLSL" approach (see \code{\link{nloptr}}).}
+\item{optim}{if "local", only a local optimization around the initial parameter values is performed (the default).
+If "global", a global maximization is attempted using the "MLSL" approach (see \code{\link{nloptr}}).}
 
-\item{method.init.disp}{the initialization method for the dispersion. One of "Qn", "Sn", "MAD", "IQR". Default to the "Qn" statistics. See Details.}
+\item{method.init.disp}{the initialization method for the dispersion.
+One of "Qn", "Sn", "MAD", "IQR". Default to the "Qn" statistics.
+See Details.}
 }
 \value{
-A list, with the maximum likelihood rate parameter, and the likelihood value.
+An object of S3 class \code{cauphyfit}, with fields:
+\item{\code{x0}}{the fitted starting value (for \code{method="fixed.root"})}
+\item{disp}{the ml or reml estimate of the dispersion parameter}
+\item{lambda}{the ml or reml estimate of the lambda parameter (for \code{model="lambda"})}
+\item{logLik}{the maximum of the log (restricted) likelihood}
+\item{p}{the number of parameters of the model}
+\item{aic}{the AIC value of the model}
+\item{trait}{the named vector of traits at the tips used in the fit}
+\item{y}{the named vector of traits at the tips used in the fit}
+\item{n}{the number of tips in the tree}
+\item{d}{the number of dependent variables}
+\item{call}{the original call of the function}
+\item{model}{the phylogenetic model (one of \code{"cauchy"} or \code{"lambda"})}
+\item{phy}{the phylogenetic tree}
+\item{method}{the method used (one of \code{"reml"}, \code{"fixed.root"}, \code{"random.root"})}
+\item{random.root}{\code{TRUE} if \code{method="random.root"}}
+\item{reml}{\code{TRUE} if \code{method="reml"}}
+\item{root_tip_reml}{name of the tip used to reroot the tree (for  \code{method="reml"})}
 }
 \description{
-Find the maximum likelihood, using numerical optimization with \code{\link{optim}}.
+Fit the Cauchy process on a phylogeny, using numerical optimization.
 }
 \details{
+For the default \code{model="cauchy"}, the parameters of the Cauchy Process (CP)
+are \code{disp}, the dispersion of the process,
+and \code{x0}, the starting value of the process at the root (for \code{method="fixed.root"}).
+
+The model assumes that each increment of the trait \eqn{X} on a branch going from node \eqn{k} to \eqn{l} 
+follows a Cauchy distribution, with a dispersion proportional to the length \eqn{t_l} of the branch:
+\deqn{X_l - X_k \sim \mathcal{C}(0, \text{disp} \times t_l).}
+
 Unless specified by the user, the initial values for the parameters are taken according to the following heuristics:
 \itemize{
- \item{\code{mu}}{ is the trimmed mean of the trait, keeping only 24\% of the observations, as advocated in Rothenberg et al. 1964 (for \code{method="fixed.root"})}
- \item{\code{disp}}{ is initialized from the trait centered and normalized by tip heights, with one of the following statistics, taken from Rousseeuw & Croux 1993:}
+ \item{\code{x0}:}{ is the trimmed mean of the trait,
+ keeping only 24\% of the observations, as advocated in Rothenberg et al. 1964
+ (for \code{method="fixed.root"});}
+ \item{\code{disp}:}{ is initialized from the trait centered and normalized 
+ by tip heights, with one of the following statistics, taken from Rousseeuw & Croux 1993:}
  \itemize{
- \item{\code{IQR}}{ half of the inter-quartile range (see \code{\link{IQR}});}
- \item{\code{MAD}}{ median absolute deviation with constant equal to 1 (see \code{\link{mad}});}
- \item{\code{Sn}}{ Sn statistics with constant 0.7071 (see \code{\link[robustbase]{Sn}});}
- \item{\code{Qn}}{ Qn statistics with constant 1.2071 (see \code{\link[robustbase]{Qn}});}
+ \item{\code{IQR}:}{ half of the inter-quartile range (see \code{\link{IQR}});}
+ \item{\code{MAD}:}{ median absolute deviation with constant equal to 1 (see \code{\link{mad}});}
+ \item{\code{Sn}:}{ Sn statistics with constant 0.7071 (see \code{\link[robustbase]{Sn}});}
+ \item{\code{Qn}:}{ (default) Qn statistics with constant 1.2071 (see \code{\link[robustbase]{Qn}}).}
 }
 }
 
-For \code{model=lambda}, the maximum default value is computed using \code{phytools:::maxLambda},
-and is the ratio between the maximum height of a tip node over the maximum height of an internal node.
-This can be larger than 1.
+Unless specified by the user, \code{x0} is taken to be unbounded,
+\code{disp} positive unbounded.
 
 The \code{method} argument specifies the method used for the fit:
 \itemize{
-  \item{\code{method=reml}}{ 
+  \item{\code{method="reml"}:}{ 
   the dispersion parameter is fitted using the REML criterion,
-  obtained by re-rooting the tree to one of the tips. 
+  obtained by re-rooting the tree to one of the tips.
+  See \code{\link{logDensityTipsCauchy}} for the default choice of the re-rooting tip;
   }
-  \item{\code{method=random.root}}{ 
-  the root value is assumed to be a random Cauchy variable, centered at \code{mu=0},
-  and with a dispersion \code{disp_root = disp * root.edge}.
+  \item{\code{method="random.root"}:}{ 
+  the root value is assumed to be a random Cauchy variable, centered at \code{x0=0},
+  and with a dispersion \code{disp_root = disp * root.edge};
   }
-  \item{\code{method=fixed.root}}{ 
-  the model is fitted conditionally on the root value mu,
+  \item{\code{method="fixed.root"}:}{ 
+  the model is fitted conditionally on the root value \code{x0},
   i.e. with a model where the root value is fixed and inferred from the data.
   }
 }
 In the first two cases, the optimization is done on the dispersion only,
 while in the last case the optimization is on the root value and the dispersion.
+
+The function uses \code{\link{nloptr}} for the numerical optimization of the 
+(restricted) likelihood, computed with function \code{\link{logDensityTipsCauchy}}.
+It uses algorithms \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#bobyqa}{\code{BOBYQA}}
+and \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#mlsl-multi-level-single-linkage}{\code{MLSL_LDS}}
+for local and global optimization.
+
+If \code{model="lambda"}, the CP is fit on a tree with branch lengths re-scaled 
+using the Pagel's lambda transform (see \code{\link[phylolm]{transf.branch.lengths}}),
+and the \code{lambda} value is estimated using numerical optimization.
+The default initial value for the \code{lambda} parameter is computed using adequate robust moments.
+The default maximum value is computed using \code{phytools:::maxLambda},
+and is the ratio between the maximum height of a tip node over the maximum height of an internal node.
+This can be larger than 1.
+The default minimum value is 0.
 }
 \examples{
 # Simulate tree and data
-phy <- ape::rphylo(5, 0.1, 0)
-dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
+set.seed(1289)
+phy <- ape::rphylo(20, 0.1, 0)
+dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+                    parameters = list(root.value = 10, disp = 0.1))
 # Fit the data
 fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
 fit
+# Approximate confidence intervals
+confint(fit)
+# Profile likelihood
+pl <- profile(fit)
+plot(pl)
 
 }
 \references{
+Bastide, P. and Didier, G. (2023), The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. bioRxiv.
+
 Rothenberg T. J., Fisher F. M., Tilanus C. B. 1964. A Note on Estimation from a Cauchy Sample. Journal of the American Statistical Association. 59:460–463.
+
 Rousseeuw P.J., Croux C. 1993. Alternatives to the Median Absolute Deviation. Journal of the American Statistical Association. 88:1273–1283.
 }
 \seealso{
-\code{\link{cauphylm}}, \code{geiger::fitContinuous}
+\code{\link{confint.cauphyfit}}, \code{\link{profile.cauphyfit}}, \code{\link{ancestral}}, \code{\link{increment}}, \code{\link{logDensityTipsCauchy}}, \code{\link{cauphylm}}, \code{\link[geiger]{fitContinuous}}
 }

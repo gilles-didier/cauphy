@@ -3,18 +3,15 @@
 \name{vcov.cauphyfit}
 \alias{vcov.cauphyfit}
 \alias{logLik.cauphyfit}
-\alias{print.logLik.cauphyfit}
 \alias{AIC.logLik.cauphyfit}
 \alias{AIC.cauphyfit}
 \alias{confint.cauphyfit}
 \alias{coef.cauphyfit}
-\title{Generic Methods for cauphyfit}
+\title{Generic Methods for S3 class \code{cauphyfit}.}
 \usage{
 \method{vcov}{cauphyfit}(object, ...)
 
 \method{logLik}{cauphyfit}(object, ...)
-
-\method{print}{logLik.cauphyfit}(x, ...)
 
 \method{AIC}{logLik.cauphyfit}(object, k = 2, ...)
 
@@ -25,11 +22,9 @@
 \method{coef}{cauphyfit}(object, ...)
 }
 \arguments{
-\item{object}{an object of class \code{"phylolm"}.}
+\item{object}{an object of class \code{cauphyfit}.}
 
 \item{...}{further arguments to methods.}
-
-\item{x}{an object of class \code{"phylolm"}.}
 
 \item{k}{numeric, the penalty per parameter to be used; the default \code{k = 2} is the classical AIC.}
 
@@ -40,5 +35,8 @@
 \item{level}{the confidence level required.}
 }
 \description{
-Generic Methods for cauphyfit
+Generic Methods for S3 class \code{cauphyfit}.
+}
+\seealso{
+\code{\link{fitCauchy}}
 }

@@ -55,7 +55,7 @@ numerical computation of the Hessian.
 confint(cauchy_reml)
 ```
 
-We can also plot the profile likelihood around the infered parameter value,
+We can also plot the profile likelihood around the inferred parameter value,
 in order to check that the numerical optimization went well, and that the
 likelihood computation did not encounter some numerical robustness issues.
 

@@ -18,7 +18,7 @@ test_that("testSimulationCauchyTree", {
   disp <- 0.1
   
   Nrep <- 100000
-  trait1 <- sapply(1:Nrep, function(x) simulateTipsCauchy(phy, start = mu, disp = disp))
+  trait1 <- sapply(1:Nrep, function(x) simulateTipsCauchy(phy, root.value = mu, disp = disp))
   expect_equal(unname(trait1[1, 1]), 0.93183503)
   expect_equal(unname(trait1[2, 1]), 1.29706603)
   expect_equal(mean(apply(trait1, 1, median)), mu, tolerance = 1e-4)
@@ -44,14 +44,14 @@ test_that("testrTraitCauchy", {
   set.seed(1289)
   trait1 <- rTraitCauchy(n = Nrep, phy, model = "cauchy", parameters = list(root.value = mu, disp = disp))
   set.seed(1289)
-  trait2 <- simulateTipsCauchy(phy, start = mu, disp = disp)
+  trait2 <- simulateTipsCauchy(phy, root.value = mu, disp = disp)
   expect_equal(trait1, trait2)
   
   Nrep <- 10
   set.seed(1289)
   trait1 <- rTraitCauchy(n = Nrep, phy, model = "cauchy", parameters = list(root.value = mu, disp = disp))
   set.seed(1289)
-  trait2 <- sapply(1:Nrep, function(x) simulateTipsCauchy(phy, start = mu, disp = disp))
+  trait2 <- sapply(1:Nrep, function(x) simulateTipsCauchy(phy, root.value = mu, disp = disp))
   expect_equal(trait1, trait2)
   
   Nrep <- 1

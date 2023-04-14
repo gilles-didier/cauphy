@@ -19,8 +19,9 @@ initDispersionParameter(
 
 \item{method.init.disp}{the robust estimator method}
 
-\item{method}{the method used to fit the process. One of \code{reml} (the default), \code{random.root} or \code{fixed.root}.
-See details.}
+\item{method}{the method used to fit the process.
+One of \code{reml} (the default), \code{fixed.root} or \code{random.root}.
+See Details.}
 }
 \value{
 The initial dispersion parameter.

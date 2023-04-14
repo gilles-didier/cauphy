@@ -1,176 +1,63 @@
-#' @useDynLib cauphy, .registration=TRUE
-#' @import ape
-# @importFrom utils flush.console
-#' @importFrom methods is
-NULL
-
-#library(ade4)
-#library(ape)
-#dyn.load("treeR.so")
-
-#testTree <- function(tree, part) {
-#phy <- read.tree(tree)
-#.Call("drawPhylo", phy, "bof.tex")
-#list <- scan(part, what = " ")
-#new <- .Call("prunePhylo", phy, list)
-#phy2 <- read.tree(text = new)
-#}
-
-#' @title Print a tree
-#'
-#' @description
-#' \code{printRtree} prints a tree in Newick format
-#' 
-#' @param tree a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.
-#' 
-#' @return No value returned.
-#' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
-#' 
-#' @keywords internal programming
-#' 
-printRTreeTest <- function(tree) {
-	res <-.Call("printRTree", tree)
-	res
-}
-
-#' @importFrom stats reorder
-
-#' @title Cauchy Trait Simulation
-#'
-#' @description
-#' Simulate a continuous trait using the Cauchy Process
-#' 
-#' @param n number of independent replicates
-#' @param phy a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.
-#' @param model a phylogenetic model. Default is "cauchy", for the Cauchy process. Alternative are "lambda", "kappa", and "delta".
-#' @param parameters list of parameters for the model (see Details).
-#' 
-#' @return
-#' If n=1, a numeric vector with names from the tip labels in the tree.
-#' For more than 1 replicate, a matrix with the tip labels as row names, and one column per replicate.
-#' 
-#' @details
-#' The default choice of parameters is as follow:
-#' \itemize{
-#'   \item{\code{model = cauchy}}{ 
-#'   \code{root.value = 0}, \code{disp = 1}
-#'   }
-#'   \item{\code{model = lambda}}{ 
-#'   \code{root.value = 0}, \code{disp = 1}, \code{lambda = 1}
-#'   }
-#'   \item{\code{model = kappa}}{ 
-#'   \code{root.value = 0}, \code{disp = 1}, \code{kappa = 1}
-#'   }
-#'   \item{\code{model = delta}}{ 
-#'   \code{root.value = 0}, \code{disp = 1}, \code{delta = 1}
-#'   }
-#' }
-#' 
-#' @seealso \code{\link[phylolm]{rTrait}}, \code{\link[ape]{rTraitCont}}
-#' 
-#' @examples
-#' phy <- ape::rphylo(5, 0.1, 0)
-#' y = rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 0.1))
-#' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
-#' 
-#' @export
-#' 
-rTraitCauchy <- function(n = 1, phy,
-                         model = c("cauchy", "lambda", "kappa", "delta"),
-                         parameters = NULL) {
-  ## Check parameters
-  if (is.null(n) || length(n) > 1) stop("n needs to be an integer (number of replicates)")
-  n = as.numeric(n)
-  if (!inherits(phy, "phylo")) stop("object \"phy\" is not of class \"phylo\".")
-  if (is.null(phy$edge.length)) stop("the tree has no branch lengths.")
-  if (is.null(phy$tip.label)) stop("the tree has no tip labels.")
-  phy <- reorder(phy, "pruningwise")
-  ## Model and parameters
-  model = match.arg(model)
-  parameters.default = c(0, 1, 1, 1, 1)
-  names(parameters.default) <- c("root.value", "disp", 
-                                 "lambda", "kappa", "delta")
-  if (is.null(parameters)) {
-    parameters <- parameters.default
-  } else {
-    if (!is.list(parameters)) stop("please specify parameters as a list().")
-    match_params <- match(names(parameters), names(parameters.default))
-    if (any(is.na(match_params))) stop(paste0("Parameters ",
-                                              paste(names(parameters)[is.na(match_params)], collapse = ", "),
-                                              " are unknown."))
-    specified <- !c(is.null(parameters$root.value), is.null(parameters$disp),
-                    is.null(parameters$lambda), is.null(parameters$kappa), is.null(parameters$delta))
-    parameters.user <- c(parameters$root.value, parameters$disp,
-                         parameters$lambda, parameters$kappa, parameters$delta)
-    parameters <- parameters.default
-    parameters[specified] <- parameters.user
-  }
-  p <- as.list(parameters)
-  if (model == "lambda" & p$lambda == 1) model <- "cauchy"
-  if (model == "kappa" & p$kappa == 1) model <- "cauchy"
-  if (model == "delta" & p$delta == 1) model <- "cauchy"
-  # Simulations
-  if (model %in% c("lambda", "kappa", "delta")) {
-    phy <- transf.branch.lengths(phy, model, parameters = p, check.pruningwise = F)$tree
-  }
-  sim <- vapply(seq_len(n),
-                FUN = function(i) simulateTipsCauchy(tree = phy, start = p$root.value, disp = p$disp),
-                FUN.VALUE = rep(0.0, length(phy$tip.label)))
-  rownames(sim) <- phy$tip.label
-  if (n == 1) {
-    sim <- as.vector(sim)
-    names(sim) <- phy$tip.label
-  }
-  return(sim)
-}
-
-
-#' @title Simulate using the Cauchy Process
-#'
-#' @description
-#' Simulate tip values with a Cauchy process
-#' 
-#' @param tree a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.
-#' @param start the initial root trait value.
-#' @param disp the dispersion parameter of the Cauchy process.
-#' 
-#' @return a vector of simulated values.
-#' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
-#' 
-#' @keywords internal
-#' 
-#' 
-simulateTipsCauchy <- function(tree, start, disp) {
-	res <-.Call("SimulateTipsCauchy", tree, start, disp)
-	res
-}
-
 #' @title Log Density of a Cauchy Process
 #'
 #' @description
-#' Compute the log density of a Cauchy process on a phylogenetic tree.
+#' Compute the log density of the vector of trait at the tips of the phylogenetic tree, 
+#' assuming a Cauchy process.
 #' 
+#' @param tree a phylogenetic tree of class \code{\link[ape]{phylo}}.
 #' @param tipTrait a names vector of tip trait values, with names matching the tree labels.
-#' @param rootTip the tip used to re-root the tree, when the REML method is used. If \code{NULL}, the tip with the longest branch is used. Ignored in `method != "reml"`.
-#' @inheritParams simulateTipsCauchy
-#' @inheritParams fitCauchy
+#' @param rootTip the tip used to re-root the tree, when the REML method is used.
+#' If \code{NULL}, the tip with the smallest distance to all the others is used (see Details).
+#' Ignored in \code{method != "reml"}.
+#' @param root.value the root starting value of the process.
+#' @param disp the dispersion value.
+#' @param method the method used to compute the likelihood.
+#' One of \code{reml} (the default), \code{fixed.root} or \code{random.root}.
+#' See Details.
 #' 
-#' @return the density value.
+#' @details
+#' The parameters of the Cauchy Process (CP)
+#' are \code{disp}, the dispersion of the process,
+#' and \code{root.value}, the starting value of the process at the root (for \code{method="fixed.root"}).
+#' 
+#' The model assumes that each increment of the trait \eqn{X} on a branch going from node \eqn{k} to \eqn{l} 
+#' follows a Cauchy distribution, with a dispersion proportional to the length \eqn{t_l} of the branch:
+#' \deqn{X_l - X_k \sim \mathcal{C}(0, \text{disp} \times t_l).}
+#' 
+#' The \code{method} argument specifies the type of likelihood that is computed:
+#' \itemize{
+#'   \item{\code{method="reml"}:}{ 
+#'   the dispersion parameter is fitted using the REML criterion,
+#'   obtained by re-rooting the tree to one of the tips.
+#'   The default tip used to reroot the tree is:
+#'   \code{rootTip = which.min(colSums(cophenetic.phylo(tree)))}.
+#'   Any tip can be used, but this default empirically proved to be the most robust numerically;
+#'   }
+#'   \item{\code{method="random.root"}:}{ 
+#'   the root value is assumed to be a random Cauchy variable, centered at \code{root.value=0},
+#'   and with a dispersion \code{disp_root = disp * root.edge};
+#'   }
+#'   \item{\code{method="fixed.root"}:}{ 
+#'   the model is fitted conditionally on the root value \code{root.value},
+#'   i.e. with a model where the root value is fixed and inferred from the data.
+#'   }
+#' }
+#' 
+#' @return the log density value.
+#' 
+#' @seealso \code{\link{fitCauchy}}
 #' 
 #' @examples
 #' phy <- ape::rphylo(5, 0.1, 0)
 #' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
 #' logDensityTipsCauchy(phy, dat, 0, 1, method = "fixed.root")
 #' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
+#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
 #' @export
 #' 
 #' 
-logDensityTipsCauchy <- function(tree, tipTrait, start = NULL, disp, method = c("reml", "random.root", "fixed.root"), rootTip = NULL) {
+logDensityTipsCauchy <- function(tree, tipTrait, root.value = NULL, disp, method = c("reml", "random.root", "fixed.root"), rootTip = NULL) {
   # type
   method <- match.arg(method)
   type <- switch(method,
@@ -182,10 +69,10 @@ logDensityTipsCauchy <- function(tree, tipTrait, start = NULL, disp, method = c(
   if (is.null(tree$edge.length)) stop("the tree has no branch lengths.")
   if (!is.binary(tree)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
   stopifnot(all.equal(matrix(as.integer(tree$edge), ncol = 2), tree$edge))
-  if (method == "random.root" && is.null(start)) stop("Starting value must be specified for root node in the `random.root` method.")
+  if (method == "random.root" && is.null(root.value)) stop("Starting value must be specified for root node in the `random.root` method.")
   if (method == "random.root" && (is.null(tree$root.edge) || tree$root.edge == 0)) stop("In the random root model, the `root.edge` must be non NULL and non zero.")
-  if ((method == "fixed.root") && (is.null(start))) stop ("Starting value must be specified for root node in the `fixed.root` method.")
-  if (method == "reml" && !is.null(start)) stop("In the reml model, `start` cannot be specified.")
+  if ((method == "fixed.root") && (is.null(root.value))) stop ("Starting value must be specified for root node in the `fixed.root` method.")
+  if (method == "reml" && !is.null(root.value)) stop("In the reml model, `root.value` cannot be specified.")
   tree$edge <- matrix(as.integer(tree$edge), ncol = 2)
   # rootTip
   if (!is.null(rootTip)) {
@@ -194,8 +81,8 @@ logDensityTipsCauchy <- function(tree, tipTrait, start = NULL, disp, method = c(
     rootTip <- which.min(colSums(cophenetic.phylo(tree))) - 1 #find_longest_tip_branch(tree) - 1
   }
   # likelihood
-	res <-.Call("getLogDensityTipsCauchy", tree, tipTrait, names(tipTrait), start, disp, type, rootTip)
-	return(res)
+  res <-.Call("getLogDensityTipsCauchy", tree, tipTrait, names(tipTrait), root.value, disp, type, rootTip)
+  return(res)
 }
 
 #' @importFrom foreach %dopar% %do%
@@ -212,17 +99,19 @@ NULL
 #' 
 #' @return the posterior density value.
 #' 
+#' @seealso \code{\link{ancestral}}, \code{\link{fitCauchy}}
+#' 
 #' @examples
 #' phy <- ape::rphylo(5, 0.1, 0)
 #' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
 #' posteriorDensityAncestral(7, 0.1, phy, dat, disp = 1)
 #' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
+#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
 #' @export
 #' 
 #' 
-posteriorDensityAncestral <- function(node, vals, tree, tipTrait, start = NULL, disp, method = c("reml", "random.root", "fixed.root")) {
+posteriorDensityAncestral <- function(node, vals, tree, tipTrait, root.value = NULL, disp, method = c("reml", "random.root", "fixed.root")) {
   # type
   method <- match.arg(method)
   type <- switch(method,
@@ -237,11 +126,11 @@ posteriorDensityAncestral <- function(node, vals, tree, tipTrait, start = NULL, 
   if (node <= length(tree$tip.label)) stop("Ancestral reconstruction is only allowed for ancestral nodes.")
   if (node > length(tree$tip.label) + Nnode(tree)) stop ("This node does not exist in the tree.")
   if ((method == "fixed.root") && (node == length(tree$tip.label) + 1)) stop ("Ancestral state reconstruction is not allowed for the root with the fixed root model.")
-  if ((method == "fixed.root") && (is.null(start))) stop ("Starting value must be specified for root node in the `fixed.root` method.")
-  if (method == "random.root" && is.null(start)) stop("Starting value must be specified for root node in the `random.root` method.")
+  if ((method == "fixed.root") && (is.null(root.value))) stop ("Starting value must be specified for root node in the `fixed.root` method.")
+  if (method == "random.root" && is.null(root.value)) stop("Starting value must be specified for root node in the `random.root` method.")
   if (method == "random.root" && (is.null(tree$root.edge) || tree$root.edge == 0)) stop("In the random root model, the `root.edge` must be non NULL and non zero.")
-  if (method == "reml" && !is.null(start)) stop("In the reml model, `start` cannot be specified.")
-  res <-.Call("getPosteriorLogDensityAncestralCauchy", node - 1, vals, tree, tipTrait, names(tipTrait), start, disp, type)
+  if (method == "reml" && !is.null(root.value)) stop("In the reml model, `root.value` cannot be specified.")
+  res <-.Call("getPosteriorLogDensityAncestralCauchy", node - 1, vals, tree, tipTrait, names(tipTrait), root.value, disp, type)
   return(exp(res))
 }
 
@@ -250,15 +139,28 @@ posteriorDensityAncestral <- function(node, vals, tree, tipTrait, start = NULL, 
 #' @title Posterior density of a node
 #'
 #' @description
-#' Compute the posterior density of a node value under a Cauchy process on a phylogenetic tree.
+#' Compute the posterior density of a node value under a fitted Cauchy process on a phylogenetic tree.
 #' 
 #' @param x an object of class \code{\link{fitCauchy}} or \code{\link{cauphylm}}.
-#' @param node the vector of nodes for which to compute the posterior density. If not specified, the reconstruction is done on all the nodes.
-#' @param values the vector of values where the density should be computed. If not specified, the reconstruction is done for a grid of \code{n_values} values between \code{1.5 * min(x$y)} and \code{1.5 * max(x$y)}.
-#' @param n_values the number of point for the grid of values. Default to \code{100}. Ignored if \code{values} is provided.
+#' @param node the vector of nodes for which to compute the posterior density. 
+#' If not specified, the reconstruction is done on all the nodes.
+#' @param values the vector of values where the density should be computed. 
+#' If not specified, the reconstruction is done for a grid of \code{n_values} values 
+#' between \code{1.5 * min(x$y)} and \code{1.5 * max(x$y)}.
+#' @param n_values the number of point for the grid of values. 
+#' Default to \code{100}. Ignored if \code{values} is provided.
 #' @param n_cores number of cores for the parallelization. Default to 1.
 # @param progress_bar if \code{TRUE}, show a progress bar for the computations.
 #' @param ... other arguments to be passed to the method.
+#' 
+#' @details
+#' This function assumes a Cauchy Process on the tree with fitted parameters 
+#' (see \code{\link{fitCauchy}}),
+#' and computes the posterior ancestral density of internal nodes, 
+#' conditionally on the vector of tip values.
+#' 
+#' It computes the posterior density on all the points in \code{values},
+#' that should be refined enough to get a good idea of the density curve.
 #' 
 #' @return an object of S3 class \code{ancestralCauchy},
 #'  which is a matrix of posterior values, with nodes in rows and values in columns.
@@ -279,9 +181,10 @@ posteriorDensityAncestral <- function(node, vals, tree, tipTrait, start = NULL, 
 #' anc2 <- ancestral(fit, node = c(12, 17), n_values = 1000)
 #' plot(anc2, type = "l")
 #' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
+#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
-#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}}, \code{\link{plot.ancestralCauchy}}, \code{\link{increment}}
+#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}}, \code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{increment}}
+#' 
 #' @export
 #'
 ##
@@ -292,6 +195,8 @@ ancestral <- function(x, ...) UseMethod("ancestral")
 #' @export
 ##
 ancestral.cauphylm <- function(x, node, values, n_values = 100, n_cores = 1, ...) {
+  if (x$model != "cauchy") stop("Ancestral reconstruction is only available for the Cauchy process.")
+  if (!(length(x$coefficients) == 1 && sum(x$X) == length(x$X))) stop("Ancestral reconstruction is only available for the Cauchy regression agains the intercept.")
   if (missing(node)) {
     if (x$method == "fixed.root") {
       node <- (Ntip(x$phy) + 2):(Ntip(x$phy) + Nnode(x$phy))
@@ -308,7 +213,7 @@ ancestral.cauphylm <- function(x, node, values, n_values = 100, n_cores = 1, ...
   }
   anc_fun <- function(x, nn, values) posteriorDensityAncestral(node = nn, vals = values,
                                                                tree = x$phy, tipTrait = x$y,
-                                                               start = x$coefficients, disp = x$disp,
+                                                               root.value = x$coefficients, disp = x$disp,
                                                                method = "fixed.root", ...)
   anc <- parallel_construction(anc_fun, x, node, values, n_cores, progress_bar = FALSE)
   class(anc) <- "ancestralCauchy"
@@ -321,6 +226,7 @@ ancestral.cauphylm <- function(x, node, values, n_values = 100, n_cores = 1, ...
 #' @export
 ##
 ancestral.cauphyfit <- function(x, node, values, n_values = 100, n_cores = 1, ...) {
+  if (x$model != "cauchy") stop("Ancestral reconstruction is only available for the Cauchy process.")
   if (missing(node)) {
     if (x$method == "fixed.root") {
       node <- (Ntip(x$phy) + 2):(Ntip(x$phy) + Nnode(x$phy))
@@ -337,7 +243,7 @@ ancestral.cauphyfit <- function(x, node, values, n_values = 100, n_cores = 1, ..
   }
   anc_fun <- function(x, nn, values) posteriorDensityAncestral(node = nn, vals = values,
                                                                tree = x$phy, tipTrait = x$trait,
-                                                               start = x$x0, disp = x$disp, method = x$method, ...)
+                                                               root.value = x$x0, disp = x$disp, method = x$method, ...)
   anc <- parallel_construction(anc_fun, x, node, values, n_cores, progress_bar = FALSE)
   class(anc) <- "ancestralCauchy"
   attr(anc, "edge") <- FALSE
@@ -361,7 +267,7 @@ parallel_construction <- function(anc_fun, x, node, values, n_cores, progress_ba
     anc <- foreach::foreach(nn = node, .packages = "cauphy", .combine = combine_fun) %dopar% {
       anc_fun(x, nn, values)
     }
-  
+    
   } else {
     combine_fun <- rbind
     
@@ -408,12 +314,14 @@ parallel_construction <- function(anc_fun, x, node, values, n_cores, progress_ba
 #' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
 #' posteriorDensityIncrement(2, 0.1, phy, dat, disp = 1)
 #' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
+#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
+#' 
+#' @seealso \code{\link{increment}}, \code{\link{fitCauchy}}
 #' 
 #' @export
 #' 
 #' 
-posteriorDensityIncrement <- function(node, vals, tree, tipTrait, start = NULL, disp, method = c("reml", "random.root", "fixed.root")) {
+posteriorDensityIncrement <- function(node, vals, tree, tipTrait, root.value = NULL, disp, method = c("reml", "random.root", "fixed.root")) {
   ntaxa <- length(tree$tip.label)
   # type
   method <- match.arg(method)
@@ -429,18 +337,18 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, start = NULL, 
   if (node > length(tree$tip.label) + Nnode(tree)) stop ("This node does not exist in the tree.")
   if ((method == "fixed.root") && (node == length(tree$tip.label) + 1)) stop ("Ancestral increment reconstruction is not allowed for the root branch with the fixed root model.")
   if ((method == "reml") && (node == length(tree$tip.label) + 1)) stop ("Ancestral increment reconstruction is not allowed for the root branch with the reml model.")
-  if ((method == "fixed.root") && (is.null(start))) stop ("Starting value must be specified for root node in the `fixed.root` method.")
-  if (method == "random.root" && is.null(start)) stop("Starting value must be specified for root node in the `random.root` method.")
+  if ((method == "fixed.root") && (is.null(root.value))) stop ("Starting value must be specified for root node in the `fixed.root` method.")
+  if (method == "random.root" && is.null(root.value)) stop("Starting value must be specified for root node in the `random.root` method.")
   if (method == "random.root" && (is.null(tree$root.edge) || tree$root.edge == 0)) stop("In the random root model, the `root.edge` must be non NULL and non zero.")
-  if (method == "reml" && !is.null(start)) stop("In the reml model, `start` cannot be specified.")
+  if (method == "reml" && !is.null(root.value)) stop("In the reml model, `root.value` cannot be specified.")
   
   if ((method == "fixed.root") && 
       (node <= length(tree$tip.label)) && # tip
       (node %in% tree$edge[tree$edge[, 1] == (length(tree$tip.label) + 1), 2])) { # descending from root
-    warning(paste0("This branch ends at a tip, and the root is fixed: the posterior increment density is a Dirac in ", tipTrait[tree$tip.label[node]] - start, "."))
+    warning(paste0("This branch ends at a tip, and the root is fixed: the posterior increment density is a Dirac in ", tipTrait[tree$tip.label[node]] - root.value, "."))
   }
   
-  res <-.Call("getPosteriorLogDensityIncrementCauchy", node - 1, vals, tree, tipTrait, names(tipTrait), start, disp, type)
+  res <-.Call("getPosteriorLogDensityIncrementCauchy", node - 1, vals, tree, tipTrait, names(tipTrait), root.value, disp, type)
   return(exp(res))
 }
 
@@ -449,7 +357,7 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, start = NULL, 
 #' @title Posterior density of an increment
 #'
 #' @description
-#' Compute the posterior density of a branch increment under a Cauchy process on a phylogenetic tree.
+#' Compute the posterior density of a branch increment under a fitted Cauchy process on a phylogenetic tree.
 #' 
 #' @param x an object of class \code{\link{cauphylm}}.
 #' @param node vector of nodes ending the branches for which to compute the posterior density of the increment. If not specified, the reconstruction is done on all the possible edges.
@@ -459,6 +367,16 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, start = NULL, 
 # @param progress_bar if \code{TRUE}, show a progress bar for the computations.
 #' @param ... other arguments to be passed to the method.
 #' 
+#' @details
+#' This function assumes a Cauchy Process on the tree with fitted parameters 
+#' (see \code{\link{fitCauchy}}),
+#' and computes the posterior ancestral density of trait increments at branches
+#' (ie, the difference between the traits value at the end and beginning of the branch),
+#' conditionally on the vector of tip values.
+#' 
+#' It computes the posterior density on all the points in \code{values},
+#' that should be refined enough to get a good idea of the density curve.
+#'  
 #' @return an object of S3 class \code{ancestralCauchy},
 #'  which is a matrix of posterior increment values, with nodes in rows and values in columns.
 #' 
@@ -470,7 +388,7 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, start = NULL, 
 #'                     parameters = list(root.value = 10, disp = 0.1))
 #' # Fit the data
 #' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
-#' # Reconstruct the ancestral nodes
+#' # Reconstruct the ancestral increments
 #' inc <- increment(fit)
 #' plot_asr(fit, inc = inc)
 #' plot(inc, node = c(2, 3, 4, 5, 8, 9), type = "l")
@@ -478,9 +396,9 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, start = NULL, 
 #' inc2 <- increment(fit, node = c(3, 8), values = seq(-3, 3, 0.01))
 #' plot(inc2, type = "l")
 #' 
-#' @author Paul Bastide \email{paul.bastide@umontpellier.fr} and Gilles Didier \email{gilles.didier@free.fr}
+#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
-#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}}, \code{\link{plot.ancestralCauchy}}, \code{\link{increment}}
+#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}}, \code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{ancestral}}
 #' 
 #' @export
 #'
@@ -492,6 +410,8 @@ increment <- function(x, ...) UseMethod("increment")
 #' @export
 ##
 increment.cauphylm <- function(x, node, values, n_values = 100, n_cores = 1, ...) {
+  if (x$model != "cauchy") stop("Ancestral reconstruction is only available for the Cauchy process.")
+  if (!(length(x$coefficients) == 1 && sum(x$X) == length(x$X))) stop("Ancestral reconstruction is only available for the Cauchy regression agains the intercept.")
   if (missing(node)) {
     node <- 1:(Ntip(x$phy) + Nnode(x$phy))
     root_node <- Ntip(x$phy) + 1
@@ -507,7 +427,7 @@ increment.cauphylm <- function(x, node, values, n_values = 100, n_cores = 1, ...
   }
   inc_fun <- function(x, nn, values) posteriorDensityIncrement(node = nn, vals = values,
                                                                tree = x$phy, tipTrait = x$y,
-                                                               start = x$coefficients, disp = x$disp,
+                                                               root.value = x$coefficients, disp = x$disp,
                                                                method = "fixed.root", ...)
   inc <- parallel_construction(inc_fun, x, node, values, n_cores, progress_bar = FALSE)
   class(inc) <- "ancestralCauchy"
@@ -520,6 +440,7 @@ increment.cauphylm <- function(x, node, values, n_values = 100, n_cores = 1, ...
 #' @export
 ##
 increment.cauphyfit <- function(x, node, values, n_values = 100, n_cores = 1, ...) {
+  if (x$model != "cauchy") stop("Ancestral reconstruction is only available for the Cauchy process.")
   if (missing(node)) {
     node <- 1:(Ntip(x$phy) + Nnode(x$phy))
     root_node <- Ntip(x$phy) + 1
@@ -535,7 +456,7 @@ increment.cauphyfit <- function(x, node, values, n_values = 100, n_cores = 1, ..
   }
   inc_fun <- function(x, nn, values) posteriorDensityIncrement(node = nn, vals = values,
                                                                tree = x$phy, tipTrait = x$trait,
-                                                               start = x$x0, disp = x$disp,
+                                                               root.value = x$x0, disp = x$disp,
                                                                method = x$method, ...)
   inc <- parallel_construction(inc_fun, x, node, values, n_cores, progress_bar = FALSE)
   class(inc) <- "ancestralCauchy"
@@ -552,10 +473,10 @@ NULL
 #'
 #' @description
 #' This function takes an object of class \code{ancestralCauchy}, result of function
-#' \code{\link{ancestral}}, and plots the reconstructed states for given nodes.
+#' \code{\link{ancestral}} or \code{\link{increment}}, and plots the reconstructed states for given nodes.
 #'
 #' @param x an object of class \code{ancestralCauchy}, result of function
-#' \code{\link{ancestral}}.
+#' \code{\link{ancestral}} or \code{\link{increment}}.
 #' @param node the vector of nodes where to plot the ancestral reconstruction.
 #' @param n.col the number of columns on which to display the plot. Can be left blank.
 #' @param ... further arguments to be passed to \code{\link{plot}}.
@@ -563,8 +484,21 @@ NULL
 #' @return
 #' NULL
 #' 
+#' @examples
+#' set.seed(1289)
+#' # Simulate tree and data
+#' phy <- ape::rphylo(10, 0.1, 0)
+#' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+#'                     parameters = list(root.value = 10, disp = 0.1))
+#' # Fit the data
+#' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
+#' # Reconstruct the ancestral values
+#' inc <- increment(fit, node = c(3, 8), values = seq(-3, 3, 0.01))
+#' plot(inc, type = "l")
+#' anc <- ancestral(fit, node = c(12, 17), n_values = 1000)
+#' plot(anc, type = "l")
 #' 
-#' @seealso \code{\link{ancestral}}, \code{\link{fitCauchy}}
+#' @seealso  \code{\link{plot_asr}}, \code{\link{ancestral}}, \code{\link{increment}}, \code{\link{fitCauchy}}
 #' 
 #' @export
 #'

@@ -232,22 +232,22 @@ test_that("testLikelihoodFunction", {
   trait <- simulateTipsCauchy(tree, mu, disp)
   
   ## Errors
-  expect_error(logDensityTipsCauchy(tree, trait,start = NULL, disp = disp, method = "fixed.root"),
+  expect_error(logDensityTipsCauchy(tree, trait,root.value = NULL, disp = disp, method = "fixed.root"),
                "Starting value must be specified for root node in the `fixed.root` method.")
-  expect_error(logDensityTipsCauchy(tree, trait,start = NULL, disp = disp, method = "random.root"),
+  expect_error(logDensityTipsCauchy(tree, trait,root.value = NULL, disp = disp, method = "random.root"),
                "Starting value must be specified for root node in the `random.root` method.")
-  expect_error(logDensityTipsCauchy(tree, trait, start = 0.0, disp = disp, method = "random.root"),
+  expect_error(logDensityTipsCauchy(tree, trait, root.value = 0.0, disp = disp, method = "random.root"),
                "In the random root model, the `root.edge` must be non NULL and non zero.")
-  expect_error(logDensityTipsCauchy(tree, trait, start = 0.0, disp = disp, method = "random.root"),
+  expect_error(logDensityTipsCauchy(tree, trait, root.value = 0.0, disp = disp, method = "random.root"),
                "In the random root model, the `root.edge` must be non NULL and non zero.")
-  expect_error(logDensityTipsCauchy(tree, trait, start = mu, disp = disp, method = "reml"),
-               "In the reml model, `start` cannot be specified.")
+  expect_error(logDensityTipsCauchy(tree, trait, root.value = mu, disp = disp, method = "reml"),
+               "In the reml model, `root.value` cannot be specified.")
   
   ## Equalities
-  expect_equal(logDensityTipsCauchy(treerr, trait, start = mu, disp = disp, method = "random.root"),
-               logDensityTipsCauchy(treerr, trait - mu, start = 0.0, disp = disp, method = "random.root"))
-  expect_equal(logDensityTipsCauchy(tree, trait, start = mu, disp = disp, method = "fixed.root"),
-               logDensityTipsCauchy(tree, trait - mu, start = 0.0, disp = disp, method = "fixed.root"))
+  expect_equal(logDensityTipsCauchy(treerr, trait, root.value = mu, disp = disp, method = "random.root"),
+               logDensityTipsCauchy(treerr, trait - mu, root.value = 0.0, disp = disp, method = "random.root"))
+  expect_equal(logDensityTipsCauchy(tree, trait, root.value = mu, disp = disp, method = "fixed.root"),
+               logDensityTipsCauchy(tree, trait - mu, root.value = 0.0, disp = disp, method = "fixed.root"))
   
   ## Non binary tree
   tree$edge.length[sample(seq_len(nrow(tree$edge)), 10)] <- 0

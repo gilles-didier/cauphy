@@ -2,7 +2,7 @@
 % Please edit documentation in R/cauphylm.R
 \name{cauphylm}
 \alias{cauphylm}
-\title{Maximum Likelihood estimator for a Cauchy model}
+\title{Phylogenetic Regression using a Cauchy Process}
 \usage{
 cauphylm(
   formula,
@@ -23,20 +23,19 @@ If not found in data, the variables are taken from current environment.}
 
 \item{phy}{a phylogenetic tree of class \code{\link[ape]{phylo}}.}
 
-\item{model}{a model for the trait evolution. Only \code{"cauchy"} is allowed.}
+\item{model}{a model for the trait evolution. One of \code{"cauchy"} or \code{"lambda"} (see Details).}
 
-\item{lower.bound}{named list with lower bound values for the parameters.}
+\item{lower.bound}{named list with lower bound values for the parameters. See Details for the default values.}
 
-\item{upper.bound}{named list with upper bound values for the parameters. See Details.}
+\item{upper.bound}{named list with upper bound values for the parameters. See Details for the default values.}
 
-\item{starting.value}{starting value for the parameters.
-This should be a named list, with \code{disp} the dispersion parameter.
-The default initial values are computed from standard statistics used on (independent) Cauchy variables, see details.}
+\item{starting.value}{named list initial values for the parameters.
+See Details for the default values.}
 
 \item{hessian}{if \code{TRUE}, then the numerical hessian is computed, for confidence interval computations. See \code{\link{compute_vcov}}.}
 }
 \value{
-\item{coefficients}{the named vector of coefficients.}
+\item{coefficients}{the named vector of estimated coefficients.}
 \item{disp}{the maximum likelihood estimate of the dispersion parameter.}
 \item{logLik}{the maximum of the log likelihood.}
 \item{p}{the number of all parameters of the model.}
@@ -50,31 +49,82 @@ The default initial values are computed from standard statistics used on (indepe
 \item{formula}{the model formula}
 \item{call}{the original call to the function}
 \item{model}{the phylogenetic model for the covariance}
+\item{phy}{the phylogenetic tree}
+\item{lambda}{the ml estimate of the lambda parameter (for \code{model="lambda"})}
 }
 \description{
-Find the maximum likelihood, using numerical optimization with \code{\link{optim}}.
+Perform a phylogenetic regression using the Cauchy Process, by numerical optimization.
 }
 \details{
-Unless specified by the user, the initial values for the parameters are taken according to the following heuristics:
+This function fits a Cauchy Process on the phylogeny, using maximum likelihood
+and the \code{"fixed.root"} method (see \code{\link{fitCauchy}}).
+It further assumes that the root value \code{x0} is a linear combination of the
+covariables in \code{formula}.
+The corresponding regression model is:
+\deqn{Y = X \beta + E,}
+with:
 \itemize{
- \item{\code{mu}}{ is the trimmed mean of the trait, keeping only 24\% of the observations, as advocated in Rothenberg et al. 1964 (for models with the intercept only)}
- \item{\code{coef}}{ are obtained from a robust regression using \code{\link[robustbase]{lmrob.S}} (for linear models with several predictors)}
- \item{\code{disp}}{ is initialized from the trait centered and normalized by tip heights, with one of the following statistics, taken from Rousseeuw & Croux 1993:}
+\item{\eqn{Y}}{ the vector of traits at the tips of the tree;}
+\item{\eqn{X}}{ the regression matrix of covariables in \code{formula};}
+\item{\eqn{\beta}}{ the vector of coefficients;}
+\item{\eqn{E}}{ a centered error vector that is Cauchy distributed,
+and can be seen as the result of a Cauchy process starting at 0 at the root,
+and with a dispersion \code{disp} (see \code{\link{fitCauchy}}).}
+}
+
+Unless specified by the user, the initial values for the parameters 
+are taken according to the following heuristics:
+\itemize{
+ \item{\code{coefficients}:}{ \eqn{\beta} are obtained from a robust regression using \code{\link[robustbase]{lmrob.S}};}
+ \item{\code{disp}:}{ is initialized from the trait centered and normalized 
+ by tip heights, with one of the following statistics, taken from Rousseeuw & Croux 1993:}
  \itemize{
- \item{\code{IQR}}{ half of the inter-quartile range (see \code{\link{IQR}});}
- \item{\code{MAD}}{ median absolute deviation with constant equal to 1 (see \code{\link{mad}});}
- \item{\code{Sn}}{ Sn statistics with constant 0.7071 (see \code{\link[robustbase]{Sn}});}
- \item{\code{Qn}}{ Qn statistics with constant 1.2071 (see \code{\link[robustbase]{Qn}});}
+ \item{\code{IQR}:}{ half of the inter-quartile range (see \code{\link{IQR}});}
+ \item{\code{MAD}:}{ median absolute deviation with constant equal to 1 (see \code{\link{mad}});}
+ \item{\code{Sn}:}{ Sn statistics with constant 0.7071 (see \code{\link[robustbase]{Sn}});}
+ \item{\code{Qn}:}{ Qn statistics with constant 1.2071 (see \code{\link[robustbase]{Qn}}).}
 }
 }
 
-For \code{model=lambda}, the maximum default value is computed using \code{phytools:::maxLambda},
+Unless specified by the user, \code{disp} is taken positive unbounded.
+
+The function uses \code{\link{nloptr}} for the numerical optimization of the 
+(restricted) likelihood, computed with function \code{\link{logDensityTipsCauchy}}.
+It uses algorithms \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#bobyqa}{\code{BOBYQA}}
+and \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#mlsl-multi-level-single-linkage}{\code{MLSL_LDS}}
+for local and global optimization.
+
+If \code{model="lambda"}, the CP is fit on a tree with branch lengths re-scaled 
+using the Pagel's lambda transform (see \code{\link[phylolm]{transf.branch.lengths}}),
+and the \code{lambda} value is estimated using numerical optimization.
+The default initial value for the \code{lambda} parameter is computed using adequate robust moments.
+The default maximum value is computed using \code{phytools:::maxLambda},
 and is the ratio between the maximum height of a tip node over the maximum height of an internal node.
 This can be larger than 1.
+The default minimum value is 0.
+}
+\examples{
+# Simulate tree and data
+set.seed(1289)
+phy <- ape::rphylo(20, 0.1, 0)
+error <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+                      parameters = list(root.value = 0, disp = 0.1))
+x1 <- ape::rTraitCont(phy, model = "BM", sigma = 0.1, root.value = 0)
+trait <- 3 + 2*x1 + error
+# Fit the data
+fit <- cauphylm(trait ~ x1, phy = phy)
+fit
+# Approximate confidence intervals
+confint(fit)
+
 }
 \references{
+Bastide, P. and Didier, G. (2023), The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. bioRxiv.
+
 Rothenberg T. J., Fisher F. M., Tilanus C. B. 1964. A Note on Estimation from a Cauchy Sample. Journal of the American Statistical Association. 59:460–463.
+
+Rousseeuw P.J., Croux C. 1993. Alternatives to the Median Absolute Deviation. Journal of the American Statistical Association. 88:1273–1283.
 }
 \seealso{
-\code{\link{fitCauchy}}, \code{\link[phylolm]{phylolm}}
+\code{\link{fitCauchy}}, \code{\link{confint.cauphylm}}, \code{\link{ancestral}}, \code{\link{increment}}, \code{\link{logDensityTipsCauchy}}, \code{\link[phylolm]{phylolm}}
 }

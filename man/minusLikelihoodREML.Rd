@@ -13,7 +13,7 @@ minusLikelihoodREML(param, param_names, tree, trait, Xdesign, model, rootTip)
 
 \item{Xdesign}{the design matrix}
 
-\item{model}{a model for the trait evolution. Only \code{"cauchy"} is allowed.}
+\item{model}{a model for the trait evolution. One of \code{"cauchy"} or \code{"lambda"} (see Details).}
 }
 \value{
 The value of minus the log-REML.

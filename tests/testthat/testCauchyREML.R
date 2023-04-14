@@ -126,15 +126,15 @@ test_that("testRootingStrategies", {
   tipName <- tree$tip.label[rootTip]
   retree <- reroottip(tree, tip)
   # root value
-  start <- trait[tipName]
+  root.value <- trait[tipName]
   tipTraitBis <- trait[names(trait) != tipName]
   # Force integers
   stopifnot(all.equal(matrix(as.integer(retree$edge), ncol = 2), retree$edge))
   retree$edge <- matrix(as.integer(retree$edge), ncol = 2)
   # likelihood
-  ll2 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, start = start, disp = disp, method = "random.root")
+  ll2 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, root.value = root.value, disp = disp, method = "random.root")
   # likelihood
-  ll3 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis - start, start = 0.0, disp = disp, method = "random.root")
+  ll3 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis - root.value, root.value = 0.0, disp = disp, method = "random.root")
   
   ## equal ?
   expect_equal(ll1, ll2)
@@ -142,17 +142,17 @@ test_that("testRootingStrategies", {
   
   ## disp 0
   ll1 <- logDensityTipsCauchy(tree, trait, NULL, 0, method = "reml", rootTip = rootTip)
-  ll2 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, start = start, disp = 0, method = "random.root")
+  ll2 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, root.value = root.value, disp = 0, method = "random.root")
   expect_equal(ll1, ll2, tolerance = 1e-5)
   
   ## disp 1.3
   ll1 <- logDensityTipsCauchy(tree, trait, NULL, 1.3, method = "reml", rootTip = rootTip)
-  ll2 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, start = start, disp = 1.3, method = "random.root")
+  ll2 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, root.value = root.value, disp = 1.3, method = "random.root")
   expect_equal(ll1, ll2, tolerance = 1e-5)
   
   # dd <- seq(0.1, 2, 0.01)
   # ll1 <- sapply(dd, function(d) logDensityTipsCauchy(tree, trait, NULL, d, method = "reml", rootTip = rootTip))
-  # ll2 <- sapply(dd, function(d) logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, start = start, disp = d, method = "random.root"))
+  # ll2 <- sapply(dd, function(d) logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, root.value = root.value, disp = d, method = "random.root"))
   # plot(dd, ll1)
   # points(dd, ll2, col = "red")
 })

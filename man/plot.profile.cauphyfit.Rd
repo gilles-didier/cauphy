@@ -14,7 +14,7 @@
 \item{...}{further arguments to be passed to \code{\link{plot}}.}
 }
 \description{
-This function takes an object of class code{\link{profile.cauphyfit}},
+This function takes an object of class \code{\link{profile.cauphyfit}},
 and plots the profile likelihood for each parameter.
 }
 \examples{
@@ -26,5 +26,5 @@ plot(pr)
 
 }
 \seealso{
-\code{\link{profile.cauphyfit}}, \code{\link{fitCauchy}}
+\code{\link{profile.cauphyfit}}, \code{\link{fitCauchy}}.
 }

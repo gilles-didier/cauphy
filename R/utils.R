@@ -1,3 +1,39 @@
+#' @useDynLib cauphy, .registration=TRUE
+#' @import ape
+# @importFrom utils flush.console
+#' @importFrom methods is
+NULL
+
+#library(ade4)
+#library(ape)
+#dyn.load("treeR.so")
+
+#testTree <- function(tree, part) {
+#phy <- read.tree(tree)
+#.Call("drawPhylo", phy, "bof.tex")
+#list <- scan(part, what = " ")
+#new <- .Call("prunePhylo", phy, list)
+#phy2 <- read.tree(text = new)
+#}
+
+#' @title Print a tree
+#'
+#' @description
+#' \code{printRtree} prints a tree in Newick format
+#' 
+#' @param tree a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.
+#' 
+#' @return No value returned.
+#' 
+#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
+#' 
+#' @keywords internal programming
+#' 
+printRTreeTest <- function(tree) {
+  res <-.Call("printRTree", tree)
+  res
+}
+
 #' @title Invisible Plotting
 #'
 #' @description Invisible Plotting
