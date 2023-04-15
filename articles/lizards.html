@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Paul
 Bastide</h4>
             
-            <h4 data-toc-skip class="date">2023-04-03</h4>
+            <h4 data-toc-skip class="date">2023-04-15</h4>
       
       
       <div class="hidden name"><code>lizards.Rmd</code></div>
@@ -117,7 +117,7 @@ through the numerical computation of the Hessian.</p>
 <span><span class="co">#&gt; Approximated asymptotic confidence interval using the Hessian.</span></span>
 <span><span class="co">#&gt;            2.5 %      97.5 %</span></span>
 <span><span class="co">#&gt; disp 0.003178267 0.005773856</span></span></code></pre></div>
-<p>We can also plot the profile likelihood around the infered parameter
+<p>We can also plot the profile likelihood around the inferred parameter
 value, in order to check that the numerical optimization went well, and
 that the likelihood computation did not encounter some numerical
 robustness issues.</p>
@@ -184,7 +184,7 @@ Gaussian models are similar.</p>
 <span>           AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">bm_ml</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">ou_ml</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">eb_ml</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">cauchy_ml</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   model       AIC</span></span>
 <span><span class="co">#&gt; 1    BM 13.400807</span></span>
-<span><span class="co">#&gt; 2    OU 15.400810</span></span>
+<span><span class="co">#&gt; 2    OU 15.400809</span></span>
 <span><span class="co">#&gt; 3    EB 14.571939</span></span>
 <span><span class="co">#&gt; 4    CP -4.883842</span></span></code></pre></div>
 <p>Here, the Cauchy Process is clearly selected by the AIC score.</p>

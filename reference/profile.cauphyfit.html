@@ -77,20 +77,21 @@
     <h2>Value</h2>
     
 
-<p>An object of class <code>profile.cauphyfit</code>, which is a list with an element for each parameter being profiled.
-The elements are data-frames with two variables
- * par.vals a matrix of parameter values for each fitted model.
- * profLogLik	the profile log likelihood.</p>
-    </div>
+<p>An object of class <code>profile.cauphyfit</code>, 
+which is a list with an element for each parameter being profiled.
+The elements are data-frames with two variables:</p><ul><li><p><code>par.vals</code>: a matrix of parameter values for each fitted model.</p></li>
+<li><p><code>profLogLik</code>: the profile log likelihood.</p></li>
+</ul></div>
     <div id="details">
     <h2>Details</h2>
     <p>This function computes a confidence interval for the parameters using <code><a href="vcov.cauphyfit.html">confint.cauphyfit</a></code>,
-and then compute the likelihood function between the bounds of the interval, for each parameter,
+and then computes the likelihood function on a grid with <code>npoints</code> values
+evenly spaced between the bounds of the interval, for each parameter one by one,
 all other parameters being fixed.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p><code><a href="fitCauchy.html">fitCauchy</a></code>, <code><a href="https://rdrr.io/r/stats/profile.html" class="external-link">profile</a></code>, <code><a href="plot.profile.cauphyfit.html">plot.profile.cauphyfit</a></code></p></div>
+    <div class="dont-index"><p><code><a href="fitCauchy.html">fitCauchy</a></code>, <code><a href="plot.profile.cauphyfit.html">plot.profile.cauphyfit</a></code>, <code><a href="https://rdrr.io/r/stats/profile.html" class="external-link">profile</a></code>.</p></div>
     </div>
 
     <div id="ref-examples">

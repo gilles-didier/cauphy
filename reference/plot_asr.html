@@ -150,9 +150,15 @@
 the node annotation use <code><a href="https://rdrr.io/pkg/ape/man/nodelabels.html" class="external-link">nodelabels</a></code>, and the 
 tip data plot use <code><a href="https://rdrr.io/pkg/ape/man/phydataplot.html" class="external-link">phydataplot</a></code>.
 Please refer to these functions for the details of the parameters.</p>
-<p>Note that the thermo plot do not dive the true probabilities of each mode values.
-Instead, they are simply proportional to the height of each mode, re-scaled so that the scores sum to one.
-For an exact representation of a node posterior density, please plot it separately, using function <code><a href="ancestral.html">ancestral</a></code>.</p>
+<p>The width of each color in the thermo plots approximately represents the 
+weight of each node of the distribution, that is estimated by numerically 
+integrating the density function around each mode.
+Function <code><a href="https://rdrr.io/pkg/pracma/man/findpeaks.html" class="external-link">findpeaks</a></code> is first used to find the modes and
+estimate their starting and ending points.
+Then function <code><a href="https://rdrr.io/pkg/pracma/man/trapz.html" class="external-link">trapz</a></code> estimates the integral of the density
+around the mode.</p>
+<p>For an exact representation of a node posterior density, please plot it separately,
+ using function <code><a href="plot.ancestralCauchy.html">plot.ancestralCauchy</a></code>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>

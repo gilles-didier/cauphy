@@ -53,7 +53,7 @@
 <span>  <span class="va">y</span>,</span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cauchy"</span>, <span class="st">"lambda"</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"reml"</span>, <span class="st">"random.root"</span>, <span class="st">"fixed.root"</span><span class="op">)</span>,</span>
-<span>  starting.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mu <span class="op">=</span> <span class="cn">NULL</span>, disp <span class="op">=</span> <span class="cn">NULL</span>, lambda <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
+<span>  starting.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x0 <span class="op">=</span> <span class="cn">NULL</span>, disp <span class="op">=</span> <span class="cn">NULL</span>, lambda <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
 <span>  lower.bound <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>disp <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  upper.bound <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>disp <span class="op">=</span> <span class="cn">Inf</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  root.edge <span class="op">=</span> <span class="fl">100</span>,</span>
@@ -70,26 +70,27 @@
 
 
 <dt>model</dt>
-<dd><p>a model for the trait evolution. Only <code>"cauchy"</code> is allowed.</p></dd>
+<dd><p>a model for the trait evolution. One of <code>"cauchy"</code> or <code>"lambda"</code> (see Details).</p></dd>
 
 
 <dt>method</dt>
-<dd><p>the method used to fit the process. One of <code>reml</code> (the default), <code>random.root</code> or <code>fixed.root</code>.
-See details.</p></dd>
+<dd><p>the method used to fit the process.
+One of <code>reml</code> (the default), <code>fixed.root</code> or <code>random.root</code>.
+See Details.</p></dd>
 
 
 <dt>starting.value</dt>
 <dd><p>starting value for the parameters of the Cauchy.
-This should be a named list, with <code>mu</code> and <code>disp</code> the ancestral central and dispersion parameters.
-The default initial values are computed from standard statistics used on (independent) Cauchy variables, see details.</p></dd>
+This should be a named list, with <code>x0</code> and <code>disp</code> the root starting value and the dispersion parameter.
+The default initial values are computed from standard statistics used on (independent) Cauchy variables, see Details.</p></dd>
 
 
 <dt>lower.bound</dt>
-<dd><p>named list with lower bound values for the parameters.</p></dd>
+<dd><p>named list with lower bound values for the parameters. See Details for the default values.</p></dd>
 
 
 <dt>upper.bound</dt>
-<dd><p>named list with upper bound values for the parameters. See Details.</p></dd>
+<dd><p>named list with upper bound values for the parameters. See Details for the default values.</p></dd>
 
 
 <dt>root.edge</dt>
@@ -97,11 +98,14 @@ The default initial values are computed from standard statistics used on (indepe
 
 
 <dt>optim</dt>
-<dd><p>if "local", only a local optimization around the initial parameter values is performed (the default). If "global", a global maximization is attempted using the "MLSL" approach (see <code>nloptr</code>).</p></dd>
+<dd><p>if "local", only a local optimization around the initial parameter values is performed (the default).
+If "global", a global maximization is attempted using the "MLSL" approach (see <code>nloptr</code>).</p></dd>
 
 
 <dt>method.init.disp</dt>
-<dd><p>the initialization method for the dispersion. One of "Qn", "Sn", "MAD", "IQR". Default to the "Qn" statistics. See Details.</p></dd>
+<dd><p>the initialization method for the dispersion.
+One of "Qn", "Sn", "MAD", "IQR". Default to the "Qn" statistics.
+See Details.</p></dd>
 
 </dl></div>
     <div id="value">
