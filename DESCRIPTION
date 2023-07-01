@@ -15,12 +15,17 @@ Imports:
     nloptr,
     pracma,
     foreach,
-    doParallel
+    doParallel,
+    stats
 Suggests:
     covr,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    treeio,
+    tidytree,
+    HDInterval,
+    matrixStats
 Description: Evolution of a trait under a Cauchy process.
 License: GPL (>= 3)
 Encoding: UTF-8
