@@ -1,0 +1,20 @@
+citHeader("To cite cauphy in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution",
+  author   = personList(as.person("Paul Bastide"),
+                   as.person("Gilles Didier")),
+  journal  = "Systematic Biology",
+  year     = "2023",
+  volume   = "",
+  number   = "",
+  pages    = "",
+  url      = "https://doi.org/10.1093/sysbio/syad053",
+  textVersion = paste(
+        "Paul Bastide & Gilles Didier (2023).",
+        "The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution.",
+        "Systematic Biology.",
+        "doi:10.1093/sysbio/syad053."
+  )
+)
