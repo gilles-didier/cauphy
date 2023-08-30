@@ -301,4 +301,7 @@ test_that("testHDI", {
   expect_message(hdi(anc_all, node = c(2, 37)), "Nodes 37 are not in the ancestralCauchy reconstruction object. They will be ignored.")
   expect_message(expect_error(hdi(anc_all, node = c(37)), "There are no node left."),
                               "Nodes 37 are not in the ancestralCauchy reconstruction object. They will be ignored.")
+  
+  ## Plot
+  expect_message(plot(anc_all, , intervals = hdi_all, node = c(2, 37)), "Nodes 37 are not in the ancestralCauchy reconstruction object. They will be ignored.")
 })
