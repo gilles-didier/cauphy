@@ -244,3 +244,61 @@ test_that("testAncestralIncrementFit", {
   expect_error(ancestral(fitfr, c(0.2, 0.4)), "whole numbers")
   expect_error(ancestral(cauphylm(trait ~ 1, phy = tree), c(0.2, 0.4)), "whole numbers")
 })
+
+test_that("testHDI", {
+  
+  library(HDInterval)
+  
+  ## Parameters
+  mu <- 0.0
+  disp <- 0.6
+  
+  ## tree with three tips
+  set.seed(1289)
+  n <- 10
+  tree <- rphylo(n, 0.1, 0)
+  
+  ## data
+  trait <- rTraitCont(tree, model = "BM", sigma = 1)
+  
+  ## Random root
+  root.edge <- 1
+  treerr <- tree
+  treerr$root.edge <- root.edge
+  
+  ## ASR - fixed root
+  fitfr <- fitCauchy(tree, trait, method = "fixed.root")
+  anc_all <- increment(fitfr)
+  hdi_all <- hdi(anc_all)
+  expect_equal(dim(hdi_all[[1]]), c(2, 2))
+  expect_equal(dim(hdi_all[[2]]), c(1, 2))
+  expect_equal(hdi_all[[7]], hdi(anc_all, node = 7)[[1]])
+  
+  anc_all <- increment(fitfr, n_values = 2000)
+  cm <- 0.4
+  hdi_all <- hdi(anc_all, credMass = cm)
+  fun <- function(x) increment(fitfr, 12, x)
+  total_mass <- unname(integrate(fun, hdi_all[["12"]][1, 1], hdi_all[["12"]][1, 2],
+                                 rel.tol = .Machine$double.eps^0.5)$value)
+  expect_equal(total_mass, cm, tolerance = 1e-2)
+  
+  cm <- 0.8
+  hdi_all <- hdi(anc_all, credMass = cm)
+  fun <- function(x) increment(fitfr, 1, x)
+  total_mass <- unname(integrate(fun, hdi_all[["1"]][1, 1], hdi_all[["1"]][1, 2],
+                                 rel.tol = .Machine$double.eps^0.5)$value)
+  total_mass <- total_mass + unname(integrate(fun, hdi_all[["1"]][2, 1], hdi_all[["1"]][2, 2],
+                                              rel.tol = .Machine$double.eps^0.5)$value)
+  expect_equal(total_mass, cm, tolerance = 1e-2)
+  
+  fun <- function(x) increment(fitfr, 2, x)
+  total_mass <- unname(integrate(fun, hdi_all[["2"]][1, 1], hdi_all[["2"]][1, 2],
+                                 rel.tol = .Machine$double.eps^0.5)$value)
+  expect_equal(total_mass, cm, tolerance = 1e-2)
+  
+  ## Errors
+  expect_error(hdi(anc_all, node = 0.5), "must be whole numbers.")
+  expect_message(hdi(anc_all, node = c(2, 37)), "Nodes 37 are not in the ancestralCauchy reconstruction object. They will be ignored.")
+  expect_message(expect_error(hdi(anc_all, node = c(37)), "There are no node left."),
+                              "Nodes 37 are not in the ancestralCauchy reconstruction object. They will be ignored.")
+})

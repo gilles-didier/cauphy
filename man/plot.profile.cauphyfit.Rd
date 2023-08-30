@@ -4,12 +4,12 @@
 \alias{plot.profile.cauphyfit}
 \title{Plot for class \code{profile.cauphyfit}}
 \usage{
-\method{plot}{profile.cauphyfit}(x, n.col, ...)
+\method{plot}{profile.cauphyfit}(x, n_col, ...)
 }
 \arguments{
 \item{x}{an object of class \code{profile.cauphyfit}}
 
-\item{n.col}{the number of columns on which to display the plot. Can be left blank.}
+\item{n_col}{the number of columns on which to display the plot. Can be left blank.}
 
 \item{...}{further arguments to be passed to \code{\link{plot}}.}
 }

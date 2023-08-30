@@ -462,7 +462,7 @@ NULL
 #' and plots the profile likelihood for each parameter.
 #'
 #' @param x an object of class \code{profile.cauphyfit}
-#' @param n.col the number of columns on which to display the plot. Can be left blank.
+#' @param n_col the number of columns on which to display the plot. Can be left blank.
 #' @param ... further arguments to be passed to \code{\link{plot}}.
 #' 
 #' @return
@@ -479,14 +479,14 @@ NULL
 #' 
 #' @export
 #'
-plot.profile.cauphyfit <- function(x, n.col, ...){
+plot.profile.cauphyfit <- function(x, n_col, ...){
   nparams <- length(x)
-  if (missing(n.col)) {
-    n.col <- ifelse(nparams <= 3, nparams, 3)
+  if (missing(n_col)) {
+    n_col <- ifelse(nparams <= 3, nparams, 3)
   }
-  n.lines <- (nparams %/% n.col) + ifelse(nparams %% n.col == 0, 0, 1)
+  n.lines <- (nparams %/% n_col) + ifelse(nparams %% n_col == 0, 0, 1)
   y_lab <- "Profile Log Likelihood"
-  scr <- split.screen(c(n.lines, n.col))
+  scr <- split.screen(c(n.lines, n_col))
   on.exit(close.screen(all.screens = TRUE))
   for (i in seq_len(nparams)) {
     screen(scr[i])

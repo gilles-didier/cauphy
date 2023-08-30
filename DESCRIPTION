@@ -15,7 +15,8 @@ Imports:
     nloptr,
     pracma,
     foreach,
-    doParallel
+    doParallel,
+    HDInterval
 Suggests:
     covr,
     knitr,

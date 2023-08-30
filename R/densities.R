@@ -465,7 +465,7 @@ increment.cauphyfit <- function(x, node, values, n_values = 100, n_cores = 1, ..
 }
 
 ##
-#'@importFrom graphics close.screen screen split.screen title
+#'@importFrom graphics close.screen screen split.screen title segments
 NULL
 
 ##
@@ -478,7 +478,12 @@ NULL
 #' @param x an object of class \code{ancestralCauchy}, result of function
 #' \code{\link{ancestral}} or \code{\link{increment}}.
 #' @param node the vector of nodes where to plot the ancestral reconstruction.
-#' @param n.col the number of columns on which to display the plot. Can be left blank.
+#' Can be missing, in which case all the nodes reconstructed in the \code{ancestralCauchy}
+#' object are plotted.
+#' @param n_col the number of columns on which to display the plot.
+#' Can be missing, in which case a default number is used.
+#' @param intervals a list of HDI intervals produced by function \code{\link{hdi.ancestralCauchy}}.
+#' If the HDI of a plotted node is in the list, then it is plotted by the function.
 #' @param ... further arguments to be passed to \code{\link{plot}}.
 #' 
 #' @return
@@ -502,33 +507,141 @@ NULL
 #' 
 #' @export
 #'
-
-plot.ancestralCauchy <- function(x, node, n.col, ...){
+plot.ancestralCauchy <- function(x, node, n_col, intervals = NULL, ...){
   values <- as.numeric(colnames(x))
-  all_nodes <- as.numeric(rownames(x))
+  nn <- check_node(x, node)
+  if (missing(n_col)) {
+    n_col <- ifelse(length(nn) <= 3, length(nn), 3)
+  }
+  n.lines <- (length(nn) %/% n_col) + ifelse(length(nn) %% n_col == 0, 0, 1)
+  y_lab <- ifelse(attr(x, "edge"), "Posterior density of increment value", "Posterior density of trait value")
+  title_plot <- ifelse(attr(x, "edge"), "Edge ending at node ", "Node ")
+  scr <- split.screen(c(n.lines, n_col))
+  on.exit(close.screen(all.screens = TRUE))
+  for (i in seq_along(nn)) {
+    screen(scr[i])
+    dens <- x[nn[i], ]
+    plot(values, dens, ylab = y_lab, ...)
+    title(paste0(title_plot, rownames(x)[nn[i]]))
+    # hdi
+    if (!is.null(intervals[[rownames(x)[nn[i]]]])) {
+      intnn <- intervals[[rownames(x)[nn[i]]]]
+      henn <- attr(intnn, "height")
+      n_mod <- nrow(intnn)
+      for (mod in 1:n_mod) {
+        segments(intnn[mod, 1], henn, intnn[mod, 2], henn,
+                 lwd = 4, col = 'red', lend = 'butt')
+      }
+    }
+  }
+}
+
+##
+#' @title Highest (Posterior) Density Interval
+#'
+#' @description
+#' This function takes an object of class \code{ancestralCauchy}, result of function
+#' \code{\link{ancestral}} or \code{\link{increment}}, and find the Highest (Posterior) Density Interval 
+#' of reconstructed states for given nodes.
+#' It relies on function \code{\link[HDInterval]{hdi}} from package \code{\link{HDInterval}}.
+#' 
+#' @details
+#' The function relies on the \code{density} method of the \code{\link[HDInterval]{hdi}} function.
+#' Package \code{\link{HDInterval}} must be loaded in the workspace for this
+#' function to work.
+#' See documentation of this functions for more details on the definition and
+#' computation of the HDI.
+#' 
+#' The density is obtained on the grid of values defined by the 
+#' \code{ancestralCauchy} object, which defaults to 100 values.
+#' See details in the documentation of the 
+#' \code{\link{ancestral}} and \code{\link{increment}} functions.
+#' 
+#' NOTE: if the grid of values is too coarse (if it has too few values),
+#' then the result can be a poor approximation.
+#' Please make sure to use an appropriate grid in the reconstruction to 
+#' get meaningful results (see example).
+#' 
+#'
+#' @param object an object of class \code{ancestralCauchy}, result of function
+#' \code{\link{ancestral}} or \code{\link{increment}}.
+#' @param credMass a scalar between 0 and 1 specifying the mass within the credible interval.
+#' @param allowSplit if FALSE and the proper HDI is discontinuous,
+#' a single credible interval is returned, but this is not HDI.
+#' See code{\link[HDInterval]{hdi}} for details. Default to \code{TRUE}.
+#' @param node the vector of nodes where to plot the ancestral reconstruction.
+#' Can be missing, in which case all the nodes reconstructed in the \code{ancestralCauchy}
+#' @param ... further arguments to be passed to \code{\link{plot}}.
+#' 
+#' @return
+#' A named list. Each item of the list is named after a node,
+#' and contains the HDI interval of the node, in the same format
+#' as in \code{\link[HDInterval]{hdi}}: 
+#' a vector of length 2 or a 2-row matrix with the lower and upper limits of the HDI, 
+#' with an attribute "credMass".
+#' If \code{allowSplit=TRUE}, the matrix has a row for each component of a discontinuous HDI 
+#' and columns for begin and end.
+#' It has an additional attribute "height" giving the probability density at the limits of the HDI.
+#' 
+#' @examples
+#' # Lizard dataset
+#' data(lizards)
+#' attach(lizards)
+#' # Fit CP
+#' fit_CP <- fitCauchy(phy, svl, model = "cauchy", method = "reml")
+#' # Reconstruct increments for some branches
+#' inc <- increment(fit_CP, node = c(142, 151), n_cores = 1)
+#' # HDI
+#' library(HDInterval)
+#' inc_int <- hdi(inc)
+#' plot(inc, intervals = inc_int, type = "l")
+#' # HDI of edge ending at node 142 is unimodal
+#' inc_int[["142"]]
+#' # HDI of edge ending at node 151 is bimodal
+#' inc_int[["151"]]
+#' # If the grid is coarse, the result is meaningless
+#' inc <- increment(fit_CP, node = c(151), n_cores = 1, n_values = 10)
+#' inc_int <- hdi(inc)
+#' plot(inc, intervals = inc_int, type = "l")
+#' 
+#' @seealso  \code{\link{plot.ancestralCauchy}}, \code{\link{ancestral}}, \code{\link{increment}}, \code{\link{fitCauchy}}
+#'
+#' @importFrom HDInterval hdi
+#' @export
+#'
+hdi.ancestralCauchy <- function(object, credMass = 0.95, allowSplit = TRUE, node, ...) {
+  # Get nodes and values
+  values <- as.numeric(colnames(object))
+  nn <- check_node(object, node)
+  # Get HDI
+  anc2dens <- function(aa) {
+    dens <- list(x = values,
+                 y = aa)
+    class(dens) <- "density"
+    return(dens)
+  }
+  anc_dens <- apply(object[nn, , drop = FALSE], 1, anc2dens)
+  tmp_hdi <- function(x) {
+    res <- HDInterval::hdi(x, credMass = credMass, allowSplit = allowSplit, ...)
+    attr(res, "height") <- unname(attr(res, "height"))
+    return(res)
+  }
+  anc_hdi <- lapply(anc_dens, tmp_hdi)
+  return(anc_hdi)
+}
+
+check_node <- function(object, node) {
+  all_nodes <- as.numeric(rownames(object))
   if (missing(node)) {
     node <- all_nodes
   } else {
     if (any(sapply(node, function(nn) !is.wholenumber(nn)))) stop("The 'node' must be whole numbers.")
   }
-  nn <- match(node, rownames(x))
+  nn <- match(node, rownames(object))
   if (anyNA(nn)) {
-    message(paste0("Nodes ", paste(node[is.na(nn)], collapse = ", "), " are not in the ancestralCauchy reconstruction object. They will not be plotted."))
+    message(paste0("Nodes ", paste(node[is.na(nn)], collapse = ", "), " are not in the ancestralCauchy reconstruction object. They will be ignored."))
     nn <- nn[!is.na(nn)]
   }
-  if (length(nn) == 0) stop("There are no nodes left to plot.")
-  if (missing(n.col)) {
-    n.col <- ifelse(length(nn) <= 3, length(nn), 3)
-  }
-  n.lines <- (length(nn) %/% n.col) + ifelse(length(nn) %% n.col == 0, 0, 1)
-  y_lab <- ifelse(attr(x, "edge"), "Posterior density of increment value", "Posterior density of trait value")
-  title_plot <- ifelse(attr(x, "edge"), "Edge ending at node ", "Node ")
-  scr <- split.screen(c(n.lines, n.col))
-  on.exit(close.screen(all.screens = TRUE))
-  for (i in seq_len(length(nn))) {
-    screen(scr[i])
-    dens <- x[nn[i], ]
-    plot(values, dens, ylab = y_lab, ...)
-    title(paste0(title_plot, rownames(x)[nn[i]]))
-  }
+  if (length(nn) == 0) stop("There are no node left.")
+  return(nn)
 }

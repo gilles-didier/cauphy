@@ -4,15 +4,21 @@
 \alias{plot.ancestralCauchy}
 \title{Plot for class \code{ancestralCauchy}}
 \usage{
-\method{plot}{ancestralCauchy}(x, node, n.col, ...)
+\method{plot}{ancestralCauchy}(x, node, n_col, intervals = NULL, ...)
 }
 \arguments{
 \item{x}{an object of class \code{ancestralCauchy}, result of function
 \code{\link{ancestral}} or \code{\link{increment}}.}
 
-\item{node}{the vector of nodes where to plot the ancestral reconstruction.}
+\item{node}{the vector of nodes where to plot the ancestral reconstruction.
+Can be missing, in which case all the nodes reconstructed in the \code{ancestralCauchy}
+object are plotted.}
 
-\item{n.col}{the number of columns on which to display the plot. Can be left blank.}
+\item{n_col}{the number of columns on which to display the plot.
+Can be missing, in which case a default number is used.}
+
+\item{intervals}{a list of HDI intervals produced by function \code{\link{hdi.ancestralCauchy}}.
+If the HDI of a plotted node is in the list, then it is plotted by the function.}
 
 \item{...}{further arguments to be passed to \code{\link{plot}}.}
 }
