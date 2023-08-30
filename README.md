@@ -24,8 +24,8 @@ See package documentation (references and vignettes) here: https://gilles-didier
 
 ## Reference
 
-Bastide, P. and Didier, G. (2023), The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology.
-[doi:10.1093/sysbio/syad053](https://doi.org/10.1093/sysbio/syad053). [bioRxiv](https://doi.org/10.1101/2023.04.05.535685).
+Bastide, P. and Didier, G. (2023), The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. *Systematic Biology*.
+[doi:10.1093/sysbio/syad053](https://doi.org/10.1093/sysbio/syad053). [[bioRxiv](https://doi.org/10.1101/2023.04.05.535685)].
 
 ## Pronunciation
 
