@@ -129,7 +129,7 @@
 # plot_asr(fit, anc, inc, offset = 5)
 #' 
 #' @references
-#' Bastide, P. and Didier, G. (2023), The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. bioRxiv.
+#' Bastide, P. and Didier, G. 2023. The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology. doi:10.1093/sysbio/syad053.
 #' 
 #' Rothenberg T. J., Fisher F. M., Tilanus C. B. 1964. A Note on Estimation from a Cauchy Sample. Journal of the American Statistical Association. 59:460–463.
 #' 

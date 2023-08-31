@@ -1,10 +1,9 @@
 citHeader("To cite cauphy in publications use:")
 
-citEntry(
-  entry    = "Article",
-  title    = "The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution",
-  author   = personList(as.person("Paul Bastide"),
-                   as.person("Gilles Didier")),
+bibentry(
+  bibtype = "Article",
+  title = "The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution",
+  author = c(person("Paul Bastide"), person("Gilles Didier")),
   journal  = "Systematic Biology",
   year     = "2023",
   volume   = "",

@@ -154,7 +154,7 @@ plot(anc_reml, node = c(142, 151), intervals = anc_int, type = "l")
 ```
 The `hdi` function can recover discontinuous intervals
 (thanks to the `allowSplit` option, see documentation),
-which can be relevent for multi-modal reconstructed densities,
+which can be relevant for multi-modal reconstructed densities,
 such as node 151 here.
 ```{r, label="reml_anc_hdi_bi", warning=FALSE, message=FALSE}
 anc_int[["151"]]

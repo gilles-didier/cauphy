@@ -26,7 +26,7 @@ A named list. Each item of the list is named after a node,
 and contains the HDI interval of the node, in the same format
 as in \code{\link[HDInterval]{hdi}}: 
 a vector of length 2 or a 2-row matrix with the lower and upper limits of the HDI, 
-with an attribute "credMass".
+with an attribute \code{credMass}.
 If \code{allowSplit=TRUE}, the matrix has a row for each component of a discontinuous HDI 
 and columns for begin and end.
 It has an additional attribute "height" giving the probability density at the limits of the HDI.
