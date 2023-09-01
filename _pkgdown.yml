@@ -19,6 +19,7 @@ reference:
   contents:
   - ancestral
   - increment
+  - hdi.ancestralCauchy
   - plot.ancestralCauchy
   - plot_asr
 - title: Simulation

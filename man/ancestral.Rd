@@ -62,16 +62,23 @@ dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
 fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
 # Reconstruct the ancestral nodes
 anc <- ancestral(fit)
-plot_asr(fit, anc = anc)
-plot(anc, type = "l")
+plot_asr(fit, anc = anc, offset = 3)
+plot(anc, type = "l", node = c(11, 17))
 # Refine grid for node 12 and 17
 anc2 <- ancestral(fit, node = c(12, 17), n_values = 1000)
 plot(anc2, type = "l")
+# Find HDI
+library(HDInterval)
+hdi_anc <- hdi(anc2)
+hdi_anc
+plot(anc2, interval = hdi_anc, type = "l")
 
 }
-\seealso{
-\code{\link{fitCauchy}}, \code{\link{cauphylm}}, \code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{increment}}
+\references{
+Bastide, P. and Didier, G. 2023. The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology. doi:10.1093/sysbio/syad053.
 }
-\author{
-Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
+\seealso{
+\code{\link{fitCauchy}}, \code{\link{cauphylm}},
+\code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{increment}},
+\code{\link{hdi.ancestralCauchy}}
 }

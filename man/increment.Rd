@@ -13,7 +13,7 @@ increment(x, ...)
 \method{increment}{cauphyfit}(x, node, values, n_values = 100, n_cores = 1, ...)
 }
 \arguments{
-\item{x}{an object of class \code{\link{cauphylm}}.}
+\item{x}{an object of class \code{\link{fitCauchy}} or \code{\link{cauphylm}}.}
 
 \item{...}{other arguments to be passed to the method.}
 
@@ -59,16 +59,23 @@ dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
 fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
 # Reconstruct the ancestral increments
 inc <- increment(fit)
-plot_asr(fit, inc = inc)
-plot(inc, node = c(2, 3, 4, 5, 8, 9), type = "l")
+plot_asr(fit, inc = inc, offset = 3)
+plot(inc, node = c(3, 8), type = "l")
 # Refine grid for edges ending at tips 3 and 8
 inc2 <- increment(fit, node = c(3, 8), values = seq(-3, 3, 0.01))
 plot(inc2, type = "l")
+# Find HDI
+library(HDInterval)
+hdi_inc <- hdi(inc2)
+hdi_inc
+plot(inc2, interval = hdi_inc, type = "l")
 
 }
-\seealso{
-\code{\link{fitCauchy}}, \code{\link{cauphylm}}, \code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{ancestral}}
+\references{
+Bastide, P. and Didier, G. 2023. The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology. doi:10.1093/sysbio/syad053.
 }
-\author{
-Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
+\seealso{
+\code{\link{fitCauchy}}, \code{\link{cauphylm}},
+\code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{ancestral}},
+\code{\link{hdi.ancestralCauchy}}
 }

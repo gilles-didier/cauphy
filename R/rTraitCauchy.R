@@ -34,10 +34,19 @@
 #' @seealso \code{\link[phylolm]{rTrait}}, \code{\link[ape]{rTraitCont}}
 #' 
 #' @examples
-#' phy <- ape::rphylo(5, 0.1, 0)
-#' y = rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 0.1))
+#' set.seed(1289)
+#' phy <- ape::rphylo(40, 0.01, 0)
+#' # One trait
+#' y <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+#'                   parameters = list(root.value = 0, disp = 0.1))
+#' y
+#' plot(phy, x.lim = c(0, 750))
+#' phydataplot(y, phy, offset = 150)
+#' # Many trait
+#' y <- rTraitCauchy(n = 10, phy = phy, model = "cauchy",
+#'                   parameters = list(root.value = 0, disp = 0.1))
+#' head(y)
 #' 
-#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
 #' @export
 #' 
@@ -102,7 +111,6 @@ rTraitCauchy <- function(n = 1, phy,
 #' 
 #' @return a vector of simulated values.
 #' 
-#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
 #' @keywords internal
 #' 

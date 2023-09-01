@@ -15,8 +15,5 @@ No value returned.
 \description{
 \code{printRtree} prints a tree in Newick format
 }
-\author{
-Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
-}
 \keyword{internal}
 \keyword{programming}

@@ -22,6 +22,9 @@ If the HDI of a plotted node is in the list, then it is plotted by the function.
 
 \item{...}{further arguments to be passed to \code{\link{plot}}.}
 }
+\value{
+None.
+}
 \description{
 This function takes an object of class \code{ancestralCauchy}, result of function
 \code{\link{ancestral}} or \code{\link{increment}}, and plots the reconstructed states for given nodes.

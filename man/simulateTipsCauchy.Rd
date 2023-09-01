@@ -19,7 +19,4 @@ a vector of simulated values.
 \description{
 Simulate tip values with a Cauchy process
 }
-\author{
-Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
-}
 \keyword{internal}

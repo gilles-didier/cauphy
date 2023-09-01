@@ -238,6 +238,8 @@ compute_vcov.cauphyfit <- function(obj) {
 ##
 #' @export
 #' @method print cauphyfit
+#' @inheritParams phylolm::print.phylolm
+#' @rdname vcov.cauphyfit
 ##
 print.cauphyfit <- function(x, digits = max(3, getOption("digits") - 3), ...){
   # Call
@@ -268,7 +270,41 @@ print.cauphyfit <- function(x, digits = max(3, getOption("digits") - 3), ...){
 #' 
 #' @export
 #' @param object an object of class \code{cauphyfit}.
-#' @seealso \code{\link{fitCauchy}}
+#' 
+#' @return
+#' Same value as the associated methods from the \code{stats} package:
+#' \itemize{
+#' \item{\code{\link[stats]{vcov}}}{ an estimated covariance matrix, see \code{\link{compute_vcov}};}
+#' \item{\code{\link[stats]{logLik}}}{ an object of class \code{\link[logLik]{logLik}};}
+#' \item{\code{\link[stats]{AIC}}}{ a numeric value;}
+#' \item{\code{\link[stats]{confint}}}{ a matrix (or vector) with columns giving lower and upper confidence limits for each parameter;}
+#' \item{\code{\link[stats]{coef}}}{ coefficients extracted from the model;}
+#' }
+#' 
+#' @examples
+#' # Simulate tree and data
+#' set.seed(1289)
+#' phy <- ape::rphylo(20, 0.1, 0)
+#' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+#'                     parameters = list(root.value = 10, disp = 0.1))
+#' # Fit the data
+#' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
+#' fit
+#' # vcov matrix
+#' vcov(fit)
+#' # Approximate confidence intervals
+#' confint(fit)
+#' # log likelihood of the fitted object
+#' logLik(fit)
+#' # AIC of the fitted object
+#' AIC(fit)
+#' # coefficients
+#' coef(fit)
+#' 
+#' @seealso \code{\link{fitCauchy}}, \code{\link[stats]{vcov}}, \code{\link[stats]{logLik}}
+#' \code{\link[stats]{AIC}}, \code{\link[stats]{confint}}, \code{\link[stats]{coef}},
+#' \code{\link[stats]{predict}}, \code{\link[phylolm]{predict.phylolm}}
+#' 
 #' @method vcov cauphyfit
 vcov.cauphyfit <- function(object, ...) {
   if (is.null(object$vcov)) {
@@ -466,7 +502,7 @@ NULL
 #' @param ... further arguments to be passed to \code{\link{plot}}.
 #' 
 #' @return
-#' NULL
+#' None.
 #' 
 #' @examples
 #' phy <- ape::rphylo(5, 0.1, 0)

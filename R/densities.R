@@ -52,8 +52,6 @@
 #' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
 #' logDensityTipsCauchy(phy, dat, 0, 1, method = "fixed.root")
 #' 
-#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
-#' 
 #' @export
 #' 
 #' 
@@ -93,6 +91,11 @@ NULL
 #' @description
 #' Compute the posterior density of a set of node values under a Cauchy process on a phylogenetic tree.
 #' 
+#' @details
+#' This function is internally called by \code{\link{ancestral}}, which
+#' is the preferred way of doing ancestral reconstruction on a fitted
+#' object.
+#' 
 #' @param node the node for which to compute the posterior density.
 #' @param vals the table of values where the density should be computed.
 #' @inheritParams logDensityTipsCauchy
@@ -106,7 +109,6 @@ NULL
 #' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
 #' posteriorDensityAncestral(7, 0.1, phy, dat, disp = 1)
 #' 
-#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
 #' @export
 #' 
@@ -175,15 +177,24 @@ posteriorDensityAncestral <- function(node, vals, tree, tipTrait, root.value = N
 #' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
 #' # Reconstruct the ancestral nodes
 #' anc <- ancestral(fit)
-#' plot_asr(fit, anc = anc)
-#' plot(anc, type = "l")
+#' plot_asr(fit, anc = anc, offset = 3)
+#' plot(anc, type = "l", node = c(11, 17))
 #' # Refine grid for node 12 and 17
 #' anc2 <- ancestral(fit, node = c(12, 17), n_values = 1000)
 #' plot(anc2, type = "l")
+#' # Find HDI
+#' library(HDInterval)
+#' hdi_anc <- hdi(anc2)
+#' hdi_anc
+#' plot(anc2, interval = hdi_anc, type = "l")
 #' 
-#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
+#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}},
+#' \code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{increment}},
+#' \code{\link{hdi.ancestralCauchy}}
 #' 
-#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}}, \code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{increment}}
+#' @references
+#' Bastide, P. and Didier, G. 2023. The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology. doi:10.1093/sysbio/syad053.
+#' 
 #' 
 #' @export
 #'
@@ -302,6 +313,12 @@ parallel_construction <- function(anc_fun, x, node, values, n_cores, progress_ba
 #' @description
 #' Compute the posterior density of a set of branch increments under a Cauchy process on a phylogenetic tree.
 #' 
+#' @details
+#' This function is internally called by \code{\link{increment}}, which
+#' is the preferred way of doing ancestral reconstruction on a fitted
+#' object.
+#' 
+#' 
 #' @param node the node ending the branch for which to compute the posterior density of the increment.
 #' @param vals the table of values where the density should be computed.
 #' @inheritParams logDensityTipsCauchy
@@ -314,7 +331,6 @@ parallel_construction <- function(anc_fun, x, node, values, n_cores, progress_ba
 #' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
 #' posteriorDensityIncrement(2, 0.1, phy, dat, disp = 1)
 #' 
-#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
 #' @seealso \code{\link{increment}}, \code{\link{fitCauchy}}
 #' 
@@ -359,7 +375,7 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, root.value = N
 #' @description
 #' Compute the posterior density of a branch increment under a fitted Cauchy process on a phylogenetic tree.
 #' 
-#' @param x an object of class \code{\link{cauphylm}}.
+#' @param x an object of class \code{\link{fitCauchy}} or \code{\link{cauphylm}}.
 #' @param node vector of nodes ending the branches for which to compute the posterior density of the increment. If not specified, the reconstruction is done on all the possible edges.
 #' @param values the vector of values where the density should be computed. If not specified, the reconstruction is done for a grid of \code{n_values} values between \code{-1.5 * maxdiff} and \code{1.5 * maxdiff}, where \code{maxdiff} is the difference between the larger and smaller tip value.
 #' @param n_values the number of point for the grid of values. Default to \code{100}. Ignored if \code{values} is provided.
@@ -390,15 +406,23 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, root.value = N
 #' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
 #' # Reconstruct the ancestral increments
 #' inc <- increment(fit)
-#' plot_asr(fit, inc = inc)
-#' plot(inc, node = c(2, 3, 4, 5, 8, 9), type = "l")
+#' plot_asr(fit, inc = inc, offset = 3)
+#' plot(inc, node = c(3, 8), type = "l")
 #' # Refine grid for edges ending at tips 3 and 8
 #' inc2 <- increment(fit, node = c(3, 8), values = seq(-3, 3, 0.01))
 #' plot(inc2, type = "l")
+#' # Find HDI
+#' library(HDInterval)
+#' hdi_inc <- hdi(inc2)
+#' hdi_inc
+#' plot(inc2, interval = hdi_inc, type = "l")
 #' 
-#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
+#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}},
+#' \code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{ancestral}},
+#' \code{\link{hdi.ancestralCauchy}}
 #' 
-#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}}, \code{\link{plot.ancestralCauchy}}, \code{\link{plot_asr}}, \code{\link{ancestral}}
+#' @references
+#' Bastide, P. and Didier, G. 2023. The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology. doi:10.1093/sysbio/syad053.
 #' 
 #' @export
 #'
@@ -487,7 +511,7 @@ NULL
 #' @param ... further arguments to be passed to \code{\link{plot}}.
 #' 
 #' @return
-#' NULL
+#' None.
 #' 
 #' @examples
 #' set.seed(1289)

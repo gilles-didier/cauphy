@@ -242,6 +242,8 @@ compute_vcov.cauphylm <- function(obj) {
 ##
 #' @export
 #' @method print cauphylm
+#' @inheritParams phylolm::print.phylolm
+#' @rdname vcov.cauphylm
 ##
 print.cauphylm <- function(x, digits = max(3, getOption("digits") - 3), ...){
   # Call
@@ -266,7 +268,46 @@ print.cauphylm <- function(x, digits = max(3, getOption("digits") - 3), ...){
 #' 
 #' @export
 #' @param object an object of class \code{cauphylm}.
-#' @seealso \code{\link{cauphylm}}
+#' 
+#' @return
+#' Same value as the associated methods from the \code{stats} package:
+#' \itemize{
+#' \item{\code{\link[stats]{vcov}}}{ an estimated covariance matrix, see \code{\link{compute_vcov}};}
+#' \item{\code{\link[stats]{logLik}}}{ an object of class \code{\link[logLik]{logLik}};}
+#' \item{\code{\link[stats]{AIC}}}{ a numeric value;}
+#' \item{\code{\link[stats]{confint}}}{ a matrix (or vector) with columns giving lower and upper confidence limits for each parameter;}
+#' \item{\code{\link[stats]{coef}}}{ coefficients extracted from the model;}
+#' \item{\code{\link[stats]{predict}}}{ a vector of predicted values.}
+#' }
+#' 
+#' @examples
+#' # Simulate tree and data
+#' set.seed(1289)
+#' phy <- ape::rphylo(20, 0.1, 0)
+#' error <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+#'                       parameters = list(root.value = 0, disp = 0.1))
+#' x1 <- ape::rTraitCont(phy, model = "BM", sigma = 0.1, root.value = 0)
+#' trait <- 3 + 2*x1 + error
+#' # Fit the data
+#' fit <- cauphylm(trait ~ x1, phy = phy)
+#' fit
+#' # vcov matrix
+#' vcov(fit)
+#' # Approximate confidence intervals
+#' confint(fit)
+#' # log likelihood of the fitted object
+#' logLik(fit)
+#' # AIC of the fitted object
+#' AIC(fit)
+#' # predicted values
+#' predict(fit)
+#' # coefficients
+#' coef(fit)
+#' 
+#' @seealso \code{\link{cauphylm}}, \code{\link[stats]{vcov}}, \code{\link[stats]{logLik}}
+#' \code{\link[stats]{AIC}}, \code{\link[stats]{confint}}, \code{\link[stats]{coef}},
+#' \code{\link[stats]{predict}}, \code{\link[phylolm]{predict.phylolm}}
+#' 
 #' @method vcov cauphylm
 vcov.cauphylm <- function(object, ...) {
   if (is.null(object$vcov)) {
@@ -306,7 +347,6 @@ AIC.cauphylm <- phylolm::AIC.phylolm
 #' @inheritParams phylolm::predict.phylolm
 #' @method predict cauphylm
 #' @rdname vcov.cauphylm
-#' @seealso \code{\link[phylolm]{predict.phylolm}}
 predict.cauphylm <- phylolm::predict.phylolm
 #' @export
 #' @inheritParams stats::confint

@@ -1,6 +1,5 @@
 Package: cauphy
-Version: 0.1
-Date: 2022-08-31
+Version: 1.0.0
 Title: Trait Evolution on Phylogenies Using the Cauchy Process
 Description: The Cauchy Process can model pulsed continuous trait evolution
     on phylogenies. The likelihood is tractable, and is used for parameter
@@ -26,6 +25,7 @@ Suggests:
     knitr,
     rmarkdown,
     spelling,
+    geiger,
     testthat (>= 3.0.0)
 License: GPL (>= 3)
 Encoding: UTF-8

@@ -74,6 +74,3 @@ logDensityTipsCauchy(phy, dat, 0, 1, method = "fixed.root")
 \seealso{
 \code{\link{fitCauchy}}
 }
-\author{
-Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
-}

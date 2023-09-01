@@ -66,7 +66,7 @@ plot_asr(
 \item{...}{other parameters to be passed on to \code{\link[ape]{plot.phylo}} or \code{\link[ape]{phydataplot}}.}
 }
 \value{
-Plot of the tree with ancestral state reconstruction.
+None.
 }
 \description{
 Plot the ancestral states reconstructions from a fitted Cauchy model.
@@ -86,7 +86,25 @@ Then function \code{\link[pracma]{trapz}} estimates the integral of the density
 around the mode.
 
 For an exact representation of a node posterior density, please plot it separately,
- using function \code{\link{plot.ancestralCauchy}}.
+using function \code{\link{plot.ancestralCauchy}}.
+}
+\examples{
+set.seed(1289)
+# Simulate tree and data
+phy <- ape::rphylo(10, 0.1, 0)
+dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+                    parameters = list(root.value = 10, disp = 0.1))
+# Fit the data
+fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
+# Reconstruct the ancestral states and increments
+inc <- increment(fit, n_values = 1000)
+anc <- ancestral(fit, n_values = 1000)
+plot_asr(fit, inc = inc, anc = anc, offset = 3,
+         width.node = 0.8, height.node = 0.5, 
+         width.edge = 1.5, height.edge = 0.2,
+         x.legend = "topright")
+
+
 }
 \seealso{
 \code{\link{cauphylm}}, \code{\link{fitCauchy}}, \code{\link{ancestral}}, \code{\link{increment}},

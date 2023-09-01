@@ -7,12 +7,15 @@
 reroottip(tree, tip)
 }
 \arguments{
-\item{...}{dots arguments to be captured}
+\item{tree}{the original tree}
+
+\item{tip}{the tip to re-root at}
 }
 \value{
-a named list of the arguments in ...
+the re-rooted tree at the tip
 }
 \description{
 Re root tree at a tip, taking care of the root length.
+This function is only used for testing purposes.
 }
 \keyword{internal}

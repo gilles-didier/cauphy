@@ -240,35 +240,6 @@ minusLikelihoodREML <- function(param, param_names, tree, trait, Xdesign, model,
   return(-logDensityTipsCauchy(tree = phy_trans, tipTrait = trait, root.value = NULL, disp = param["disp"], method = "reml", rootTip = rootTip))
 }
 
-# fitCauchyREMLOld <- function(tree, trait, start.values, rootTip = 1) {
-#   # Reroot
-#   tip <- rootTip
-#   tipName <- tree$tip.label[rootTip]
-#   retree <- reroottip(tree, tip)
-#   
-#   # root value
-#   root.value <- trait[tipName]
-#   tipTraitBis <- trait[names(trait) != tipName] - root.value
-#   
-#   ## Force integers
-#   stopifnot(all.equal(matrix(as.integer(retree$edge), ncol = 2), retree$edge))
-#   retree$edge <- matrix(as.integer(retree$edge), ncol = 2)
-#   
-#   # Opt function
-#   minus_like <- function(param, tree, trait) {
-#     # return(-logREMLTipsCauchy(tree, trait, disp = exp(param[1]), ultrametric = ape::is.ultrametric(tree), lse = TRUE, rootTip = rootTip))
-#     return(-logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, root.value = 0.0, disp = exp(param[1]), method = "random.root"))
-#   }
-#   # local around init
-#   opt <- nloptr::nloptr(x0 = start.values, eval_f = minus_like,
-#                         opts = list("algorithm" = "NLOPT_LN_BOBYQA", "xtol_rel" = 1e-8, "maxeval" = 1000),
-#                         tree = tree, trait = trait)
-#   # parameters
-#   return(list(param = list(disp = exp(opt$solution[1])),
-#               logLikelihood = -opt$objective,
-#               tip_rooted_tree = retree))
-# }
-
 #' @title Initialization of the position parameter.
 #'
 #' @description

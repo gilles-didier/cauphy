@@ -25,7 +25,6 @@ NULL
 #' 
 #' @return No value returned.
 #' 
-#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 #' 
 #' @keywords internal programming
 #' 
@@ -58,10 +57,12 @@ plot.invisible <- function(...){
 #' @title Re root tree at a tip
 #'
 #' @description Re root tree at a tip, taking care of the root length.
+#' This function is only used for testing purposes.
 #' 
-#' @param ... dots arguments to be captured
+#' @param tree the original tree
+#' @param tip the tip to re-root at
 #'
-#' @return a named list of the arguments in ...
+#' @return the re-rooted tree at the tip
 #'
 #' @keywords internal
 #'

@@ -13,6 +13,9 @@
 
 \item{...}{further arguments to be passed to \code{\link{plot}}.}
 }
+\value{
+None.
+}
 \description{
 This function takes an object of class \code{\link{profile.cauphyfit}},
 and plots the profile likelihood for each parameter.
