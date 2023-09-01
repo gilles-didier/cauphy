@@ -55,8 +55,8 @@ NULL
 #' # Fit the data
 #' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
 #' # Reconstruct the ancestral states and increments
-#' inc <- increment(fit, n_values = 1000)
-#' anc <- ancestral(fit, n_values = 1000)
+#' inc <- increment(fit, n_values = 100)
+#' anc <- ancestral(fit, n_values = 100)
 #' plot_asr(fit, inc = inc, anc = anc, offset = 3,
 #'          width.node = 0.8, height.node = 0.5, 
 #'          width.edge = 1.5, height.edge = 0.2,
