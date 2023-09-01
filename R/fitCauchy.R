@@ -275,7 +275,7 @@ print.cauphyfit <- function(x, digits = max(3, getOption("digits") - 3), ...){
 #' Same value as the associated methods from the \code{stats} package:
 #' \itemize{
 #' \item{\code{\link[stats]{vcov}}}{ an estimated covariance matrix, see \code{\link{compute_vcov}};}
-#' \item{\code{\link[stats]{logLik}}}{ an object of class \code{\link[logLik]{logLik}};}
+#' \item{\code{\link[stats]{logLik}}}{ an object of class \code{\link[stats]{logLik}};}
 #' \item{\code{\link[stats]{AIC}}}{ a numeric value;}
 #' \item{\code{\link[stats]{confint}}}{ a matrix (or vector) with columns giving lower and upper confidence limits for each parameter;}
 #' \item{\code{\link[stats]{coef}}}{ coefficients extracted from the model;}
