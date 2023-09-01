@@ -83,7 +83,7 @@ void inspect(SEXP x) {
 TypeTree *Phylo2Tree(SEXP phy) {
 	TypeTree *tree;
 	int n, i, *parent;
-	double *bl, *rl;
+	double *bl;
 	SEXP namesTip, edge;
 	SEXP dim;
 	SEXP rootEdge;
@@ -94,9 +94,6 @@ TypeTree *Phylo2Tree(SEXP phy) {
 	edge = getListElement(phy, "edge");
 	dim = getAttrib(edge, R_DimSymbol) ;
 	rootEdge = getListElement(phy, "root.edge");
-	if (!isNull(rootEdge)) {
-	  rl = REAL(rootEdge);
-	}
 	nrow = INTEGER(dim)[0];
 	ncol = INTEGER(dim)[1];
 	tab = INTEGER(edge);
@@ -141,6 +138,8 @@ TypeTree *Phylo2Tree(SEXP phy) {
 	if (isNull(rootEdge)) {
 	  tree->time[tree->root] = NO_TIME;
 	} else {
+          double *rl;
+	  rl = REAL(rootEdge);
 	  tree->time[tree->root] = rl[0];
 	}
 	return tree;
