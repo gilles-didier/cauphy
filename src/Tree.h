@@ -44,12 +44,9 @@ TypeTree *cpyTree(TypeTree *tree);
 void freeTree(TypeTree *tree);
 void fprintIdentTimeComment(FILE *f, int n, TypeTree *tree, TypeDisplayName display);
 /*print tree in newick format*/
-void fprintSubtreeNewick(FILE *f, int n, TypeTree *tree);
-/*print tree in newick format*/
 void fprintTreeNewick(FILE *f, TypeTree *tree);
 /*print node in newick format*/
 void fprintNodeNewick(FILE *f, int n, TypeTree *tree);
-void fillCountTips(int n, TypeTree *tree, int *ntips);
 TypeTree *rerootTreeREML(int node, TypeTree *tree);
 TypeTree *rerootTreeStem(int node, TypeTree *tree);
 int findSide(int node, TypeTree *tree);
