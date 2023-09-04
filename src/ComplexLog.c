@@ -7,8 +7,8 @@
 #endif
 
 
-static complex clog1p(complex a);
-static complex clogSumLog(complex a, complex b);
+static double complex clog1p(double complex a);
+static double complex clogSumLog(double complex a, double complex b);
 
 
 /* Kahan operations for complex numbers */
@@ -52,7 +52,7 @@ TypeComplex getComplex(double re, double im) {
   return c;
 }
 
-complex toLogComplex(TypeComplex a) {
+double complex toLogComplex(TypeComplex a) {
 	return CMPLXE(creal(a.c)+log(fabs(cos(cimag(a.c)))), creal(a.c)+log(fabs(sin(cimag(a.c)))));
 }
 
@@ -123,18 +123,18 @@ void fprintComplex(FILE *f, TypeComplex a) {
 		fprintf(f, "%le\t\n", creal(c.c));
 }
 
-complex clog1p(complex a) {
+double complex clog1p(double complex a) {
 	if(cabs(a) < 1.E-07)
 		return a;
 	else
 		return clog(1.0+a);
 }
 
-complex clogSumLog(complex a, complex b) {
-	complex max, min;
-	if(isinf(creal(a)))
+double complex clogSumLog(double complex a, double complex b) {
+	double complex max, min;
+	if(isinf(creal(a)) && creal(a) < 0)
 		return b;
-	if(isinf(creal(b)))
+	if(isinf(creal(b)) && creal(b) < 0)
 		return a;
 	if(creal(a)>creal(b)) {
 		max = a;
