@@ -98,7 +98,7 @@ void initLexiNode(char symbol, TypeLexiNode *n) {
     n->sibling = -1;
 }
 
-TypeLexiTree *newLexiTree() {
+TypeLexiTree *newLexiTree(void) {
     TypeLexiTree* dict;
     dict = (TypeLexiTree*) malloc(sizeof(TypeLexiTree));
     dict->sizeBuf = INC_SIZE_DICT;

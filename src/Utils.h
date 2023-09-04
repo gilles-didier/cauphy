@@ -26,7 +26,7 @@ char *strdpl(char *src);
 int findWordLexi(char *w, TypeLexiTree *dict);
 int addWordLexi(char *w, int index, TypeLexiTree *dict);
 void initLexiNode(char symbol, TypeLexiNode *n);
-TypeLexiTree *newLexiTree();
+TypeLexiTree *newLexiTree(void);
 void freeLexiTree(TypeLexiTree *dict);
 
 #ifdef __cplusplus
