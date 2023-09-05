@@ -2,7 +2,7 @@
 % Please edit documentation in R/export.R
 \name{write.evolaps}
 \alias{write.evolaps}
-\title{Write treedata in evolaps format}
+\title{Write a \code{treedata} in Evolaps format}
 \usage{
 write.evolaps(treedata, file)
 }
@@ -12,6 +12,6 @@ write.evolaps(treedata, file)
 \item{file}{the path of the file}
 }
 \description{
-Write treedata in evolaps format
+Write a \code{treedata} in Evolaps format
 }
 \keyword{internal}

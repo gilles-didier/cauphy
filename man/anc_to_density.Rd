@@ -10,7 +10,7 @@ anc_to_density(anc)
 \item{anc}{an object of class \code{ancestralCauchy}, obtained with \code{\link{ancestral}}.}
 }
 \value{
-list of matrching density objects
+list of matching density objects
 }
 \description{
 Transform an object of class \code{ancestralCauchy}

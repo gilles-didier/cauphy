@@ -92,7 +92,7 @@ ancestral_to_treedata <- function(tree,
 #' @param i the item number
 #' @param nn the name to retrieve
 #' 
-#' @return entry nn from item i of list x, or NA
+#' @return entry \code{nn} from item \code{i} of list \code{x}, or \code{NA}
 #' 
 #' @keywords internal
 #' 
@@ -107,7 +107,7 @@ get_entry_safe <- function(x, i, nn) {
 #' See \code{\link[emdbook]{HPDregionplot}}
 #' 
 #' @param den a two dimensional density object
-#' @param prob the probaility level
+#' @param prob the probability level
 #' 
 #' @return contour plot coordinates
 #' 
@@ -258,7 +258,7 @@ get_line_safe <- function(x, i) {
 #' 
 #' @param anc an object of class \code{ancestralCauchy}, obtained with \code{\link{ancestral}}.
 #' 
-#' @return list of matrching density objects
+#' @return list of matching density objects
 #' 
 #' @keywords internal
 #' 
@@ -273,7 +273,7 @@ anc_to_density <- function(anc) {
   return(anc_dens)
 }
 
-#' @title Write treedata in evolaps format
+#' @title Write a \code{treedata} in Evolaps format
 #' 
 #' @param treedata an object of class \code{\link[tidytree]{treedata-class}}
 #' @param file the path of the file

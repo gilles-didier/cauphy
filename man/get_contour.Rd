@@ -9,7 +9,7 @@ get_contour(den, prob)
 \arguments{
 \item{den}{a two dimensional density object}
 
-\item{prob}{the probaility level}
+\item{prob}{the probability level}
 }
 \value{
 contour plot coordinates

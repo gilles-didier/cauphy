@@ -14,7 +14,7 @@ get_entry_safe(x, i, nn)
 \item{nn}{the name to retrieve}
 }
 \value{
-entry nn from item i of list x, or NA
+entry \code{nn} from item \code{i} of list \code{x}, or \code{NA}
 }
 \description{
 Get the entry if the index is acceptable, otherwise return NA.
