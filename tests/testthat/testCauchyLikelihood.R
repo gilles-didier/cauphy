@@ -259,6 +259,17 @@ test_that("testLikelihoodFunction", {
   expect_error(logDensityTipsCauchy(tree_bis, trait, disp = disp), "The tree must be binary.")
   expect_error(posteriorDensityAncestral(55, 1, tree_bis, trait, disp = disp), "The tree must be binary.")
   
+  ## Fixed root
+  set.seed(1289)
+  tree <- rphylo(50, 0.1, 0)
+  root.value <- 2.3
+  dat <- rTraitCauchy(n = 10, phy = tree, model = "cauchy", parameters = list(root.value = root.value, disp = 1))
+  for (k in 1:10) {
+    res1 <-.Call("getLogDensityTipsCauchy", tree, dat[, k], names(dat[, k]), root.value, 1.0, 1, NULL)
+    res2 <-.Call("getLogDensityTipsCauchy", tree, dat[, k] - root.value, names(dat[, k]), 0.0, 1.0, 1, NULL)
+    expect_equal(res1, res2)
+  }
+  
 })
 
 
