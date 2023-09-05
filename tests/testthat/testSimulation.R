@@ -66,6 +66,21 @@ test_that("testrTraitCauchy", {
   trait2 <- rTraitCauchy(n = 1, phy)
   expect_equal(trait1, trait2)
   
+  set.seed(1289)
+  trait1 <- rTraitCauchy(n = Nrep, phy, model = "lambda", parameters = list(root.value = mu, disp = disp, lambda = 1))
+  set.seed(1289)
+  trait2 <- rTraitCauchy(n = 1, phy, parameters = list(root.value = mu, disp = disp, lambda = 1))
+  expect_equal(trait1, trait2)
+  
+  set.seed(1289)
+  trait1 <- rTraitCauchy(n = Nrep, phy, model = "kappa", parameters = list(root.value = mu, disp = disp, kappa = 1))
+  expect_equal(trait1, trait2)
+  set.seed(1289)
+  trait1 <- rTraitCauchy(n = Nrep, phy, model = "delta", parameters = list(root.value = mu, disp = disp, delta = 1))
+  expect_equal(trait1, trait2)
+  
+  
+  
 })
 
 test_that("test rTraitCauchy errors", {

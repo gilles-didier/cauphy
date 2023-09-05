@@ -21,4 +21,27 @@ using function \code{\link[pracma]{hessian}}, and then uses its inverse
 to approximate the variance covariance matrix.
 It can be used to compute confidence intervals with functions \code{\link{confint.cauphylm}}
 or \code{\link{confint.cauphyfit}}.
+
+\code{\link{confint.cauphylm}} and \code{\link{confint.cauphyfit}}
+internally call \code{compute_vcov}, but do not save the result.
+This function can be used to save the vcov matrix.
+}
+\examples{
+# Simulate tree and data
+set.seed(1289)
+phy <- ape::rphylo(20, 0.1, 0)
+dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+                    parameters = list(root.value = 10, disp = 0.1))
+# Fit the data, without computing the Hessian at the estimated parameters.
+fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml", hessian = FALSE)
+# Precompute the vcov matrix
+fit <- compute_vcov(fit)
+# Approximate confidence intervals
+confint(fit)
+
+}
+\seealso{
+\code{\link{fitCauchy}}, \code{\link{cauphylm}}, 
+\code{\link{confint.cauphylm}}, \code{\link{confint.cauphyfit}},
+\code{\link{vcov.cauphylm}}, \code{\link{vcov.cauphyfit}}
 }

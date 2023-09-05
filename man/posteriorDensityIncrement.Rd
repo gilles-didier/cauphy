@@ -37,16 +37,19 @@ the posterior density value.
 \description{
 Compute the posterior density of a set of branch increments under a Cauchy process on a phylogenetic tree.
 }
+\details{
+This function is internally called by \code{\link{increment}}, which
+is the preferred way of doing ancestral reconstruction on a fitted
+object.
+}
 \examples{
 set.seed(1289)
 phy <- ape::rphylo(5, 0.1, 0)
 dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
 posteriorDensityIncrement(2, 0.1, phy, dat, disp = 1)
 
+
 }
 \seealso{
 \code{\link{increment}}, \code{\link{fitCauchy}}
-}
-\author{
-Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 }

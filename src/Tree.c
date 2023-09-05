@@ -37,23 +37,6 @@ void fprintIdentTimeComment(FILE *f, int n, TypeTree *tree, TypeDisplayName disp
 }
 
 /*print tree in newick format*/
-void fprintSubtreeNewick(FILE *f, int n, TypeTree *tree) {
-    if(tree->size<=0 || n>=tree->size || n<0)
-        return;
-    if(tree->node[n].child >= 0) {
-        int tmp = tree->node[n].child;
-        fprintf(f, "(");
-        fprintNodeNewick(f, tmp, tree);
-        for(tmp = tree->node[tmp].sibling; tmp >= 0; tmp = tree->node[tmp].sibling) {
-            fprintf(f, ", ");
-            fprintNodeNewick(f, tmp, tree);
-        }
-        fprintf(f, ")");
-    }
-    fprintIdentTimeComment(f, n, tree, display_time_name);
-    fprintf(f, ";\n");
-}
-/*print tree in newick format*/
 void fprintTreeNewick(FILE *f, TypeTree *tree) {
     if(tree->size<=0)
         return;
@@ -180,20 +163,6 @@ void freeTree(TypeTree *tree) {
         free((void*)tree->comment);
     }
     free((void*)tree);
-}
-
-
-void fillCountTips(int n, TypeTree *tree, int *ntips) {
-	if(tree->node[n].child == NOSUCH)
-		ntips[n] = 1;
-	else {
-		int c;
-		ntips[n] = 0;
-		for(c=tree->node[n].child; c != NOSUCH; c=tree->node[c].sibling) {
-			fillCountTips(c, tree, ntips);
-			ntips[n] += ntips[c];
-		}
-	}
 }
 
 void fillTipsRec(int n, TypeTree *tree, int *tips, int *ntips) {
