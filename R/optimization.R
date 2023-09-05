@@ -37,10 +37,7 @@ fitCauchy.internal <- function(phy, X, y,
                                optim = c("local", "global"),
                                method.init.disp = "Qn", ...) {
   # Checks
-  if (!inherits(phy, "phylo")) stop("object \"phy\" is not of class \"phylo\".")
-  if (is.null(phy$edge.length)) stop("the tree has no branch lengths.")
-  if (is.null(phy$tip.label)) stop("the tree has no tip labels.")
-  if (!is.binary(phy)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
+  check_binary_tree(phy)
   
   y <- checkTraitTree(y, phy)
   
@@ -180,7 +177,7 @@ minusLikelihoodFixedRoot_mu <- function(param, param_names, tree, trait, Xdesign
   phy_trans <- transformBranchLengths(tree, model, param)
   # tree_height <- max(node.depth.edgelength(phy_trans))
   # return(length(phy_trans$tip.label) * log(param["disp"] * 100 / tree_height) - logDensityTipsCauchy(phy_trans, trait / param["disp"] / 100 * tree_height, param[1], 0.01 * tree_height, method = "fixed.root"))  
-  return(-logDensityTipsCauchy(phy_trans, trait, param[1], param["disp"], method = "fixed.root"))
+  return(-logDensityTipsCauchy(phy_trans, trait, param[1], param["disp"], method = "fixed.root", do_checks = FALSE))
 }
 
 #' @title Minus Likelihood function for a Cauchy model
@@ -199,7 +196,7 @@ minusLikelihoodFixedRoot_lm <- function(param, param_names, tree, trait, Xdesign
   param <- back_transform_values(param)
   centralTips <- drop(Xdesign %*% param[grepl("coef", names(param))])
   phy_trans <- transformBranchLengths(tree, model, param)
-  return(-logDensityTipsCauchy(phy_trans, trait - centralTips, 0, param["disp"], method = "fixed.root"))
+  return(-logDensityTipsCauchy(phy_trans, trait - centralTips, 0, param["disp"], method = "fixed.root", do_checks = FALSE))
 }
 
 #' @title Minus Likelihood function for a Cauchy model
@@ -217,7 +214,7 @@ minusLikelihoodRandomRoot <- function(param, param_names, tree, trait, Xdesign, 
   names(param) <- param_names
   param <- back_transform_values(param)
   phy_trans <- transformBranchLengths(tree, model, param)
-  return(-logDensityTipsCauchy(phy_trans, trait, root.value = 0.0, disp = param["disp"], method = "random.root"))
+  return(-logDensityTipsCauchy(phy_trans, trait, root.value = 0.0, disp = param["disp"], method = "random.root", do_checks = FALSE))
 }
 
 #' @title Minus REML function for a Cauchy model
@@ -237,7 +234,7 @@ minusLikelihoodREML <- function(param, param_names, tree, trait, Xdesign, model,
   phy_trans <- transformBranchLengths(tree, model, param)
   # tree_height <- max(node.depth.edgelength(phy_trans))
   # return((length(phy_trans$tip.label) - 1) * log(param["disp"] * 1000 / tree_height) - logDensityTipsCauchy(tree = phy_trans, tipTrait = trait / param["disp"] / 1000 * tree_height, root.value = NULL, disp = 0.001 * tree_height, method = "reml", rootTip = rootTip))  
-  return(-logDensityTipsCauchy(tree = phy_trans, tipTrait = trait, root.value = NULL, disp = param["disp"], method = "reml", rootTip = rootTip))
+  return(-logDensityTipsCauchy(tree = phy_trans, tipTrait = trait, root.value = NULL, disp = param["disp"], method = "reml", rootTip = rootTip, do_checks = FALSE))
 }
 
 #' @title Initialization of the position parameter.
@@ -366,8 +363,7 @@ transformBranchLengths <- function(phy, model, param) {
 #' @keywords internal
 #'
 maxLambda <- function (phy) {
-  if (!inherits(phy, "phylo")) 
-    stop("tree should be an object of class \"phylo\".")
+  if (!inherits(phy, "phylo")) stop("tree should be an object of class \"phylo\".")
   if (is.ultrametric(phy)) {
     h <- ape::node.depth.edgelength(phy)
     return(max(h[phy$edge[, 2]]) / max(h[phy$edge[, 1]]))

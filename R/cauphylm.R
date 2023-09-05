@@ -109,10 +109,8 @@ cauphylm <- function(formula, data = list(), phy,
                                            lambda = NULL),
                      hessian = FALSE) {
   # Checks
-  if (!inherits(phy, "phylo")) stop("object \"phy\" is not of class \"phylo\".")
-  if (is.null(phy$edge.length)) stop("the tree has no branch lengths.")
-  if (is.null(phy$tip.label)) stop("the tree has no tip labels.")
-  if (!is.binary(phy)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
+  check_binary_tree(phy)
+  
   ## Model matrix
   mf <- model.frame(formula = formula, data = data)
   mf <- checkTraitTree(mf, phy)
@@ -229,7 +227,7 @@ compute_vcov.cauphylm <- function(obj) {
     names(param) <- param_names
     centralTips <- drop(obj$X %*% param[grepl("coef", names(param))])
     phy_trans <- transformBranchLengths(obj$phy, obj$model, param)
-    return(-logDensityTipsCauchy(phy_trans, obj$y - centralTips, 0, param["disp"], method = "fixed.root"))
+    return(-logDensityTipsCauchy(phy_trans, obj$y - centralTips, 0, param["disp"], method = "fixed.root", do_checks = FALSE))
   }
   # approxHessian <- nlme::fdHess(obj$all_params, minus_like)
   # obj$vcov <- solve(approxHessian$Hessian)

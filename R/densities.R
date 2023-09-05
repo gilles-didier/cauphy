@@ -14,6 +14,9 @@
 #' @param method the method used to compute the likelihood.
 #' One of \code{reml} (the default), \code{fixed.root} or \code{random.root}.
 #' See Details.
+#' @param do_checks if \code{FALSE}, the entry parameters are not checked for consistency.
+#' This can be useful when doing multiple calls to the function, as in numerical optimization.
+#' Default to \code{TRUE}.
 #' 
 #' @details
 #' The parameters of the Cauchy Process (CP)
@@ -55,7 +58,7 @@
 #' @export
 #' 
 #' 
-logDensityTipsCauchy <- function(tree, tipTrait, root.value = NULL, disp, method = c("reml", "random.root", "fixed.root"), rootTip = NULL) {
+logDensityTipsCauchy <- function(tree, tipTrait, root.value = NULL, disp, method = c("reml", "random.root", "fixed.root"), rootTip = NULL, do_checks = TRUE) {
   # type
   method <- match.arg(method)
   type <- switch(method,
@@ -63,14 +66,14 @@ logDensityTipsCauchy <- function(tree, tipTrait, root.value = NULL, disp, method
                  random.root = 0,
                  fixed.root = 1)
   # checks
-  if (!inherits(tree, "phylo")) stop("object \"tree\" is not of class \"phylo\".")
-  if (is.null(tree$edge.length)) stop("the tree has no branch lengths.")
-  if (!is.binary(tree)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
+  if (do_checks){
+    check_binary_tree(tree)
+    if (method == "random.root" && is.null(root.value)) stop("Starting value must be specified for root node in the `random.root` method.")
+    if (method == "random.root" && (is.null(tree$root.edge) || tree$root.edge == 0)) stop("In the random root model, the `root.edge` must be non NULL and non zero.")
+    if ((method == "fixed.root") && (is.null(root.value))) stop ("Starting value must be specified for root node in the `fixed.root` method.")
+    if (method == "reml" && !is.null(root.value)) stop("In the reml model, `root.value` cannot be specified.")
+  }
   stopifnot(all.equal(matrix(as.integer(tree$edge), ncol = 2), tree$edge))
-  if (method == "random.root" && is.null(root.value)) stop("Starting value must be specified for root node in the `random.root` method.")
-  if (method == "random.root" && (is.null(tree$root.edge) || tree$root.edge == 0)) stop("In the random root model, the `root.edge` must be non NULL and non zero.")
-  if ((method == "fixed.root") && (is.null(root.value))) stop ("Starting value must be specified for root node in the `fixed.root` method.")
-  if (method == "reml" && !is.null(root.value)) stop("In the reml model, `root.value` cannot be specified.")
   tree$edge <- matrix(as.integer(tree$edge), ncol = 2)
   # rootTip
   if (!is.null(rootTip)) {
@@ -122,9 +125,7 @@ posteriorDensityAncestral <- function(node, vals, tree, tipTrait, root.value = N
                  fixed.root = 1)
   vals <- as.double(vals)
   # checks
-  if (!inherits(tree, "phylo")) stop("object \"tree\" is not of class \"phylo\".")
-  if (is.null(tree$edge.length)) stop("the tree has no branch lengths.")
-  if (!is.binary(tree)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
+  check_binary_tree(tree)
   if (node <= length(tree$tip.label)) stop("Ancestral reconstruction is only allowed for ancestral nodes.")
   if (node > length(tree$tip.label) + Nnode(tree)) stop ("This node does not exist in the tree.")
   if ((method == "fixed.root") && (node == length(tree$tip.label) + 1)) stop ("Ancestral state reconstruction is not allowed for the root with the fixed root model.")
@@ -347,9 +348,7 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, root.value = N
                  fixed.root = 1)
   vals <- as.double(vals)
   # checks
-  if (!inherits(tree, "phylo")) stop("object \"tree\" is not of class \"phylo\".")
-  if (is.null(tree$edge.length)) stop("the tree has no branch lengths.")
-  if (!is.binary(tree)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
+  check_binary_tree(tree)
   if (node > length(tree$tip.label) + Nnode(tree)) stop ("This node does not exist in the tree.")
   if ((method == "fixed.root") && (node == length(tree$tip.label) + 1)) stop ("Ancestral increment reconstruction is not allowed for the root branch with the fixed root model.")
   if ((method == "reml") && (node == length(tree$tip.label) + 1)) stop ("Ancestral increment reconstruction is not allowed for the root branch with the reml model.")

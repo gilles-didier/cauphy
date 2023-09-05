@@ -479,42 +479,4 @@ test_that("Errors with species names", {
   tree$edge.length[tree$edge[, 2] == 1] <- 1.0
   expect_no_error(checkDuplicates(y_data, tree))
   
-  ## Tree phylo
-  y_data <- rnorm(ntips)
-  names(y_data) <- tree$tip.label
-  ## class
-  class(tree_wrong) <- NULL
-  expect_error(fitCauchy(tree_wrong, y_data),
-               "object \"phy\" is not of class \"phylo\".")
-  expect_error(cauphylm(y_data ~ 1, phy = tree_wrong),
-               "object \"phy\" is not of class \"phylo\".")
-  expect_error(rTraitCauchy(1, phy = tree_wrong),
-               "object \"phy\" is not of class \"phylo\".")
-  ## branch lengths
-  tree_wrong <- tree
-  tree_wrong$edge.length <- NULL
-  expect_error(fitCauchy(tree_wrong, y_data),
-               "the tree has no branch lengths.")
-  expect_error(cauphylm(y_data ~ 1, phy = tree_wrong),
-               "the tree has no branch lengths.")
-  expect_error(rTraitCauchy(1, phy = tree_wrong),
-               "the tree has no branch lengths.")
-  ## tip labels
-  tree_wrong <- tree
-  tree_wrong$tip.label <- NULL
-  expect_error(fitCauchy(tree_wrong, y_data),
-               "the tree has no tip labels.")
-  expect_error(cauphylm(y_data ~ 1, phy = tree_wrong),
-               "the tree has no tip labels.")
-  expect_error(rTraitCauchy(1, phy = tree_wrong),
-               "the tree has no tip labels.")
-  ## binary tree
-  tree_wrong <- tree
-  tree_wrong$edge.length[4] <- 0
-  tree_wrong <- di2multi(tree_wrong)
-  expect_error(fitCauchy(tree_wrong, y_data),
-               "The tree must be binary.")
-  expect_error(cauphylm(y_data ~ 1, phy = tree_wrong),
-               "The tree must be binary.")
-  
 })

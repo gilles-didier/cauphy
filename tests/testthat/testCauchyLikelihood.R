@@ -254,10 +254,24 @@ test_that("testLikelihoodFunction", {
   ff <- fitCauchy(tree, trait)
   expect_equal(ff$disp, 0.06785236, tolerance = 1e-6)
   tree_bis <- di2multi(tree)
-  expect_error(fitCauchy(tree_bis, trait), "The tree must be binary.")
-  expect_error(cauphylm(trait ~ 1, phy = tree_bis), "The tree must be binary.")
-  expect_error(logDensityTipsCauchy(tree_bis, trait, disp = disp), "The tree must be binary.")
-  expect_error(posteriorDensityAncestral(55, 1, tree_bis, trait, disp = disp), "The tree must be binary.")
+  expect_error(check_binary_tree(tree_bis), "The tree must be binary.")
+  
+  ## Tree with no branch length
+  tree <- stree(10)
+  expect_error(check_binary_tree(tree), "the tree has no branch lengths.")
+  expect_error(check_tree(tree), "the tree has no branch lengths.")
+  
+  ## Tree with no labels
+  tree <- rtree(10)
+  tree$tip.label <- NULL
+  expect_error(check_binary_tree(tree), "the tree has no tip labels.")
+  expect_error(check_tree(tree), "the tree has no tip labels.")
+  
+  ## Tree with no labels
+  tree <- rtree(10)
+  class(tree) <- NULL
+  expect_error(check_binary_tree(tree), "object \"tree\" is not of class \"phylo\"")
+  expect_error(check_tree(tree), "object \"tree\" is not of class \"phylo\"")
   
 })
 
