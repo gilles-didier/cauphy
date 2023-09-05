@@ -146,34 +146,30 @@ TypeTree *Phylo2Tree(SEXP phy) {
 }
 
 SEXP printRTree(SEXP phy) {
-  FILE *fout;
-  TypeTree *tree;
-  long numbytes;
-  char *buffer;
-  
-  tree = Phylo2Tree(phy);
-  if (tree->time[tree->root] == NO_TIME) {
-    tree->time[tree->root] = 0; 
-  }
-  
-  if((fout = tmpfile())) {
-    fprintTreeNewick(fout, tree);
-    fseek(fout, 0L, SEEK_END);
-    numbytes = ftell(fout);
-    fseek(fout, 0L, SEEK_SET);
-    buffer = (char*)calloc(numbytes+1, sizeof(char));
-    int size_read = fread(buffer, sizeof(char), numbytes, fout);
-    fclose(fout);
-    
-    if (size_read != numbytes) error("Temporary file reading failed.");
-    
-    buffer[numbytes] = '\0';
-    
-    SEXP res = Rf_mkString(buffer);
-    free(buffer);
-    return res;
-  }
-  return R_NilValue;
+	FILE *fout;
+	if((fout = tmpfile())) {
+		TypeTree *tree;
+		long numbytes;
+		char *buffer;
+		tree = Phylo2Tree(phy);
+		if (tree->time[tree->root] == NO_TIME)
+			tree->time[tree->root] = 0; 
+		fprintTreeNewick(fout, tree);
+		freeTree(tree);
+		fseek(fout, 0L, SEEK_END);
+		numbytes = ftell(fout);
+		fseek(fout, 0L, SEEK_SET);
+		buffer = (char*)calloc(numbytes+1, sizeof(char));
+		int size_read = fread(buffer, sizeof(char), numbytes, fout);
+		fclose(fout);
+		if (size_read != numbytes) 
+			error("Temporary file reading failed.");
+		buffer[numbytes] = '\0';
+		SEXP res = Rf_mkString(buffer);
+		free(buffer);
+		return res;
+	}
+	return R_NilValue;
 } 
 
 SEXP SimulateTipsCauchy(SEXP treeR, SEXP startR, SEXP dispR) {
