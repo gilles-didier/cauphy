@@ -37,11 +37,12 @@ double totalDoubleKahan(TypeDoubleKahan *ka) {
 double sumSignedLogTableKahan(double a[], int sign[], int size) {
 	int i, npos, max_sign, max_ind;
 	double max_double, res;
-	for(max_ind=0; max_ind<size && sign[max_ind] <= -1; max_ind++)
-		;
+	if(size <= 0)
+		return log(0.);
+	max_ind = 0
 	max_double = a[max_ind];
 	max_sign = sign[max_ind];
-	for (i = 0; i < size; i++) {
+	for (i = 1; i < size; i++) {
 		if (a[i] > max_double) {
 			max_ind = i;
 			max_double = a[i];
