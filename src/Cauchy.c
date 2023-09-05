@@ -152,10 +152,10 @@ void fillCauchyAncestralPosteriorLogDensityStem(int node, double *dens, double *
 			freeCauchyInfo(tree->node[node].child, tree, cinf);
 			freeCauchyInfo(tree->node[tree->node[node].child].sibling, tree, cinf);
 			freeCauchyInfo(treeC->root, treeC, cinf);
-			free((void*)cinf);
 			treeC->info = NULL;
 			freeTree(treeC);
 		}
+		free((void*)cinf);
 	}
 }
 
@@ -283,6 +283,7 @@ void fillCauchyIncrementPosteriorLogDensityStem(int node, double *dens, double *
 			dens[j] = getCauchyLogDensityStem(cinf[tree->root], ((double*)tree->info), start) + getCauchyLogDensityStandard(tabVal[j], disp*timeSave) - densRef;
 			freeCauchyInfo(tree->root, tree, cinf);
 		}
+		free((void*)tips);
 		free((void*)tree->info);
 		tree->info = infoSave;
 		tree->time[node] = timeSave;
