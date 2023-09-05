@@ -270,8 +270,8 @@ test_that("testLikelihoodFunction", {
   ## Tree with no labels
   tree <- rtree(10)
   class(tree) <- NULL
-  expect_error(check_binary_tree(tree), "object \"tree\" is not of class \"phylo\"")
-  expect_error(check_tree(tree), "object \"tree\" is not of class \"phylo\"")
+  expect_error(check_binary_tree(tree), "tree object is not of class \"phylo\"")
+  expect_error(check_tree(tree), "tree object is not of class \"phylo\"")
   
 })
 
