@@ -92,6 +92,9 @@ logDensityTipsCauchyBi <- function(tree, tipTrait,
   return(as.vector(ll))
 }
 
+#' @importFrom stats dcauchy
+NULL
+
 #' @title Log Density of a Bivariate Cauchy Process
 #'
 #' @description
