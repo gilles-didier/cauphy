@@ -91,3 +91,36 @@ logDensityTipsCauchyBi <- function(tree, tipTrait,
   ll <- - n * determinant(basisMatr, logarithm = TRUE)$modulus + sum(ind_ll)
   return(as.vector(ll))
 }
+
+#' @title Log Density of a Bivariate Cauchy Process
+#'
+#' @description
+#' Compute the log density of the vector of trait at the tips of the phylogenetic tree, 
+#' assuming a Cauchy process.
+#' 
+#' @param values a matrix with two columns of values where to evaluate the density.
+#' @param centervector of the 2 angles of the 2 axes.
+#' @param angle vector of the 2 angles of the 2 axes.
+#' @param disp vector of the 2 dispersion values along the two axes.
+#' 
+#' @return the log density values for each row of \code{values}.
+#' 
+#' @keywords internal
+#' 
+logDensityCauchyBi <- function(values, center, disp, angle) {
+  # dim
+  p <- 2
+  if (ncol(values) != 2) stop("For the bivariate Cauchy, values must be a matrix with two columns.")
+  if (length(center) != 2) stop("For the bivariate Cauchy, if specified 'center' must a vector of length 2.")
+  if (length(angle) != 2) stop("For the bivariate Cauchy, 'angle' must be a vector of length 2.")
+  if (length(disp) != 2) stop("For the bivariate Cauchy, 'disp' must be a vector of length 2.")
+  # transform trait
+  basisMatr <- sapply(angle, function(x) c(cos(x), sin(x)))
+  transvalues <- solve(basisMatr, t(values))
+  center <- solve(basisMatr, center)
+  # Independent likelihoods
+  ind_ll <- sapply(1:2, function(k) dcauchy(transvalues[k, ], location = center[k], scale = disp[k], log = TRUE))
+  # likelihood
+  ll <- - determinant(basisMatr, logarithm = TRUE)$modulus + rowSums(ind_ll)
+  return(as.vector(ll))
+}
