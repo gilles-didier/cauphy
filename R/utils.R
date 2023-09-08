@@ -4,18 +4,6 @@
 #' @importFrom methods is
 NULL
 
-#library(ade4)
-#library(ape)
-#dyn.load("treeR.so")
-
-#testTree <- function(tree, part) {
-#phy <- read.tree(tree)
-#.Call("drawPhylo", phy, "bof.tex")
-#list <- scan(part, what = " ")
-#new <- .Call("prunePhylo", phy, list)
-#phy2 <- read.tree(text = new)
-#}
-
 #' @title Print a tree
 #'
 #' @description
@@ -115,3 +103,28 @@ slog1p <- Vectorize(function(x) {
   # return(0)
   return(x)
 })
+
+#' @title Check Binary Tree object
+#'
+#' @description
+#' Perform check on the tree: it needs to be a \code{phylo} object,
+#' with branch lengths, binary, with tip labels.
+#' 
+#' @param tree a phylogenetic tree
+#' 
+#' @return No value returned.
+#' 
+#' @keywords internal
+#' 
+check_tree <- function(tree) {
+  if (!inherits(tree, "phylo")) stop("tree object is not of class \"phylo\".")
+  if (is.null(tree$edge.length)) stop("the tree has no branch lengths.")
+  if (is.null(tree$tip.label)) stop("the tree has no tip labels.")
+}
+
+#' @rdname check_tree
+#' @keywords internal
+check_binary_tree <- function(tree) {
+  check_tree(tree)
+  if (!is.binary(tree)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
+}

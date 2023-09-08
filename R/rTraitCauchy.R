@@ -56,9 +56,7 @@ rTraitCauchy <- function(n = 1, phy,
   ## Check parameters
   if (is.null(n) || length(n) > 1) stop("n needs to be an integer (number of replicates)")
   n = as.numeric(n)
-  if (!inherits(phy, "phylo")) stop("object \"phy\" is not of class \"phylo\".")
-  if (is.null(phy$edge.length)) stop("the tree has no branch lengths.")
-  if (is.null(phy$tip.label)) stop("the tree has no tip labels.")
+  check_tree(phy)
   phy <- reorder(phy, "pruningwise")
   ## Model and parameters
   model = match.arg(model)
