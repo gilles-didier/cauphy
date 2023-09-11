@@ -7,7 +7,7 @@ Description: The Cauchy Process can model pulsed continuous trait evolution
     See Bastide and Didier (2023) <doi:10.1093/sysbio/syad053>.
 Authors@R: c(
     person("Gilles", "Didier", email = "gilles.didier@free.fr", role = c("aut", "cph")),
-    person("Paul", "Bastide", email = "paul.bastide@m4x.org", role = c("aut", "cre")))
+    person("Paul", "Bastide", email = "paul.bastide@cnrs.fr", role = c("aut", "cre")))
 Depends: 
     R (>= 3.5),
     ape (>= 5.5)
