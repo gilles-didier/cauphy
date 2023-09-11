@@ -86,10 +86,11 @@ reroottip <- function(tree, tip) {
 #' @keywords internal
 #'
 safe_get <- function(x, name) {
-  if (!any(grepl(name, names(x)))) {
+  ind_name <- grepl(name, names(x))
+  if (!any(ind_name)) {
     return(NULL)
   } else {
-    return(x[[name]])
+    return(unname(x[ind_name]))
   }
 }
 

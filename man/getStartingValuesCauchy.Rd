@@ -4,7 +4,15 @@
 \alias{getStartingValuesCauchy}
 \title{Get starting values for a Cauchy}
 \usage{
-getStartingValuesCauchy(phy, X, y, starting.value, method.init.disp, method)
+getStartingValuesCauchy(
+  phy,
+  X,
+  y,
+  number.params,
+  starting.value,
+  method.init.disp,
+  method
+)
 }
 \arguments{
 \item{phy}{the phylogenetic tree}

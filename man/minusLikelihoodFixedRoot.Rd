@@ -4,10 +4,12 @@
 \alias{minusLikelihoodFixedRoot}
 \title{Minus Likelihood function for a Cauchy model}
 \usage{
-minusLikelihoodFixedRoot(Xdesign)
+minusLikelihoodFixedRoot(Xdesign, pdim)
 }
 \arguments{
 \item{Xdesign}{the design matrix}
+
+\item{pdim}{dimension of the process}
 }
 \value{
 A function

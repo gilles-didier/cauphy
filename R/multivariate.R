@@ -84,9 +84,10 @@ logDensityTipsCauchyBi <- function(tree, tipTrait,
   transTrait <- solve(basisMatr, t(tipTrait))
   if (!is.null(root.value)) root.value <- solve(basisMatr, root.value)
   # Independent likelihoods
-  ind_ll <- sapply(1:2, function(k) logDensityTipsCauchy(tree = tree, tipTrait = transTrait[k, ],
+  ind_ll <- sapply(1:2, function(k) logDensityTipsCauchy(tree = tree, tipTrait = as.matrix(transTrait[k, ]),
                                                          root.value = root.value[k], disp = disp[k],
-                                                         method = method, rootTip = rootTip))
+                                                         method = method, rootTip = rootTip,
+                                                         do_checks = FALSE))
   # likelihood
   ll <- - n * determinant(basisMatr, logarithm = TRUE)$modulus + sum(ind_ll)
   return(as.vector(ll))

@@ -4,7 +4,7 @@
 \alias{getBoundsCauchy}
 \title{Get bound for a Cauchy process}
 \usage{
-getBoundsCauchy(phy, X, y, values, default.values)
+getBoundsCauchy(phy, X, y, number.params, values, default.values)
 }
 \arguments{
 \item{phy}{the phylogenetic tree}

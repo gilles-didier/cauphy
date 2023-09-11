@@ -4,7 +4,16 @@
 \alias{getStartingValues}
 \title{Get starting values}
 \usage{
-getStartingValues(model, phy, X, y, starting.value, method.init.disp, method)
+getStartingValues(
+  model,
+  phy,
+  X,
+  y,
+  number.params,
+  starting.value,
+  method.init.disp,
+  method
+)
 }
 \arguments{
 \item{model}{the model}

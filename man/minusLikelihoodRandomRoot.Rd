@@ -4,24 +4,10 @@
 \alias{minusLikelihoodRandomRoot}
 \title{Minus Likelihood function for a Cauchy model}
 \usage{
-minusLikelihoodRandomRoot(
-  param,
-  param_names,
-  tree,
-  trait,
-  Xdesign,
-  model,
-  rootTip
-)
+minusLikelihoodRandomRoot(pdim)
 }
 \arguments{
-\item{param}{the parameters where to evaluate the function}
-
-\item{param_names}{the parameter names}
-
-\item{Xdesign}{the design matrix}
-
-\item{model}{a model for the trait evolution. One of \code{"cauchy"} or \code{"lambda"} (see Details).}
+\item{pdim}{dimension of the process}
 }
 \value{
 The value of minus the log-likelihood.

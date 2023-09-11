@@ -4,12 +4,10 @@
 \alias{getParamNames}
 \title{Get parameter names}
 \usage{
-getParamNames(model, X)
+getParamNames(number.params)
 }
 \arguments{
-\item{model}{model}
-
-\item{X}{model matrix}
+\item{number.params}{named list with number of parameters.}
 }
 \description{
 Get the names of the parameters depending on the model.

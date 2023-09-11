@@ -138,14 +138,19 @@ cauphylm <- function(formula, data = list(), phy,
   coefs <- res$param[grepl("coef", names(res$param))]
   names(coefs) <- colnames(X)
   
+  number.params <- list(mean = ifelse(is.null(X), 0, ncol(X)),
+                        angle = 0,
+                        disp = 1,
+                        lambda = ifelse(model == "lambda", 1, 0))
+  
   res <- list(coefficients = coefs,
               disp = safe_get(res$param, "disp"),
               logLik = res$logLikelihood,
               p = length(res$param),
               aic = 2 * (length(res$param)) - 2 * res$logLikelihood,
-              fitted.values = drop(X %*% coefs),
-              residuals = y - drop(X %*% coefs),
-              y = y,
+              fitted.values = X %*% coefs,
+              residuals = as.matrix(y) - X %*% coefs,
+              y = as.matrix(y),
               X = X,
               n = n,
               d = d,
@@ -155,7 +160,8 @@ cauphylm <- function(formula, data = list(), phy,
               phy = phy,
               lambda = safe_get(res$param, "lambda"),
               method = "fixed.root",
-              root_tip_reml = res$rootTip)
+              root_tip_reml = res$rootTip,
+              number.params = number.params)
   
   ## vcov
   if (hessian) {
@@ -215,7 +221,7 @@ compute_vcov <- function(obj) {
 #' @method compute_vcov cauphylm
 ##
 compute_vcov.cauphylm <- function(obj) {
-  param_names <- getParamNames(obj$model, obj$X)
+  param_names <- getParamNames(obj$number.params)
   all_params_names <- c(names(obj$coefficients), param_names[!grepl("coef", param_names)])
   all_params <- c(obj$coefficients, obj$disp)
   if (obj$model == "lambda") all_params <- c(all_params, obj$lambda)
@@ -375,7 +381,7 @@ confint.cauphylm <- function(object, parm, level = 0.95, ...){
 #' @rdname vcov.cauphylm
 coef.cauphylm <- function(object, ...){
   ## Regression matrix for fixed root
-  param_names <- getParamNames(object$model, object$X)
+  param_names <- getParamNamesUni(object$model, object$X)
   all_params_names <- c(names(object$coefficients), param_names[!grepl("coef", param_names)])
   all_params <- c(object$coefficients, object$disp)
   if (object$model == "lambda") all_params <- c(all_params, object$lambda)

@@ -4,7 +4,7 @@
 \alias{getBoundsLambda}
 \title{Get bounds for a Cauchy Lambda}
 \usage{
-getBoundsLambda(phy, X, y, values, default.values)
+getBoundsLambda(phy, X, y, number.params, values, default.values)
 }
 \arguments{
 \item{phy}{the phylogenetic tree}

@@ -67,6 +67,7 @@ logDensityTipsCauchy <- function(tree, tipTrait, root.value = NULL, disp, method
                  fixed.root = 1)
   # checks
   if (do_checks){
+    if (is.null(dim(tipTrait))) tipTrait <- as.matrix(tipTrait)
     check_binary_tree(tree)
     if (method == "random.root" && is.null(root.value)) stop("Starting value must be specified for root node in the `random.root` method.")
     if (method == "random.root" && (is.null(tree$root.edge) || tree$root.edge == 0)) stop("In the random root model, the `root.edge` must be non NULL and non zero.")
@@ -82,7 +83,7 @@ logDensityTipsCauchy <- function(tree, tipTrait, root.value = NULL, disp, method
     rootTip <- which.min(colSums(cophenetic.phylo(tree))) - 1
   }
   # likelihood
-  res <-.Call("getLogDensityTipsCauchy", tree, tipTrait, names(tipTrait), root.value, disp, type, rootTip)
+  res <-.Call("getLogDensityTipsCauchy", tree, tipTrait, rownames(tipTrait), root.value, disp, type, rootTip)
   return(res)
 }
 
@@ -126,6 +127,7 @@ posteriorDensityAncestral <- function(node, vals, tree, tipTrait, root.value = N
   vals <- as.double(vals)
   # checks
   check_binary_tree(tree)
+  if (is.null(dim(tipTrait))) tipTrait <- as.matrix(tipTrait)
   if (node <= length(tree$tip.label)) stop("Ancestral reconstruction is only allowed for ancestral nodes.")
   if (node > length(tree$tip.label) + Nnode(tree)) stop ("This node does not exist in the tree.")
   if ((method == "fixed.root") && (node == length(tree$tip.label) + 1)) stop ("Ancestral state reconstruction is not allowed for the root with the fixed root model.")
@@ -133,7 +135,7 @@ posteriorDensityAncestral <- function(node, vals, tree, tipTrait, root.value = N
   if (method == "random.root" && is.null(root.value)) stop("Starting value must be specified for root node in the `random.root` method.")
   if (method == "random.root" && (is.null(tree$root.edge) || tree$root.edge == 0)) stop("In the random root model, the `root.edge` must be non NULL and non zero.")
   if (method == "reml" && !is.null(root.value)) stop("In the reml model, `root.value` cannot be specified.")
-  res <-.Call("getPosteriorLogDensityAncestralCauchy", node - 1, vals, tree, tipTrait, names(tipTrait), root.value, disp, type)
+  res <-.Call("getPosteriorLogDensityAncestralCauchy", node - 1, vals, tree, tipTrait, rownames(tipTrait), root.value, disp, type)
   return(exp(res))
 }
 
@@ -349,6 +351,7 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, root.value = N
   vals <- as.double(vals)
   # checks
   check_binary_tree(tree)
+  if (is.null(dim(tipTrait))) tipTrait <- as.matrix(tipTrait)
   if (node > length(tree$tip.label) + Nnode(tree)) stop ("This node does not exist in the tree.")
   if ((method == "fixed.root") && (node == length(tree$tip.label) + 1)) stop ("Ancestral increment reconstruction is not allowed for the root branch with the fixed root model.")
   if ((method == "reml") && (node == length(tree$tip.label) + 1)) stop ("Ancestral increment reconstruction is not allowed for the root branch with the reml model.")
@@ -360,10 +363,10 @@ posteriorDensityIncrement <- function(node, vals, tree, tipTrait, root.value = N
   if ((method == "fixed.root") && 
       (node <= length(tree$tip.label)) && # tip
       (node %in% tree$edge[tree$edge[, 1] == (length(tree$tip.label) + 1), 2])) { # descending from root
-    warning(paste0("This branch ends at a tip, and the root is fixed: the posterior increment density is a Dirac in ", tipTrait[tree$tip.label[node]] - root.value, "."))
+    warning(paste0("This branch ends at a tip, and the root is fixed: the posterior increment density is a Dirac in ", tipTrait[tree$tip.label[node], ] - root.value, "."))
   }
   
-  res <-.Call("getPosteriorLogDensityIncrementCauchy", node - 1, vals, tree, tipTrait, names(tipTrait), root.value, disp, type)
+  res <-.Call("getPosteriorLogDensityIncrementCauchy", node - 1, vals, tree, tipTrait, rownames(tipTrait), root.value, disp, type)
   return(exp(res))
 }
 

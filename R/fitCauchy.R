@@ -165,14 +165,19 @@ fitCauchy <- function(phy, trait,
                             optim = optim,
                             method.init.disp = method.init.disp)
   
-  res <- list(x0 = safe_get(res$param, "coef1"),
+  number.params <- list(mean = ifelse(method == "fixed.root", 1, 0),
+                        angle = 0,
+                        disp = 1,
+                        lambda = ifelse(model == "lambda", 1, 0))
+  
+  res <- list(x0 = safe_get(res$param, "coef"),
               disp = safe_get(res$param, "disp"),
               lambda = safe_get(res$param, "lambda"),
               logLik = res$logLikelihood,
               p = length(res$param),
               aic = 2 * length(res$param) - 2 * res$logLikelihood,
-              trait = trait,
-              y = trait,
+              trait = as.matrix(trait),
+              y = as.matrix(trait),
               n = Ntip(phy),
               d = 1,
               call = match.call(),
@@ -181,7 +186,8 @@ fitCauchy <- function(phy, trait,
               method = method,
               random.root = (method == "random.root"),
               reml = (method == "reml"),
-              root_tip_reml = res$rootTip)
+              root_tip_reml = res$rootTip,
+              number.params = number.params)
   if (method == "random.root") {
     res$x0 <- 0.0
     res$phy$root.edge <- root.edge
@@ -204,28 +210,29 @@ compute_vcov.cauphyfit <- function(obj) {
   X <- NULL
   if (is.null(X) && obj$method == "fixed.root") {
     X <- matrix(rep(1, length(obj$y)), nrow = length(obj$y))
-    colnames(X) <- "coef1"
+    colnames(X) <- "coef"
   }
   # parameters
-  param_names <- getParamNames(obj$model, X)
-  all_params_names <- sub("coef1", "x0", param_names)
+  param_names <- getParamNames(obj$number.params)
+  all_params_names <- sub("coef", "x0", param_names)
   all_params <- obj$disp
   if (obj$method == "fixed.root") all_params <- c(obj$x0, all_params)
   if (obj$model == "lambda") all_params <- c(all_params, obj$lambda)
   names(all_params) <- all_params_names
   obj$all_params <- all_params
   # likelihood
+  pdim <- ncol(obj$y)
   minus_like <- switch(obj$method,
-                       reml = minusLikelihoodREML,
-                       fixed.root = minusLikelihoodFixedRoot(X),
-                       random.root = minusLikelihoodRandomRoot)
+                       reml = minusLikelihoodREML(pdim),
+                       fixed.root = minusLikelihoodFixedRoot(X, pdim),
+                       random.root = minusLikelihoodRandomRoot(pdim))
   minus_like_untransformed <- function(param, param_names, ...) {
     names(param) <- param_names
     param <- transform_values(param)
     return(minus_like(param, param_names, ...))
   }
   # approxHessian <- nlme::fdHess(pars = obj$all_params, fun = minus_like_untransformed,
-                                # param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
+  # param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
   # approxHessian <- transform_hessian(approxHessian, obj$all_params)
   # obj$vcov <- solve(approxHessian$Hessian)
   approxHessian <- pracma::hessian(f = minus_like_untransformed, x0 = obj$all_params,
@@ -377,11 +384,11 @@ coef.cauphyfit <- function(object, ...){
   X <- NULL
   if (is.null(X) && object$method == "fixed.root") {
     X <- matrix(rep(1, length(object$y)), nrow = length(object$y))
-    colnames(X) <- "coef1"
+    colnames(X) <- "coef"
   }
   # parameters
-  param_names <- getParamNames(object$model, X)
-  all_params_names <- sub("coef1", "x0", param_names)
+  param_names <- getParamNamesUni(object$model, X)
+  all_params_names <- sub("coef", "x0", param_names)
   all_params <- object$disp
   if (object$method == "fixed.root") all_params <- c(object$x0, all_params)
   if (object$model == "lambda") all_params <- c(all_params, object$lambda)
@@ -434,23 +441,24 @@ profile.cauphyfit <- function(fitted, which = 1:npar, level = 0.80, npoints = 10
   ci["disp", 1] <- max(0, ci["disp", 1]) # make sure lower bound is larger than 0
   estim <- fitted$all_params
   names_params <- names(estim)
-
+  
   # likelihood
   X <- NULL
   if (is.null(X) && fitted$method == "fixed.root") {
     X <- matrix(rep(1, length(fitted$y)), nrow = length(fitted$y))
-    colnames(X) <- "coef1"
+    colnames(X) <- "coef"
   }
+  pdim <- ncol(fitted$y)
   minus_like <- switch(fitted$method,
-                       reml = minusLikelihoodREML,
-                       fixed.root = minusLikelihoodFixedRoot(X),
-                       random.root = minusLikelihoodRandomRoot)
+                       reml = minusLikelihoodREML(pdim),
+                       fixed.root = minusLikelihoodFixedRoot(X, pdim),
+                       random.root = minusLikelihoodRandomRoot(pdim))
   like_untransformed <- function(param, param_names, ...) {
     names(param) <- param_names
     param <- transform_values(param)
     return(- minus_like(param, param_names, ...))
   }
-
+  
   # select params
   npar <- length(names_params)
   if (is.character(which)) {
@@ -532,4 +540,102 @@ plot.profile.cauphyfit <- function(x, n_col, ...){
          ylab = y_lab, type = 'l', ...)
     abline(v = x[[i]]$par.vals[which.max(x[[i]]$profLogLik), names(x)[i]], lty = 2)
   }
+}
+
+
+#' @title Model fitting for a Cauchy Process
+#'
+#' @description
+#' Fit the bivariate Cauchy process on a phylogeny, using numerical optimization.
+#'
+#' @inheritParams fitCauchy
+#' @param number.params TODO
+#' 
+#' @details 
+# TODO
+#'
+#' @return
+# TODO
+#' 
+#' @examples
+# TODO
+#' 
+#' @references
+#' Bastide, P. and Didier, G. 2023. The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology. doi:10.1093/sysbio/syad053.
+#'
+#' @seealso \code{\link{confint.cauphyfit}}, \code{\link{profile.cauphyfit}}, \code{\link{ancestral}}, \code{\link{increment}}, \code{\link{logDensityTipsCauchy}}, \code{\link{cauphylm}}, \code{\link[geiger]{fitContinuous}}
+#' 
+#' @export
+#'
+fitCauchyBi <- function(phy, trait, 
+                        model = c("cauchy", "lambda"),
+                        method = c("reml", "random.root", "fixed.root"),
+                        number.params,
+                        starting.value = list(x0 = NULL, angle = NULL, disp = NULL, lambda = NULL),
+                        lower.bound = list(angle = NULL, disp = NULL, lambda = NULL), 
+                        upper.bound = list(angle = NULL, disp = NULL, lambda = NULL),
+                        root.edge = 100,
+                        hessian = FALSE,
+                        optim = c("local", "global"),
+                        method.init.disp = c("Qn", "Sn", "MAD", "IQR")) {
+  
+  model <- match.arg(model)
+  method <- match.arg(method)
+  optim <- match.arg(optim)
+  method.init.disp <- match.arg(method.init.disp)
+  
+  if (model == "lambda") stop("The lambda process is not implemented for the bivariate Cauchy.")
+  
+  # Number of parameters
+  if (missing(number.params)) {
+    number.params <- list(mean = ifelse(method == "fixed.root", ncol(trait), 0),
+                          angle = ncol(trait)*(ncol(trait)-1),
+                          disp = ncol(trait),
+                          lambda = ifelse(model=="lambda", 1, 0))
+  } else {
+    # TODO: checks of number of parameters
+  }
+  
+  res <- fitCauchy.internal(phy, X = NULL, trait, 
+                            model = model,
+                            method = method,
+                            number.params = number.params,
+                            starting.value = starting.value,
+                            lower.bound = lower.bound, 
+                            upper.bound = upper.bound,
+                            root.edge = root.edge,
+                            optim = optim,
+                            method.init.disp = method.init.disp)
+  
+  res <- list(x0 = safe_get(res$param, "coef"),
+              theta = safe_get(res$param, "angle"),
+              disp = safe_get(res$param, "disp"),
+              lambda = safe_get(res$param, "lambda"),
+              logLik = res$logLikelihood,
+              p = length(res$param),
+              aic = 2 * length(res$param) - 2 * res$logLikelihood,
+              trait = as.matrix(trait),
+              y = as.matrix(trait),
+              n = Ntip(phy),
+              d = ncol(trait),
+              call = match.call(),
+              model = model,
+              phy = phy,
+              method = method,
+              random.root = (method == "random.root"),
+              reml = (method == "reml"),
+              root_tip_reml = res$rootTip,
+              number.params = number.params)
+  if (method == "random.root") {
+    res$x0 <- 0.0
+    res$phy$root.edge <- root.edge
+  }
+  
+  ## vcov
+  if (hessian) {
+    res <- compute_vcov.cauphyfit(res)
+  }
+  
+  class(res) <- "cauphyfit"
+  return(res)
 }

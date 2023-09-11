@@ -4,7 +4,7 @@
 \alias{getBounds}
 \title{Get bounds}
 \usage{
-getBounds(model, phy, X, y, values, default.values)
+getBounds(model, phy, X, y, number.params, values, default.values)
 }
 \arguments{
 \item{model}{the model}

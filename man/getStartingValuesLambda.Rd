@@ -4,7 +4,15 @@
 \alias{getStartingValuesLambda}
 \title{Get starting values for a Cauchy Lambda}
 \usage{
-getStartingValuesLambda(phy, X, y, starting.value, method.init.disp, method)
+getStartingValuesLambda(
+  phy,
+  X,
+  y,
+  number.params,
+  starting.value,
+  method.init.disp,
+  method
+)
 }
 \arguments{
 \item{phy}{the phylogenetic tree}
