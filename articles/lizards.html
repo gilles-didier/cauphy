@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cauphy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
 
@@ -46,7 +46,14 @@
   <a href="../reference/index.html">Reference</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/gilles-didier/cauphy/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -63,9 +70,9 @@
                         <h4 data-toc-skip class="author">Paul
 Bastide</h4>
             
-            <h4 data-toc-skip class="date">2023-09-01</h4>
+            <h4 data-toc-skip class="date">2023-09-11</h4>
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/gilles-didier/cauphy/blob/HEAD/vignettes/lizards.Rmd" class="external-link"><code>vignettes/lizards.Rmd</code></a></small>
       <div class="hidden name"><code>lizards.Rmd</code></div>
 
     </div>
@@ -213,6 +220,36 @@ internal node, representing two possible evolutionary scenarios.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anc_reml</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="lizards_files/figure-html/reml_anc_plot-1.png" width="672"></p>
+<p>Using the <code>HDInterval</code> package, it is possible to compute
+Highest (Posterior) Density Intervals for ancestral nodes, using the
+density estimated on the grid.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">HDInterval</span><span class="op">)</span></span>
+<span><span class="va">anc_int</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDInterval/man/hdi.html" class="external-link">hdi</a></span><span class="op">(</span><span class="va">anc_reml</span><span class="op">)</span> <span class="co"># defaults to 95% HDI</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anc_reml</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span><span class="op">)</span>, intervals <span class="op">=</span> <span class="va">anc_int</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="lizards_files/figure-html/reml_anc_plot_hdi-1.png" width="672">
+The <code>hdi</code> function can recover discontinuous intervals
+(thanks to the <code>allowSplit</code> option, see documentation), which
+can be relevant for multi-modal reconstructed densities, such as node
+151 here.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anc_int</span><span class="op">[[</span><span class="st">"151"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt;         begin      end</span></span>
+<span><span class="co">#&gt; [1,] 3.820448 4.298035</span></span>
+<span><span class="co">#&gt; [2,] 4.745773 5.133812</span></span>
+<span><span class="co">#&gt; attr(,"credMass")</span></span>
+<span><span class="co">#&gt; [1] 0.95</span></span>
+<span><span class="co">#&gt; attr(,"height")</span></span>
+<span><span class="co">#&gt; [1] 0.1772771</span></span></code></pre></div>
+<p>Note that the quality of the estimation of the interval depends on
+the quality of the estimation of the ancestral density. In particular,
+if the grid is inadequate or too coarse, then the resulting intervals
+can be meaningless.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anc_bad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancestral.html">ancestral</a></span><span class="op">(</span><span class="va">cauchy_reml</span>, n_values <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="co"># grid is too coarse</span></span>
+<span><span class="va">anc_int_bad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDInterval/man/hdi.html" class="external-link">hdi</a></span><span class="op">(</span><span class="va">anc_bad</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anc_bad</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span><span class="op">)</span>, intervals <span class="op">=</span> <span class="va">anc_int_bad</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="lizards_files/figure-html/reml_anc_plot_hdi_bad-1.png" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="ancestral-branch-increment-reconstruction">Ancestral Branch Increment Reconstruction<a class="anchor" aria-label="anchor" href="#ancestral-branch-increment-reconstruction"></a>
@@ -224,18 +261,28 @@ branch increments can be associated with shifts on the trait value.</p>
 computationally more expensive. A built-in option can allow for
 parallelization of these computations. To avoid long run times, we only
 reconstruct the increment on a few chosen branches here.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">inc_reml</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/increment.html">increment</a></span><span class="op">(</span><span class="va">cauchy_reml</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span>, <span class="fl">157</span><span class="op">)</span>, n_cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>We recover here a behavior that is complementary to the node
 reconstruction, with the edge ending at node <span class="math inline">\(151\)</span> being bi-modal, with modes around
 <span class="math inline">\(0\)</span> (no change on the edge) and <span class="math inline">\(1\)</span> (shift in the log trait space).</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">inc_reml</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="lizards_files/figure-html/reml_inc_plot-1.png" width="672"></p>
-<p>We can then plot these schematics of these reconstructions on the
-tree, using thermo plots. To avoid any clutter, we only plot a few of
-them here.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>We can again compute and plot the HDI for the ancestral
+increments:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">inc_int</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDInterval/man/hdi.html" class="external-link">hdi</a></span><span class="op">(</span><span class="va">inc_reml</span><span class="op">)</span> <span class="co"># defaults to 95% HDI</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">inc_reml</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">151</span><span class="op">)</span>, intervals <span class="op">=</span> <span class="va">inc_int</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="lizards_files/figure-html/reml_inc_plot_hdi-1.png" width="672"></p>
+</div>
+<div class="section level2">
+<h2 id="schematic-plot-of-ancestral-reconstructions">Schematic Plot of Ancestral Reconstructions<a class="anchor" aria-label="anchor" href="#schematic-plot-of-ancestral-reconstructions"></a>
+</h2>
+<p>We can then plot schematics of these reconstructions on the tree,
+using thermo plots. To avoid any clutter, we only plot a few of them
+here.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_asr.html">plot_asr</a></span><span class="op">(</span><span class="va">cauchy_reml</span>, anc <span class="op">=</span> <span class="va">anc_reml</span>, inc <span class="op">=</span> <span class="va">inc_reml</span>,</span>
 <span>         show.tip.label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>         width.node <span class="op">=</span> <span class="fl">0.8</span>, height.node <span class="op">=</span> <span class="fl">1.8</span>,</span>

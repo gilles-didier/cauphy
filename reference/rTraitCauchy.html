@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cauphy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
 
@@ -28,7 +28,13 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/gilles-didier/cauphy/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -38,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Cauchy Trait Simulation</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/gilles-didier/cauphy/blob/HEAD/R/rTraitCauchy.R" class="external-link"><code>R/rTraitCauchy.R</code></a></small>
     <div class="hidden name"><code>rTraitCauchy.Rd</code></div>
     </div>
 
@@ -95,15 +101,51 @@ For more than 1 replicate, a matrix with the tip labels as row names, and one co
     <h2>See also</h2>
     <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/phylolm/man/rTrait.html" class="external-link">rTrait</a></code>, <code><a href="https://rdrr.io/pkg/ape/man/rTraitCont.html" class="external-link">rTraitCont</a></code></p></div>
     </div>
-    <div id="author">
-    <h2>Author</h2>
-    <p>Paul Bastide <a href="mailto:paul.bastide@m4x.org">paul.bastide@m4x.org</a> and Gilles Didier <a href="mailto:gilles.didier@free.fr">gilles.didier@free.fr</a></p>
-    </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">phy</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rlineage.html" class="external-link">rphylo</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">0.1</span>, <span class="fl">0</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="fu">rTraitCauchy</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, phy <span class="op">=</span> <span class="va">phy</span>, model <span class="op">=</span> <span class="st">"cauchy"</span>, parameters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>root.value <span class="op">=</span> <span class="fl">0</span>, disp <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1289</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">phy</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rlineage.html" class="external-link">rphylo</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">0.01</span>, <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># One trait</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu">rTraitCauchy</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, phy <span class="op">=</span> <span class="va">phy</span>, model <span class="op">=</span> <span class="st">"cauchy"</span>,</span></span>
+<span class="r-in"><span>                  parameters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>root.value <span class="op">=</span> <span class="fl">0</span>, disp <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          t1          t2          t3          t4          t5          t6 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -19.7836864  -6.4565183  -0.6540311 158.0987207 127.5360462 -89.8160998 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          t7          t8          t9         t10         t11         t12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -6.9966910 131.9668304   3.2243344 -36.8263533 -11.2891239  26.4793554 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         t13         t14         t15         t16         t17         t18 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  77.5240345 108.9499536 -18.4919200 132.4769952  -2.9577254 -17.9076511 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         t19         t20         t21         t22         t23         t24 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -15.0047732 -10.4484145  -1.7023756  16.5862768  -9.2665804  18.3067747 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         t25         t26         t27         t28         t29         t30 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -9.9573878  -5.0490531 -35.9429867 131.0540121 -23.8539793  16.9864284 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         t31         t32         t33         t34         t35         t36 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -11.2525015 -14.5805471 -15.7367069 -92.1090761  -4.3144022  -9.0875610 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         t37         t38         t39         t40 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -17.2918197 -13.2481063 -39.8714221 -91.5614637 </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">phy</span>, x.lim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">750</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">phydataplot</span><span class="op">(</span><span class="va">y</span>, <span class="va">phy</span>, offset <span class="op">=</span> <span class="fl">150</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="rTraitCauchy-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="co"># Many trait</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu">rTraitCauchy</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, phy <span class="op">=</span> <span class="va">phy</span>, model <span class="op">=</span> <span class="st">"cauchy"</span>,</span></span>
+<span class="r-in"><span>                  parameters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>root.value <span class="op">=</span> <span class="fl">0</span>, disp <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]      [,3]        [,4]        [,5]        [,6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t1    -4.059334   10.03650  22.03857  -27.538355 1175.437924 1241.604903</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t2    37.294124   12.89517  21.47235  -66.985763   21.582613 1238.060210</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t3    82.599713 -170.83520  44.05055  -57.617606  -59.598502 1213.773019</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t4   144.714538 -132.53897 310.66940    4.858611    5.046497   24.613782</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t5 -1813.003405 -128.84778  34.49181   23.309434    2.057757   -6.671051</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t6    45.697794   95.46919 228.47125 -240.143874  -27.125454 1064.289837</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         [,7]        [,8]      [,9]      [,10]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t1 -37.53598    5.187966  56.31571 -25.531966</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t2 -24.05523  -95.918020  13.61329  -2.042555</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t3 -76.77719  -90.300979  43.79448 -26.198105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t4 -70.59075  -41.986502 128.55073   2.871317</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t5 -11.96752 4021.965140 126.51943  49.187235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t6  21.74661 -349.044479  61.22999 -11.728113</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

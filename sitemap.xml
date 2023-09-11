@@ -19,6 +19,9 @@
     <loc>https://gilles-didier.github.io/cauphy/index.html</loc>
   </url>
   <url>
+    <loc>https://gilles-didier.github.io/cauphy/news/index.html</loc>
+  </url>
+  <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/ancestral.html</loc>
   </url>
   <url>
@@ -29,6 +32,9 @@
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/checkTraitTree.html</loc>
+  </url>
+  <url>
+    <loc>https://gilles-didier.github.io/cauphy/reference/check_tree.html</loc>
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/compute_vcov.html</loc>
@@ -68,6 +74,9 @@
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/getStartingValuesLambda.html</loc>
+  </url>
+  <url>
+    <loc>https://gilles-didier.github.io/cauphy/reference/hdi.ancestralCauchy.html</loc>
   </url>
   <url>
     <loc>https://gilles-didier.github.io/cauphy/reference/increment.html</loc>

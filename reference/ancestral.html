@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cauphy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
 
@@ -28,7 +28,13 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/gilles-didier/cauphy/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -38,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Posterior density of a node</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/gilles-didier/cauphy/blob/HEAD/R/densities.R" class="external-link"><code>R/densities.R</code></a></small>
     <div class="hidden name"><code>ancestral.Rd</code></div>
     </div>
 
@@ -108,13 +114,15 @@ that should be refined enough to get a good idea of the density curve.</p>
 <ul><li><p><code>ancestral(cauphylm)</code>: <code><a href="cauphylm.html">cauphylm</a></code> object</p></li>
 <li><p><code>ancestral(cauphyfit)</code>: <code><a href="fitCauchy.html">fitCauchy</a></code> object</p></li>
 </ul></div>
+    <div id="references">
+    <h2>References</h2>
+    <p>Bastide, P. and Didier, G. 2023. The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology. doi:10.1093/sysbio/syad053.</p>
+    </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p><code><a href="fitCauchy.html">fitCauchy</a></code>, <code><a href="cauphylm.html">cauphylm</a></code>, <code><a href="plot.ancestralCauchy.html">plot.ancestralCauchy</a></code>, <code><a href="plot_asr.html">plot_asr</a></code>, <code><a href="increment.html">increment</a></code></p></div>
-    </div>
-    <div id="author">
-    <h2>Author</h2>
-    <p>Paul Bastide <a href="mailto:paul.bastide@m4x.org">paul.bastide@m4x.org</a> and Gilles Didier <a href="mailto:gilles.didier@free.fr">gilles.didier@free.fr</a></p>
+    <div class="dont-index"><p><code><a href="fitCauchy.html">fitCauchy</a></code>, <code><a href="cauphylm.html">cauphylm</a></code>,
+<code><a href="plot.ancestralCauchy.html">plot.ancestralCauchy</a></code>, <code><a href="plot_asr.html">plot_asr</a></code>, <code><a href="increment.html">increment</a></code>,
+<code><a href="hdi.ancestralCauchy.html">hdi.ancestralCauchy</a></code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -128,14 +136,36 @@ that should be refined enough to get a good idea of the density curve.</p>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitCauchy.html">fitCauchy</a></span><span class="op">(</span><span class="va">phy</span>, <span class="va">dat</span>, model <span class="op">=</span> <span class="st">"cauchy"</span>, method <span class="op">=</span> <span class="st">"reml"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Reconstruct the ancestral nodes</span></span></span>
 <span class="r-in"><span><span class="va">anc</span> <span class="op">&lt;-</span> <span class="fu">ancestral</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="plot_asr.html">plot_asr</a></span><span class="op">(</span><span class="va">fit</span>, anc <span class="op">=</span> <span class="va">anc</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot_asr.html">plot_asr</a></span><span class="op">(</span><span class="va">fit</span>, anc <span class="op">=</span> <span class="va">anc</span>, offset <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ancestral-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anc</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anc</span>, type <span class="op">=</span> <span class="st">"l"</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11</span>, <span class="fl">17</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ancestral-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># Refine grid for node 12 and 17</span></span></span>
 <span class="r-in"><span><span class="va">anc2</span> <span class="op">&lt;-</span> <span class="fu">ancestral</span><span class="op">(</span><span class="va">fit</span>, node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">17</span><span class="op">)</span>, n_values <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anc2</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ancestral-3.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="co"># Find HDI</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">HDInterval</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hdi_anc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDInterval/man/hdi.html" class="external-link">hdi</a></span><span class="op">(</span><span class="va">anc2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hdi_anc</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $`12`</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         begin      end</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 6.711216 13.83631</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"credMass")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"height")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.01594822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $`17`</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         begin      end</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 8.588486 11.04174</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"credMass")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"height")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.07555742</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anc2</span>, interval <span class="op">=</span> <span class="va">hdi_anc</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="ancestral-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

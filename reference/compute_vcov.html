@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cauphy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
 
@@ -28,7 +28,13 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/gilles-didier/cauphy/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -38,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Compute Approximated Variance Covariance Matrix</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/gilles-didier/cauphy/blob/HEAD/R/cauphylm.R" class="external-link"><code>R/cauphylm.R</code></a></small>
     <div class="hidden name"><code>compute_vcov.Rd</code></div>
     </div>
 
@@ -69,8 +75,36 @@ using function <code><a href="https://rdrr.io/pkg/pracma/man/hessian.html" class
 to approximate the variance covariance matrix.
 It can be used to compute confidence intervals with functions <code><a href="vcov.cauphylm.html">confint.cauphylm</a></code>
 or <code><a href="vcov.cauphyfit.html">confint.cauphyfit</a></code>.</p>
+<p><code><a href="vcov.cauphylm.html">confint.cauphylm</a></code> and <code><a href="vcov.cauphyfit.html">confint.cauphyfit</a></code>
+internally call <code>compute_vcov</code>, but do not save the result.
+This function can be used to save the vcov matrix.</p>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p><code><a href="fitCauchy.html">fitCauchy</a></code>, <code><a href="cauphylm.html">cauphylm</a></code>, 
+<code><a href="vcov.cauphylm.html">confint.cauphylm</a></code>, <code><a href="vcov.cauphyfit.html">confint.cauphyfit</a></code>,
+<code><a href="vcov.cauphylm.html">vcov.cauphylm</a></code>, <code><a href="vcov.cauphyfit.html">vcov.cauphyfit</a></code></p></div>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Simulate tree and data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1289</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">phy</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rlineage.html" class="external-link">rphylo</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0.1</span>, <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="rTraitCauchy.html">rTraitCauchy</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, phy <span class="op">=</span> <span class="va">phy</span>, model <span class="op">=</span> <span class="st">"cauchy"</span>,</span></span>
+<span class="r-in"><span>                    parameters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>root.value <span class="op">=</span> <span class="fl">10</span>, disp <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Fit the data, without computing the Hessian at the estimated parameters.</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitCauchy.html">fitCauchy</a></span><span class="op">(</span><span class="va">phy</span>, <span class="va">dat</span>, model <span class="op">=</span> <span class="st">"cauchy"</span>, method <span class="op">=</span> <span class="st">"reml"</span>, hessian <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Precompute the vcov matrix</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">compute_vcov</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Approximate confidence intervals</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Approximated asymptotic confidence interval using the Hessian.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          2.5 %    97.5 %</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> disp 0.0240104 0.1010921</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
