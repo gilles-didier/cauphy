@@ -93,7 +93,7 @@
 #' confint(fit)
 #' 
 #' @references
-#' Bastide, P. and Didier, G. (2023), The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. bioRxiv.
+#' Bastide, P. and Didier, G. 2023. The Cauchy Process on Phylogenies: a Tractable Model for Pulsed Evolution. Systematic Biology. doi:10.1093/sysbio/syad053.
 #' 
 #' Rothenberg T. J., Fisher F. M., Tilanus C. B. 1964. A Note on Estimation from a Cauchy Sample. Journal of the American Statistical Association. 59:460–463.
 #' 
@@ -109,10 +109,8 @@ cauphylm <- function(formula, data = list(), phy,
                                            lambda = NULL),
                      hessian = FALSE) {
   # Checks
-  if (!inherits(phy, "phylo")) stop("object \"phy\" is not of class \"phylo\".")
-  if (is.null(phy$edge.length)) stop("the tree has no branch lengths.")
-  if (is.null(phy$tip.label)) stop("the tree has no tip labels.")
-  if (!is.binary(phy)) stop("The tree must be binary. Please use `ape::multi2di` before proceeding.")
+  check_binary_tree(phy)
+  
   ## Model matrix
   mf <- model.frame(formula = formula, data = data)
   mf <- checkTraitTree(mf, phy)
@@ -181,9 +179,30 @@ cauphylm <- function(formula, data = list(), phy,
 #' to approximate the variance covariance matrix.
 #' It can be used to compute confidence intervals with functions \code{\link{confint.cauphylm}}
 #' or \code{\link{confint.cauphyfit}}.
+#' 
+#' \code{\link{confint.cauphylm}} and \code{\link{confint.cauphyfit}}
+#' internally call \code{compute_vcov}, but do not save the result.
+#' This function can be used to save the vcov matrix.
 #'
 #' @return
 #' The same object, with added vcov entry.
+#' 
+#' @seealso \code{\link{fitCauchy}}, \code{\link{cauphylm}}, 
+#' \code{\link{confint.cauphylm}}, \code{\link{confint.cauphyfit}},
+#' \code{\link{vcov.cauphylm}}, \code{\link{vcov.cauphyfit}}
+#' 
+#' @examples
+#' # Simulate tree and data
+#' set.seed(1289)
+#' phy <- ape::rphylo(20, 0.1, 0)
+#' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+#'                     parameters = list(root.value = 10, disp = 0.1))
+#' # Fit the data, without computing the Hessian at the estimated parameters.
+#' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml", hessian = FALSE)
+#' # Precompute the vcov matrix
+#' fit <- compute_vcov(fit)
+#' # Approximate confidence intervals
+#' confint(fit)
 #' 
 #' @export
 #'
@@ -208,7 +227,7 @@ compute_vcov.cauphylm <- function(obj) {
     names(param) <- param_names
     centralTips <- drop(obj$X %*% param[grepl("coef", names(param))])
     phy_trans <- transformBranchLengths(obj$phy, obj$model, param)
-    return(-logDensityTipsCauchy(phy_trans, obj$y - centralTips, 0, param["disp"], method = "fixed.root"))
+    return(-logDensityTipsCauchy(phy_trans, obj$y - centralTips, 0, param["disp"], method = "fixed.root", do_checks = FALSE))
   }
   # approxHessian <- nlme::fdHess(obj$all_params, minus_like)
   # obj$vcov <- solve(approxHessian$Hessian)
@@ -221,6 +240,8 @@ compute_vcov.cauphylm <- function(obj) {
 ##
 #' @export
 #' @method print cauphylm
+#' @inheritParams phylolm::print.phylolm
+#' @rdname vcov.cauphylm
 ##
 print.cauphylm <- function(x, digits = max(3, getOption("digits") - 3), ...){
   # Call
@@ -245,7 +266,46 @@ print.cauphylm <- function(x, digits = max(3, getOption("digits") - 3), ...){
 #' 
 #' @export
 #' @param object an object of class \code{cauphylm}.
-#' @seealso \code{\link{cauphylm}}
+#' 
+#' @return
+#' Same value as the associated methods from the \code{stats} package:
+#' \itemize{
+#' \item{\code{\link[stats]{vcov}}}{ an estimated covariance matrix, see \code{\link{compute_vcov}};}
+#' \item{\code{\link[stats]{logLik}}}{ an object of class \code{\link[stats]{logLik}};}
+#' \item{\code{\link[stats]{AIC}}}{ a numeric value;}
+#' \item{\code{\link[stats]{confint}}}{ a matrix (or vector) with columns giving lower and upper confidence limits for each parameter;}
+#' \item{\code{\link[stats]{coef}}}{ coefficients extracted from the model;}
+#' \item{\code{\link[stats]{predict}}}{ a vector of predicted values.}
+#' }
+#' 
+#' @examples
+#' # Simulate tree and data
+#' set.seed(1289)
+#' phy <- ape::rphylo(20, 0.1, 0)
+#' error <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+#'                       parameters = list(root.value = 0, disp = 0.1))
+#' x1 <- ape::rTraitCont(phy, model = "BM", sigma = 0.1, root.value = 0)
+#' trait <- 3 + 2*x1 + error
+#' # Fit the data
+#' fit <- cauphylm(trait ~ x1, phy = phy)
+#' fit
+#' # vcov matrix
+#' vcov(fit)
+#' # Approximate confidence intervals
+#' confint(fit)
+#' # log likelihood of the fitted object
+#' logLik(fit)
+#' # AIC of the fitted object
+#' AIC(fit)
+#' # predicted values
+#' predict(fit)
+#' # coefficients
+#' coef(fit)
+#' 
+#' @seealso \code{\link{cauphylm}}, \code{\link[stats]{vcov}}, \code{\link[stats]{logLik}}
+#' \code{\link[stats]{AIC}}, \code{\link[stats]{confint}}, \code{\link[stats]{coef}},
+#' \code{\link[stats]{predict}}, \code{\link[phylolm]{predict.phylolm}}
+#' 
 #' @method vcov cauphylm
 vcov.cauphylm <- function(object, ...) {
   if (is.null(object$vcov)) {
@@ -285,7 +345,6 @@ AIC.cauphylm <- phylolm::AIC.phylolm
 #' @inheritParams phylolm::predict.phylolm
 #' @method predict cauphylm
 #' @rdname vcov.cauphylm
-#' @seealso \code{\link[phylolm]{predict.phylolm}}
 predict.cauphylm <- phylolm::predict.phylolm
 #' @export
 #' @inheritParams stats::confint

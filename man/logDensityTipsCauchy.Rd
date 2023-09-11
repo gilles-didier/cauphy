@@ -10,7 +10,8 @@ logDensityTipsCauchy(
   root.value = NULL,
   disp,
   method = c("reml", "random.root", "fixed.root"),
-  rootTip = NULL
+  rootTip = NULL,
+  do_checks = TRUE
 )
 }
 \arguments{
@@ -29,6 +30,10 @@ See Details.}
 \item{rootTip}{the tip used to re-root the tree, when the REML method is used.
 If \code{NULL}, the tip with the smallest distance to all the others is used (see Details).
 Ignored in \code{method != "reml"}.}
+
+\item{do_checks}{if \code{FALSE}, the entry parameters are not checked for consistency.
+This can be useful when doing multiple calls to the function, as in numerical optimization.
+Default to \code{TRUE}.}
 }
 \value{
 the log density value.
@@ -73,7 +78,4 @@ logDensityTipsCauchy(phy, dat, 0, 1, method = "fixed.root")
 }
 \seealso{
 \code{\link{fitCauchy}}
-}
-\author{
-Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 }

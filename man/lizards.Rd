@@ -13,7 +13,7 @@ A data frame with 53940 rows and 10 variables:
 }
 }
 \source{
-https://doi.org/10.5061/dryad.9g182
+\doi{10.5061/dryad.9g182}
 }
 \usage{
 lizards

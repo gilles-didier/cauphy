@@ -144,6 +144,32 @@ of the trait at this internal node, representing two possible evolutionary scena
 plot(anc_reml, node = c(142, 151), type = "l")
 ```
 
+Using the `HDInterval` package, it is possible to compute 
+Highest (Posterior) Density Intervals for ancestral nodes, using the
+density estimated on the grid.
+```{r, label="reml_anc_plot_hdi", fig.show='hold', fig.height=4, fig.width=7, warning=FALSE, message=FALSE}
+library(HDInterval)
+anc_int <- hdi(anc_reml) # defaults to 95% HDI
+plot(anc_reml, node = c(142, 151), intervals = anc_int, type = "l")
+```
+The `hdi` function can recover discontinuous intervals
+(thanks to the `allowSplit` option, see documentation),
+which can be relevant for multi-modal reconstructed densities,
+such as node 151 here.
+```{r, label="reml_anc_hdi_bi", warning=FALSE, message=FALSE}
+anc_int[["151"]]
+```
+
+Note that the quality of the estimation of the interval depends on the
+quality of the estimation of the ancestral density.
+In particular, if the grid is inadequate or too coarse, then the resulting
+intervals can be meaningless.
+```{r, label="reml_anc_plot_hdi_bad", fig.show='hold', fig.height=4, fig.width=7, warning=FALSE, message=FALSE}
+anc_bad <- ancestral(cauchy_reml, n_values = 10) # grid is too coarse
+anc_int_bad <- hdi(anc_bad)
+plot(anc_bad, node = c(142, 151), intervals = anc_int_bad, type = "l")
+```
+
 ## Ancestral Branch Increment Reconstruction
 
 Ancestral branch increment reconstruction computes the posterior density of the
@@ -166,7 +192,15 @@ and $1$ (shift in the log trait space).
 plot(inc_reml, node = c(142, 151), type = "l")
 ```
 
-We can then plot these schematics of these reconstructions on the tree, using
+We can again compute and plot the HDI for the ancestral increments:
+```{r, label="reml_inc_plot_hdi", fig.show='hold', fig.height=4, fig.width=7, warning=FALSE, message=FALSE}
+inc_int <- hdi(inc_reml) # defaults to 95% HDI
+plot(inc_reml, node = c(142, 151), intervals = inc_int, type = "l")
+```
+
+## Schematic Plot of Ancestral Reconstructions
+
+We can then plot schematics of these reconstructions on the tree, using
 thermo plots.
 To avoid any clutter, we only plot a few of them here.
 

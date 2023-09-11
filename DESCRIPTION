@@ -1,10 +1,13 @@
 Package: cauphy
-Version: 0.1
-Date: 2021-05-06
-Title: Evolution of a trait under a Cauchy process
+Version: 1.0.0
+Title: Trait Evolution on Phylogenies Using the Cauchy Process
+Description: The Cauchy Process can model pulsed continuous trait evolution
+    on phylogenies. The likelihood is tractable, and is used for parameter
+    inference and ancestral trait reconstruction.
+    See Bastide and Didier (2023) <doi:10.1093/sysbio/syad053>.
 Authors@R: c(
-    person("Gilles", "Didier", email = "gilles.didier@free.fr", role = c("aut")),
-    person("Paul", "Bastide", email = "paul.bastide@m4x.org", role = c("aut", "cre")))
+    person("Gilles", "Didier", email = "gilles.didier@free.fr", role = c("aut", "cph")),
+    person("Paul", "Bastide", email = "paul.bastide@cnrs.fr", role = c("aut", "cre")))
 Depends: 
     R (>= 3.5),
     ape (>= 5.5)
@@ -15,13 +18,15 @@ Imports:
     nloptr,
     pracma,
     foreach,
-    doParallel
+    doParallel,
+    HDInterval
 Suggests:
     covr,
     knitr,
     rmarkdown,
+    spelling,
+    geiger,
     testthat (>= 3.0.0)
-Description: Evolution of a trait under a Cauchy process.
 License: GPL (>= 3)
 Encoding: UTF-8
 RoxygenNote: 7.2.3
@@ -29,3 +34,5 @@ Config/testthat/edition: 3
 LazyData: true
 VignetteBuilder: knitr
 URL: https://gilles-didier.github.io/cauphy/
+BugReports: https://github.com/gilles-didier/cauphy/issues
+Language: en-US

@@ -37,15 +37,18 @@ the posterior density value.
 \description{
 Compute the posterior density of a set of node values under a Cauchy process on a phylogenetic tree.
 }
+\details{
+This function is internally called by \code{\link{ancestral}}, which
+is the preferred way of doing ancestral reconstruction on a fitted
+object.
+}
 \examples{
 phy <- ape::rphylo(5, 0.1, 0)
 dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy", parameters = list(root.value = 0, disp = 1))
 posteriorDensityAncestral(7, 0.1, phy, dat, disp = 1)
 
+
 }
 \seealso{
 \code{\link{ancestral}}, \code{\link{fitCauchy}}
-}
-\author{
-Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
 }

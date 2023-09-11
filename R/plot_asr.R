@@ -44,7 +44,23 @@ NULL
 # Note that the thermo plot do not dive the true probabilities of each mode values.
 # Instead, they are simply proportional to the height of each mode, re-scaled so that the scores sum to one.
 #' For an exact representation of a node posterior density, please plot it separately,
-#'  using function \code{\link{plot.ancestralCauchy}}.
+#' using function \code{\link{plot.ancestralCauchy}}.
+#'  
+#' @examples
+#' set.seed(1289)
+#' # Simulate tree and data
+#' phy <- ape::rphylo(10, 0.1, 0)
+#' dat <- rTraitCauchy(n = 1, phy = phy, model = "cauchy",
+#'                     parameters = list(root.value = 10, disp = 0.1))
+#' # Fit the data
+#' fit <- fitCauchy(phy, dat, model = "cauchy", method = "reml")
+#' # Reconstruct the ancestral states and increments
+#' inc <- increment(fit, n_values = 100)
+#' anc <- ancestral(fit, n_values = 100)
+#' plot_asr(fit, inc = inc, anc = anc, offset = 3,
+#'          width.node = 0.8, height.node = 0.5, 
+#'          width.edge = 1.5, height.edge = 0.2,
+#'          x.legend = "topright")
 #' 
 # Parameter \code{mode_proba_method} controls what is plotted on each node.
 # If set to \code{mode_proba_method="value"} (the default), then the importance of each node is taken as proportional
@@ -54,7 +70,7 @@ NULL
 # the density around the mode. The probabilities are still not exact and need to be re-scaled to sum to one,
 # but might be more realistic. This method can be much slower on large datasets.
 #' 
-#' @return Plot of the tree with ancestral state reconstruction.
+#' @return None.
 #' 
 #' @seealso \code{\link{cauphylm}}, \code{\link{fitCauchy}}, \code{\link{ancestral}}, \code{\link{increment}},
 #' \code{\link[ape]{plot.phylo}}, \code{\link[ape]{phydataplot}}, \code{\link[ape]{nodelabels}}

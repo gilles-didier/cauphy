@@ -249,8 +249,8 @@ test_that("testAncestralFitPlot", {
   plot_asr(fitreml, anc = anc_reml, inc = inc_reml)
 
   expect_message(plot(anc_fr, node = c(9, 11, 12)), 
-                 "Nodes 9, 11 are not in the ancestralCauchy reconstruction object. They will not be plotted.")
-  expect_message(expect_error(plot(anc_fr, node = c(9, 11)), "no nodes left"))
+                 "Nodes 9, 11 are not in the ancestralCauchy reconstruction object.")
+  expect_message(expect_error(plot(anc_fr, node = c(9, 11)), "no node left"))
   expect_error(plot(anc_fr, node = c(9.2)), "whole number")
   expect_error(plot_asr(fitreml, anc = 3), "'anc' must by of S3 class 'ancestralCauchy'")
   expect_error(plot_asr(fitreml, inc = 3), "'inc' must by of S3 class 'ancestralCauchy'")

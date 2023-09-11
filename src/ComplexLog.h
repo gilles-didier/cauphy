@@ -8,7 +8,7 @@
 #define CMPLXE(x,y) ((x)+I*(y))
 
 typedef struct COMPLEX {
-	complex c;
+	double complex c;
 } TypeComplex;
 
 typedef struct COMPLEX_KAHAN {
@@ -25,7 +25,7 @@ void sumComplexKahan(TypeComplex x, TypeComplexKahan *ka);
 TypeComplex totalComplexKahan(TypeComplexKahan *ka);
 
 TypeComplex getComplex(double re, double im);
-complex toLogComplex(TypeComplex a);
+double complex toLogComplex(TypeComplex a);
 TypeComplex getNullComplex(void);
 TypeComplex addComplex(TypeComplex a, TypeComplex b);
 TypeComplex prodComplex(TypeComplex a, TypeComplex b);
