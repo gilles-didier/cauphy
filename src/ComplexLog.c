@@ -132,9 +132,9 @@ complex clog1p(complex a) {
 
 complex clogSumLog(complex a, complex b) {
 	complex max, min;
-	if(isinf(creal(a)) == -1)
+	if(isinf(creal(a)))
 		return b;
-	if(isinf(creal(b)) == -1)
+	if(isinf(creal(b)))
 		return a;
 	if(creal(a)>creal(b)) {
 		max = a;
