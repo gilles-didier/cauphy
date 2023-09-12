@@ -5,14 +5,14 @@ cauphy
 [![R-CMD-check](https://github.com/gilles-didier/cauphy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gilles-didier/cauphy/actions/workflows/R-CMD-check.yaml)
 [![](https://img.shields.io/badge/docs-vignettes-blue.svg)](https://gilles-didier.github.io/cauphy/)
 [![Codecov test coverage](https://codecov.io/gh/gilles-didier/cauphy/branch/master/graph/badge.svg)](https://app.codecov.io/gh/gilles-didier/cauphy?branch=master)
-<!-- [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/cauphy)](https://CRAN.R-project.org/package=cauphy) -->
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/cauphy)](https://CRAN.R-project.org/package=cauphy)
 <!-- badges: end -->
 
 The Cauchy Process to model trait evolution on phylogenies.
 
 ## Installation
 
-Stable version on the CRAN.
+Stable version on the [CRAN](https://CRAN.R-project.org/package=cauphy)
 
 The development version can be installed from GitHub using the `remotes` package:
 ```R
