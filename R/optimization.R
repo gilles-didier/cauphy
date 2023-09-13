@@ -127,6 +127,25 @@ transform_values <- function(param) {
   return(param)
 }
 
+gradient_transform_values <- function(param) {
+  param_names <- names(param)
+  gradpar <- matrix(0.0, ncol = length(param), nrow = length(param))
+  colnames(gradpar) <- rownames(gradpar) <- param_names
+  # x0
+  coef_params <- grepl("coef", param_names)
+  gradpar[coef_params, coef_params] <- diag(rep(1.0, sum(coef_params)))
+  # disp
+  disp_params <- grepl("disp", param_names)
+  gradpar[disp_params, disp_params] <- gradient_log_sorted_transform(param[disp_params])
+  # lambda
+  lambda_params <- grepl("lambda", param_names)
+  gradpar[lambda_params, lambda_params] <- diag(1 / param[lambda_params])
+  # angle
+  angle_params <- grepl("angle", param_names)
+  gradpar[angle_params, angle_params] <- diag(gradient_logit_transform(param[angle_params], 0, pi))
+  return(gradpar)
+}
+
 back_transform_values <- function(param) {
   # disp
   disp_params <- grepl("disp", names(param))
@@ -150,6 +169,11 @@ logit_back_transform <- function(x, lower_bound, upper_bound) {
   return(lower_bound + (upper_bound - lower_bound) * x)
 }
 
+gradient_logit_transform <- function(x, lower_bound, upper_bound) {
+  x <- (x - lower_bound)/(upper_bound - lower_bound)
+  return(1 / x + 1 / (1 - x))
+}
+
 log_sorted_transform <- function(x) {
   if (all(x == 0)) return(rep(-Inf, length(x)))
   if (all(x == Inf)) return(rep(Inf, length(x)))
@@ -170,11 +194,21 @@ log_sorted_back_transform <- function(x) {
   return(exp(y))
 }
 
-# transform_hessian <- function(hessian, param) {
-#   param["disp"] <- log(param["disp"])
-#   if (!is.na(param["lambda"])) param["lambda"] <- log(param["lambda"])
-#   return(param)
-# }
+gradient_log_sorted_transform <- function(x) {
+  n <- length(x)
+  if (all(x == 0)) return(diag(rep(-Inf, n)))
+  if (all(x == Inf)) return(diag(rep(Inf, n)))
+  J_log <- diag(1 / x)
+  y <- log(x)
+  J_ord <- matrix(0.0, n, n)
+  J_ord[1,1] <- 1.0
+  J_ord[1,2] <- 1 / y[1]
+  for (i in seq_along(y)[-1]) {
+    J_ord[i,i] <- - 1 / y[i]
+    if (i+1 <= n) J_ord[i,i+1] <- 1 / y[i]
+  }
+  return(J_ord %*% J_log)
+}
 
 #' @title Maximum Likelihood estimator for a Cauchy model
 #'

@@ -225,7 +225,7 @@ test_that("testTransform", {
 test_that("testFitBi", {
 
   ## Parameters
-  n <- 50
+  n <- 20
   p <- 2
 
   ## tree
@@ -256,7 +256,28 @@ test_that("testFitBi", {
   expect_true(fitfr$logLik >= fitfr1$logLik + fitfr2$logLik)
   expect_equal(1 - pchisq(fitfr$logLik - (fitfr1$logLik + fitfr2$logLik), df = 2), 0.0)
   # vcov
-  # fitfr <- compute_vcov(fitfr)
+  fitfr <- compute_vcov(fitfr)
+  expect_equal(dim(fitfr$vcov), c(6, 6))
+  expect_equal(colnames(fitfr$vcov), c("x01", "x02", "angle1", "angle2", "disp1", "disp2" ))
+  expect_equal(fitfr$vcov[6,6], 0.001561619, tolerance = 1e-6)
+  expect_equal(unname(diag(fitfr$vcov)), c(5.337384e+01, 7.380680e+02, 8.339859e-08, 6.681717e+00, 8.998384e-01, 1.561619e-03), tolerance = 1e-6)
+  # confint
+  expect_message(ii <- confint(fitfr))
+  expect_equal(rownames(ii), rownames(fitfr$vcov))
+  expect_equal(ii[5,1], 0.4908973, tolerance = 1e-6)
+  for (i in 1:6) {
+    expect_true(ii[i, 1] <= fitfr$all_params[i] && ii[i, 2] >= fitfr$all_params[i])
+  }
+  # profile
+  pr <- profile(fitfr)
+  # plot(pr)
+  expect_equal(max(pr$x01$profLogLik), fitfr$logLik)
+  expect_equal(max(pr$x02$profLogLik), fitfr$logLik)
+  expect_equal(max(pr$angle1$profLogLik), fitfr$logLik, tolerance = 1e-5)
+  expect_equal(max(pr$angle2$profLogLik), fitfr$logLik, tolerance = 1e-2)
+  expect_equal(max(pr$disp1$profLogLik), fitfr$logLik, tolerance = 1e-4)
+  expect_equal(max(pr$disp2$profLogLik), fitfr$logLik, tolerance = 1e-5)
+  
   
   ## REML
   fitreml <- fitCauchyBi(tree, dat, method = "reml")

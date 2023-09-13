@@ -215,9 +215,9 @@ compute_vcov.cauphyfit <- function(obj) {
   # parameters
   param_names <- getParamNames(obj$number.params)
   all_params_names <- sub("coef", "x0", param_names)
-  all_params <- obj$disp
-  if (obj$method == "fixed.root") all_params <- c(obj$x0, all_params)
-  if (obj$model == "lambda") all_params <- c(all_params, obj$lambda)
+  all_params <- NULL
+  if (obj$method == "fixed.root") all_params <- obj$x0
+  all_params <- c(all_params, obj$angle, obj$disp, obj$lambda)
   names(all_params) <- all_params_names
   obj$all_params <- all_params
   # likelihood
@@ -231,16 +231,77 @@ compute_vcov.cauphyfit <- function(obj) {
     param <- transform_values(param)
     return(minus_like(param, param_names, ...))
   }
-  # approxHessian <- nlme::fdHess(pars = obj$all_params, fun = minus_like_untransformed,
-  # param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
-  # approxHessian <- transform_hessian(approxHessian, obj$all_params)
-  # obj$vcov <- solve(approxHessian$Hessian)
   approxHessian <- pracma::hessian(f = minus_like_untransformed, x0 = obj$all_params,
                                    param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
-  obj$vcov <- solve(approxHessian)
+  obj$vcov <- chol2inv(chol(approxHessian))
+  # ## Get gradient of transforms
+  # optpar <- obj$all_params
+  # names(optpar) <- param_names
+  # J_trans <- gradient_transform_values(optpar)
+  # optpar <- transform_values(optpar)
+  # approxHessianTrans <- pracma::hessian(f = minus_like, x0 = optpar,
+  #                                       param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
+  # approxHessian <- t(J_trans) %*% approxHessianTrans %*% J_trans
+  # obj$vcov <- chol2inv(chol(approxHessian))
+  # hh <- compute_inv_hessian(f = minus_like, x0 = optpar, J_trans = t(J_trans),
+  #                           param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
+  # obj$vcov <- hh
   colnames(obj$vcov) <- rownames(obj$vcov) <- all_params_names
   return(obj)
 }
+
+# #' @title Get Inverse Hessian
+# #'
+# #' @description
+# #' Compute the inverse Hessian
+# #'
+# #' @details
+# #' Code adapted from \code{lmerTest}, see
+# #' \url{https://github.com/runehaubo/lmerTestR/blob/35dc5885205d709cdc395b369b08ca2b7273cb78/R/lmer.R#L173}
+# #'
+# #' @param x0 parameter vector around which to compute the Hessian
+# #' @param f function for which the Hessian needs to be computed
+# #' @param J_trans Jacobian matrix of transformed parameters
+# #' @param tol tolerance for calling zero eigenvalues
+# #'
+# #' @return The inverse hessian
+# #'
+# #' @keywords internal
+# #'
+# compute_inv_hessian <- function(f, x0, J_trans, tol = 1e-8, ...) {
+#   browser()
+#   # Compute Hessian:
+#   h <- pracma::hessian(f = f, x0 = x0, ...)
+#   # back transformation of parameters
+#   h <- t(J_trans) %*% h %*% J_trans
+#   # Eigen decompose the Hessian:
+#   eig_h <- eigen(h, symmetric=TRUE)
+#   evals <- eig_h$values
+#   neg <- evals < -tol
+#   pos <- evals > tol
+#   zero <- evals > -tol & evals < tol
+#   if(sum(neg) > 0) { # negative eigenvalues
+#     eval_chr <- if(sum(neg) > 1) "eigenvalues" else "eigenvalue"
+#     evals_num <- paste(sprintf("%1.1e", evals[neg]), collapse = " ")
+#     warning(sprintf("Model failed to converge with %d negative %s: %s",
+#                     sum(neg), eval_chr, evals_num), call.=FALSE)
+#   }
+#   # Note: we warn about negative AND zero eigenvalues:
+#   if(sum(zero) > 0) { # some eigenvalues are zero
+#     eval_chr <- if(sum(zero) > 1) "eigenvalues" else "eigenvalue"
+#     evals_num <- paste(sprintf("%1.1e", evals[zero]), collapse = " ")
+#     warning(sprintf("Model may not have converged with %d %s close to zero: %s",
+#                     sum(zero), eval_chr, evals_num))
+#   }
+#   # Compute vcov(varpar):
+#   pos <- eig_h$values > tol
+#   q <- sum(pos)
+#   # Using the Moore-Penrose generalized inverse for h:
+#   h_inv <- with(eig_h, {
+#     vectors[, pos, drop=FALSE] %*% diag(1/values[pos], nrow=q) %*%
+#       t(vectors[, pos, drop=FALSE]) })
+#   return(h_inv)
+# }
 
 ##
 #' @export
@@ -438,9 +499,22 @@ profile.cauphyfit <- function(fitted, which = 1:npar, level = 0.80, npoints = 10
   # Fitted object
   fitted <- compute_vcov(fitted)
   ci <- suppressMessages(confint.cauphyfit(fitted, level = level))
-  ci["disp", 1] <- max(0, ci["disp", 1]) # make sure lower bound is larger than 0
+  ci[grepl("disp", rownames(ci)), 1] <- pmax(0, ci[grepl("disp", rownames(ci)), 1]) # make sure lower bound is larger than 0
   estim <- fitted$all_params
   names_params <- names(estim)
+  names_params <- sub("coef", "x0", names_params)
+  names_params_fun <- sub("x0", "coef", names_params)
+  # make sure lower bound on disp is larger than 0
+  ci[grepl("disp", rownames(ci)), 1] <- pmax(0, ci[grepl("disp", rownames(ci)), 1])
+  # make sure disp 1 is larger than disp 2
+  ddind1 <- grepl("disp1", rownames(ci))
+  ddind2 <- grepl("disp2", rownames(ci))
+  ci[ddind1, 1] <- pmax(estim[ddind2], ci[ddind1, 1])
+  ci[ddind2, 2] <- pmin(estim[ddind1], ci[ddind2, 2])
+  # make sure angles are between 0 and pi
+  aaind <- grepl("angle", rownames(ci))
+  ci[aaind, 1] <- pmax(0, ci[aaind, 1])
+  ci[aaind, 2] <- pmin(pi, ci[aaind, 2])
   
   # likelihood
   X <- NULL
@@ -486,7 +560,7 @@ profile.cauphyfit <- function(fitted, which = 1:npar, level = 0.80, npoints = 10
     par.vals <- par.vals.estim
     par.vals[, param] <- grid
     profLogLik <- apply(par.vals, 1, like_untransformed,
-                        param_names = names_params,
+                        param_names = names_params_fun,
                         tree = fitted$phy, trait = fitted$trait, Xdesign = X, model = fitted$model, rootTip = fitted$root_tip_reml)
     res[[names_params[param]]] <- list(par.vals = par.vals,
                                        profLogLik = profLogLik)
@@ -608,7 +682,7 @@ fitCauchyBi <- function(phy, trait,
                             method.init.disp = method.init.disp)
   
   res <- list(x0 = safe_get(res$param, "coef"),
-              theta = safe_get(res$param, "angle"),
+              angle = safe_get(res$param, "angle"),
               disp = safe_get(res$param, "disp"),
               lambda = safe_get(res$param, "lambda"),
               logLik = res$logLikelihood,
