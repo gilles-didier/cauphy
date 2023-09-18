@@ -1,6 +1,6 @@
 # cauphy 1.0.1
 
-* Fix LTO initialization declaration issue (Fix CRAN additional issues).
+* Fix CRAN additional check results issues.
 
 # cauphy 1.0.0
 
