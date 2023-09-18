@@ -170,16 +170,27 @@ logit_back_transform <- function(x, lower_bound, upper_bound) {
 }
 
 gradient_logit_transform <- function(x, lower_bound, upper_bound) {
-  x <- (x - lower_bound)/(upper_bound - lower_bound)
-  return(1 / x + 1 / (1 - x))
+  return(1 / (x - lower_bound) + 1 / (upper_bound - x))
 }
 
 log_sorted_transform <- function(x) {
   if (all(x == 0)) return(rep(-Inf, length(x)))
   if (all(x == Inf)) return(rep(Inf, length(x)))
   y <- log(x)
+  return(sorted_transform(y))
+}
+
+sorted_transform <- function(y) {
   for (i in seq_along(y)[-1]) {
     y[i] <- log(y[i-1] - y[i])
+  }
+  return(y)
+}
+
+sorted_back_transform <- function(x) {
+  y <- x
+  for (i in seq_along(y)[-1]) {
+    y[i] <- y[i-1] - exp(x[i])
   }
   return(y)
 }
@@ -187,10 +198,7 @@ log_sorted_transform <- function(x) {
 log_sorted_back_transform <- function(x) {
   if (all(x == -Inf)) return(rep(0, length(x)))
   if (all(x == Inf)) return(rep(Inf, length(x)))
-  y <- x
-  for (i in seq_along(y)[-1]) {
-    y[i] <- y[i-1] - exp(x[i])
-  }
+  y <- sorted_back_transform(x)
   return(exp(y))
 }
 
@@ -200,14 +208,20 @@ gradient_log_sorted_transform <- function(x) {
   if (all(x == Inf)) return(diag(rep(Inf, n)))
   J_log <- diag(1 / x)
   y <- log(x)
+  J_ord <- gradient_sorted_transform(y)
+  return(J_ord %*% J_log)
+}
+
+gradient_sorted_transform <- function(y) {
+  n <- length(y)
   J_ord <- matrix(0.0, n, n)
   J_ord[1,1] <- 1.0
-  J_ord[1,2] <- 1 / y[1]
+  J_ord[2,1] <- 1 / (y[1] - y[2])
   for (i in seq_along(y)[-1]) {
-    J_ord[i,i] <- - 1 / y[i]
-    if (i+1 <= n) J_ord[i,i+1] <- 1 / y[i]
+    J_ord[i,i] <- - 1 / (y[i-1] - y[i])
+    if (i+1 <= n) J_ord[i+1,i] <- 1 / (y[i] - y[i+1])
   }
-  return(J_ord %*% J_log)
+  return(J_ord)
 }
 
 #' @title Maximum Likelihood estimator for a Cauchy model

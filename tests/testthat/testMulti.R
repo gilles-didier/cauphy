@@ -207,18 +207,40 @@ test_that("testLikelihoodBi", {
 
 test_that("testTransform", {
   
+  ## log sorted transform
   ori <- c(2.3, 0.1)
   trans <- log_sorted_transform(ori)
   back <- log_sorted_back_transform(trans)
   expect_equal(ori, back)
+  # derivative
+  dd <- gradient_sorted_transform(ori)
+  ddnum <- numDeriv::jacobian(sorted_transform, ori)
+  expect_equal(dd, ddnum)
+  # derivative
+  dd <- gradient_log_sorted_transform(ori)
+  ddnum <- numDeriv::jacobian(log_sorted_transform, ori)
+  expect_equal(dd, ddnum)
   
+  ## logit transform
   ori <- c(pi / 3, pi / 3 + pi / 4)
   trans <- logit_transform(ori, 0, pi)
   back <- logit_back_transform(trans, 0, pi)
   expect_equal(ori, back)
+  # derivative
+  dd <- gradient_logit_transform(ori, lower_bound = 0, upper_bound = pi)
+  ddnum <- numDeriv::grad(logit_transform, ori, lower_bound = 0, upper_bound = pi)
+  expect_equal(dd, ddnum)
   
-  # start.values <- getStartingValues("cauchy", phy, NULL, dat, number.params, starting.value, method.init.disp, method)
-  # start.values <- transform_values(start.values)
+  ## All transforms
+  ori <- c(-3.4, 2.5, pi / 3, pi / 3 + pi / 4, 2.3, 0.1)
+  names(ori) <- c("coef1", "coef2", "angle1", "angle2", "disp1", "disp2")
+  trans <- transform_values(ori)
+  back <- back_transform_values(trans)
+  expect_equal(ori, back)
+  # derivative
+  dd <- gradient_transform_values(ori)
+  ddnum <- numDeriv::jacobian(transform_values, ori)
+  expect_equal(unname(dd), ddnum)
   
 })
 
