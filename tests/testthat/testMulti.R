@@ -249,12 +249,10 @@ test_that("testFitBi", {
   ## Parameters
   n <- 20
   p <- 2
-
   ## tree
   set.seed(1289)
   tree <- rphylo(n, 0.1, 0)
   tree_height <- max(diag(vcv(tree)))
-
   # True parameters
   theta <- c(pi / 3, pi / 3 + pi / 4)
   dispVec <- c(0.1, 2.3)
@@ -262,7 +260,6 @@ test_that("testFitBi", {
   A <- A %*% diag(dispVec)
   mu <- 0.0
   M <- rep(mu, p)
-
   # data
   dat <- rTraitCauchy(n = p, phy = tree, model = "cauchy", parameters = list(root.value = 0.0, disp = 1.0))
   dat <- dat %*% t(A)
@@ -312,5 +309,60 @@ test_that("testFitBi", {
   fitreml2 <- fitCauchy(tree, dat[, 2], method = "reml")
   expect_true(fitreml$logLik >= fitreml1$logLik + fitreml1$logLik)
   expect_equal(1 - pchisq(fitreml$logLik - (fitreml1$logLik + fitreml2$logLik), df = 2), 0.0)
+  # vcov
+  fitreml <- compute_vcov(fitreml)
+  expect_equal(dim(fitreml$vcov), c(4, 4))
+  expect_equal(colnames(fitreml$vcov), c("angle1", "angle2", "disp1", "disp2" ))
+  expect_equal(unname(diag(fitreml$vcov)),
+               c(9.282913e-08, 8.612623e-04, 4.293138e-01, 8.710660e-03),
+               tolerance = 1e-5)
+  # confint
+  expect_message(ii <- confint(fitreml))
+  expect_equal(rownames(ii), rownames(fitreml$vcov))
+  expect_equal(ii[4,1], 0.06478452, tolerance = 1e-6)
+  for (i in 1:4) {
+    expect_true(ii[i, 1] <= fitreml$all_params[i] && ii[i, 2] >= fitreml$all_params[i])
+  }
+  # profile
+  pr <- profile(fitreml)
+  # plot(pr)
+  expect_equal(max(pr$angle1$profLogLik), fitreml$logLik, tolerance = 1e-5)
+  expect_equal(max(pr$angle2$profLogLik), fitreml$logLik, tolerance = 1e-2)
+  expect_equal(max(pr$disp1$profLogLik), fitreml$logLik, tolerance = 1e-4)
+  expect_equal(max(pr$disp2$profLogLik), fitreml$logLik, tolerance = 1e-5)
+  
+  ## random root
+  root.edge <- 100
+  fitrr <- fitCauchyBi(tree, dat, method = "random.root", root.edge = root.edge)
+  # Compare with true value
+  treerr <- res$phy
+  treerr$root.edge <- root.edge
+  expect_true(logDensityTipsCauchyBi(treerr, dat, M, dispVec, theta, method = "random.root") <= fitrr$logLik)
+  # Compare with independent fits
+  fitrr1 <- fitCauchy(tree, dat[, 1], method = "random.root", root.edge = root.edge)
+  fitrr2 <- fitCauchy(tree, dat[, 2], method = "random.root", root.edge = root.edge)
+  expect_true(fitrr$logLik >= fitrr1$logLik + fitrr1$logLik)
+  expect_equal(1 - pchisq(fitrr$logLik - (fitrr1$logLik + fitrr2$logLik), df = 2), 0.0)
+  # vcov
+  fitrr <- compute_vcov(fitrr)
+  expect_equal(dim(fitrr$vcov), c(4, 4))
+  expect_equal(colnames(fitrr$vcov), c("angle1", "angle2", "disp1", "disp2" ))
+  expect_equal(unname(diag(fitrr$vcov)),
+               c(4.819142e-08, 1.555542e-03, 5.880968e-01, 2.360420e-03),
+               tolerance = 1e-5)
+  # confint
+  expect_message(ii <- confint(fitrr))
+  expect_equal(rownames(ii), rownames(fitrr$vcov))
+  expect_equal(ii[4,1], 0.03607927, tolerance = 1e-6)
+  for (i in 1:4) {
+    expect_true(ii[i, 1] <= fitrr$all_params[i] && ii[i, 2] >= fitrr$all_params[i])
+  }
+  # profile
+  pr <- profile(fitrr)
+  # plot(pr)
+  expect_equal(max(pr$angle1$profLogLik), fitrr$logLik, tolerance = 1e-3)
+  expect_equal(max(pr$angle2$profLogLik), fitrr$logLik, tolerance = 1e-2)
+  expect_equal(max(pr$disp1$profLogLik), fitrr$logLik, tolerance = 1e-2)
+  expect_equal(max(pr$disp2$profLogLik), fitrr$logLik, tolerance = 1e-2)
   
 })
