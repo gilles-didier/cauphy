@@ -226,82 +226,26 @@ compute_vcov.cauphyfit <- function(obj) {
                        reml = minusLikelihoodREML(pdim),
                        fixed.root = minusLikelihoodFixedRoot(X, pdim),
                        random.root = minusLikelihoodRandomRoot(pdim))
-  minus_like_untransformed <- function(param, param_names, ...) {
-    names(param) <- param_names
-    param <- transform_values(param)
-    return(minus_like(param, param_names, ...))
-  }
-  approxHessian <- pracma::hessian(f = minus_like_untransformed, x0 = obj$all_params,
-                                   param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
-  obj$vcov <- chol2inv(chol(approxHessian))
-  # ## Get gradient of transforms
-  # optpar <- obj$all_params
-  # names(optpar) <- param_names
-  # J_trans <- gradient_transform_values(optpar)
-  # optpar <- transform_values(optpar)
-  # approxHessianTrans <- pracma::hessian(f = minus_like, x0 = optpar,
-  #                                       param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
-  # approxHessian <- t(J_trans) %*% approxHessianTrans %*% J_trans
+  # minus_like_untransformed <- function(param, param_names, ...) {
+  #   names(param) <- param_names
+  #   param <- transform_values(param)
+  #   return(minus_like(param, param_names, ...))
+  # }
+  # approxHessian <- pracma::hessian(f = minus_like_untransformed, x0 = obj$all_params,
+  #                                  param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
   # obj$vcov <- chol2inv(chol(approxHessian))
-  # hh <- compute_inv_hessian(f = minus_like, x0 = optpar, J_trans = t(J_trans),
-  #                           param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
-  # obj$vcov <- hh
+  ## Get gradient of transforms
+  optpar <- obj$all_params
+  names(optpar) <- param_names
+  J_trans <- gradient_transform_values(optpar)
+  optpar <- transform_values(optpar)
+  approxHessianTrans <- pracma::hessian(f = minus_like, x0 = optpar,
+                                        param_names = param_names, tree = obj$phy, trait = obj$trait, Xdesign = X, model = obj$model, rootTip = obj$root_tip_reml)
+  approxHessian <- t(J_trans) %*% approxHessianTrans %*% J_trans
+  obj$vcov <- chol2inv(chol(approxHessian))
   colnames(obj$vcov) <- rownames(obj$vcov) <- all_params_names
   return(obj)
 }
-
-# #' @title Get Inverse Hessian
-# #'
-# #' @description
-# #' Compute the inverse Hessian
-# #'
-# #' @details
-# #' Code adapted from \code{lmerTest}, see
-# #' \url{https://github.com/runehaubo/lmerTestR/blob/35dc5885205d709cdc395b369b08ca2b7273cb78/R/lmer.R#L173}
-# #'
-# #' @param x0 parameter vector around which to compute the Hessian
-# #' @param f function for which the Hessian needs to be computed
-# #' @param J_trans Jacobian matrix of transformed parameters
-# #' @param tol tolerance for calling zero eigenvalues
-# #'
-# #' @return The inverse hessian
-# #'
-# #' @keywords internal
-# #'
-# compute_inv_hessian <- function(f, x0, J_trans, tol = 1e-8, ...) {
-#   browser()
-#   # Compute Hessian:
-#   h <- pracma::hessian(f = f, x0 = x0, ...)
-#   # back transformation of parameters
-#   h <- t(J_trans) %*% h %*% J_trans
-#   # Eigen decompose the Hessian:
-#   eig_h <- eigen(h, symmetric=TRUE)
-#   evals <- eig_h$values
-#   neg <- evals < -tol
-#   pos <- evals > tol
-#   zero <- evals > -tol & evals < tol
-#   if(sum(neg) > 0) { # negative eigenvalues
-#     eval_chr <- if(sum(neg) > 1) "eigenvalues" else "eigenvalue"
-#     evals_num <- paste(sprintf("%1.1e", evals[neg]), collapse = " ")
-#     warning(sprintf("Model failed to converge with %d negative %s: %s",
-#                     sum(neg), eval_chr, evals_num), call.=FALSE)
-#   }
-#   # Note: we warn about negative AND zero eigenvalues:
-#   if(sum(zero) > 0) { # some eigenvalues are zero
-#     eval_chr <- if(sum(zero) > 1) "eigenvalues" else "eigenvalue"
-#     evals_num <- paste(sprintf("%1.1e", evals[zero]), collapse = " ")
-#     warning(sprintf("Model may not have converged with %d %s close to zero: %s",
-#                     sum(zero), eval_chr, evals_num))
-#   }
-#   # Compute vcov(varpar):
-#   pos <- eig_h$values > tol
-#   q <- sum(pos)
-#   # Using the Moore-Penrose generalized inverse for h:
-#   h_inv <- with(eig_h, {
-#     vectors[, pos, drop=FALSE] %*% diag(1/values[pos], nrow=q) %*%
-#       t(vectors[, pos, drop=FALSE]) })
-#   return(h_inv)
-# }
 
 ##
 #' @export

@@ -133,16 +133,16 @@ gradient_transform_values <- function(param) {
   colnames(gradpar) <- rownames(gradpar) <- param_names
   # x0
   coef_params <- grepl("coef", param_names)
-  gradpar[coef_params, coef_params] <- diag(rep(1.0, sum(coef_params)))
+  gradpar[coef_params, coef_params] <- diag(rep(1.0, sum(coef_params)), ncol = sum(coef_params))
   # disp
   disp_params <- grepl("disp", param_names)
   gradpar[disp_params, disp_params] <- gradient_log_sorted_transform(param[disp_params])
   # lambda
   lambda_params <- grepl("lambda", param_names)
-  gradpar[lambda_params, lambda_params] <- diag(1 / param[lambda_params])
+  gradpar[lambda_params, lambda_params] <- diag(1 / param[lambda_params], ncol = sum(lambda_params))
   # angle
   angle_params <- grepl("angle", param_names)
-  gradpar[angle_params, angle_params] <- diag(gradient_logit_transform(param[angle_params], 0, pi))
+  gradpar[angle_params, angle_params] <- diag(gradient_logit_transform(param[angle_params], 0, pi), ncol = sum(angle_params))
   return(gradpar)
 }
 
@@ -204,9 +204,9 @@ log_sorted_back_transform <- function(x) {
 
 gradient_log_sorted_transform <- function(x) {
   n <- length(x)
-  if (all(x == 0)) return(diag(rep(-Inf, n)))
-  if (all(x == Inf)) return(diag(rep(Inf, n)))
-  J_log <- diag(1 / x)
+  if (all(x == 0)) return(diag(rep(-Inf, n), ncol = n))
+  if (all(x == Inf)) return(diag(rep(Inf, n), ncol = n))
+  J_log <- diag(x = 1 / x, ncol = n)
   y <- log(x)
   J_ord <- gradient_sorted_transform(y)
   return(J_ord %*% J_log)
@@ -216,7 +216,7 @@ gradient_sorted_transform <- function(y) {
   n <- length(y)
   J_ord <- matrix(0.0, n, n)
   J_ord[1,1] <- 1.0
-  J_ord[2,1] <- 1 / (y[1] - y[2])
+  if (n >= 2) J_ord[2,1] <- 1 / (y[1] - y[2])
   for (i in seq_along(y)[-1]) {
     J_ord[i,i] <- - 1 / (y[i-1] - y[i])
     if (i+1 <= n) J_ord[i+1,i] <- 1 / (y[i] - y[i+1])
@@ -942,6 +942,15 @@ do_optim <- function(minus_like, start.values, lower.values, upper.values,
   opt <- nloptr::nloptr(x0 = init_local, eval_f = minus_like,
                         lb = lower.values, ub = upper.values,
                         opts = options_nloptr, ...)
+  # re-optimize around max with LBFGS
+  num_grad <- function(param, param_names, tree, trait, Xdesign, model, rootTip) {
+    return(nloptr::nl.grad(x0 = param, fn = minus_like,
+                           param_names = param_names, tree = tree, trait = trait, Xdesign = Xdesign, model = model, rootTip = rootTip))
+  }
+  opt <- nloptr::nloptr(x0 = opt$solution, eval_f = minus_like,
+                        eval_grad_f = num_grad,
+                        lb = lower.values, ub = upper.values,
+                        opts =  list("algorithm" = "NLOPT_LD_LBFGS", "xtol_rel" = 1e-8, "maxeval" = 1000), ...)
   # local around init
   # opt_fun <- function(algo, xtol_rel, x0) {
   #   opt <- nloptr::nloptr(x0 = x0, eval_f = minus_like,
@@ -955,6 +964,7 @@ do_optim <- function(minus_like, start.values, lower.values, upper.values,
   # names(sol) <- param_names
   # opt <- opt_fun(optim.algo[[best_algo]], xtol_rel = 1e-8, x0 = sol)
   # opt <- opt_fun("NLOPT_LN_BOBYQA", xtol_rel = 1e-08, x0 = opt_global$solution)
+  return(opt)
 }
 
 #' @title Check For Duplicated Entries

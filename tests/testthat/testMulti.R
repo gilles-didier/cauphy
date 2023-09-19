@@ -214,11 +214,11 @@ test_that("testTransform", {
   expect_equal(ori, back)
   # derivative
   dd <- gradient_sorted_transform(ori)
-  ddnum <- numDeriv::jacobian(sorted_transform, ori)
+  ddnum <- nloptr::nl.jacobian(ori, sorted_transform)
   expect_equal(dd, ddnum)
   # derivative
   dd <- gradient_log_sorted_transform(ori)
-  ddnum <- numDeriv::jacobian(log_sorted_transform, ori)
+  ddnum <- nloptr::nl.jacobian(ori, log_sorted_transform)
   expect_equal(dd, ddnum)
   
   ## logit transform
@@ -228,8 +228,8 @@ test_that("testTransform", {
   expect_equal(ori, back)
   # derivative
   dd <- gradient_logit_transform(ori, lower_bound = 0, upper_bound = pi)
-  ddnum <- numDeriv::grad(logit_transform, ori, lower_bound = 0, upper_bound = pi)
-  expect_equal(dd, ddnum)
+  ddnum <- nloptr::nl.jacobian(ori, logit_transform, lower_bound = 0, upper_bound = pi)
+  expect_equal(dd, diag(ddnum))
   
   ## All transforms
   ori <- c(-3.4, 2.5, pi / 3, pi / 3 + pi / 4, 2.3, 0.1)
@@ -239,7 +239,7 @@ test_that("testTransform", {
   expect_equal(ori, back)
   # derivative
   dd <- gradient_transform_values(ori)
-  ddnum <- numDeriv::jacobian(transform_values, ori)
+  ddnum <- nloptr::nl.jacobian(ori, transform_values)
   expect_equal(unname(dd), ddnum)
   
 })
@@ -281,12 +281,14 @@ test_that("testFitBi", {
   fitfr <- compute_vcov(fitfr)
   expect_equal(dim(fitfr$vcov), c(6, 6))
   expect_equal(colnames(fitfr$vcov), c("x01", "x02", "angle1", "angle2", "disp1", "disp2" ))
-  expect_equal(fitfr$vcov[6,6], 0.001561619, tolerance = 1e-6)
-  expect_equal(unname(diag(fitfr$vcov)), c(5.337384e+01, 7.380680e+02, 8.339859e-08, 6.681717e+00, 8.998384e-01, 1.561619e-03), tolerance = 1e-6)
+  expect_equal(fitfr$vcov[6,6], 0.007512049, tolerance = 1e-4)
+  expect_equal(unname(diag(fitfr$vcov)),
+               c(2.353479e+01, 3.348212e+02, 8.433166e-08, 9.369576e-04, 3.633829e-01, 7.512049e-03),
+               tolerance = 1e-5)
   # confint
   expect_message(ii <- confint(fitfr))
   expect_equal(rownames(ii), rownames(fitfr$vcov))
-  expect_equal(ii[5,1], 0.4908973, tolerance = 1e-6)
+  expect_equal(ii[5,1], 0.7054907, tolerance = 1e-6)
   for (i in 1:6) {
     expect_true(ii[i, 1] <= fitfr$all_params[i] && ii[i, 2] >= fitfr$all_params[i])
   }
