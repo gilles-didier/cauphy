@@ -9,7 +9,7 @@
 */
 
 /* .Call calls */
-extern SEXP getLogDensityTipsCauchy(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP getLogDensityTipsCauchy(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP getPosteriorLogDensityAncestralCauchy(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP getPosteriorLogDensityIncrementCauchy(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP printRTree(SEXP);

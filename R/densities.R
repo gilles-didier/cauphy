@@ -25,7 +25,7 @@
 #' 
 #' The model assumes that each increment of the trait \eqn{X} on a branch going from node \eqn{k} to \eqn{l} 
 #' follows a Cauchy distribution, with a dispersion proportional to the length \eqn{t_l} of the branch:
-#' \deqn{X_l - X_k \sim \mathcal{C}(0, \text{disp} \times t_l).}
+#' \deqn{X_l - X_k \sim \mathcal{C}(0, \mbox{disp} \times t_l).}
 #' 
 #' The \code{method} argument specifies the type of likelihood that is computed:
 #' \itemize{
