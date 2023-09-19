@@ -30,7 +30,7 @@
 #' 
 #' The model assumes that each increment of the trait \eqn{X} on a branch going from node \eqn{k} to \eqn{l} 
 #' follows a Cauchy distribution, with a dispersion proportional to the length \eqn{t_l} of the branch:
-#' \deqn{X_l - X_k \sim \mathcal{C}(0, \text{disp} \times t_l).}
+#' \deqn{X_l - X_k \sim \mathcal{C}(0, \mbox{disp} \times t_l).}
 #' 
 #' Unless specified by the user, the initial values for the parameters are taken according to the following heuristics:
 #' \itemize{
