@@ -140,6 +140,97 @@ test_that("testLikelihoodThreeTipsTreeUltra", {
   
 })
 
+test_that("testLikelihoodThreeTipsTreeUltraEqualValues", {
+  
+  ## Parameters
+  mu <- 0.8
+  disp <- 0.6
+  
+  ## tree with three tips
+  tree <- read.tree(text = "((A:1.5,B:1.5):0.3, C:1.8);")
+  
+  ## data
+  trait <- c(1.1, 1.1, -1.2)
+  names(trait) <- c("A", "B", "C")
+  
+  ## cauchy dist
+  cauchy <- function(x, m, d) {
+    1/pi * d / ((x - m)^2 + d^2)
+  }
+  
+  ## likelihood manual (numerical integral)
+  lmanC <- function(x0) cauchy(trait[3], x0, disp * tree$edge.length[4])
+  
+  lmanA <- function(x) cauchy(x, trait[1], disp * tree$edge.length[2])
+  lmanB <- function(x) cauchy(x, trait[2], disp * tree$edge.length[3])
+  lmanLat <- function(x, x0) cauchy(x, x0, disp * tree$edge.length[1])
+  lmanAB <- function(x0) {
+    lint <- function(x) lmanA(x) * lmanB(x) * lmanLat(x, x0)
+    res <- integrate(lint, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)
+    return(unname(res$value))
+  }
+  
+  lman <- unname(lmanAB(mu) * lmanC(mu))
+  
+  ## likelihood
+  lalgolse <- logDensityTipsCauchy(tree, trait, mu, disp, method = "fixed.root")
+  
+  ## equal ?
+  expect_equal(log(lman), lalgolse)
+  
+  ## Random root
+  root.edge <- 10
+  tree$root.edge <- root.edge
+  lmanroot <- function(x) cauchy(x, 0, disp * root.edge)
+  lmanfun <- Vectorize(function(x) {lmanAB(x) * lmanC(x) * lmanroot(x)})
+  lmanRandomRoot <- unname(integrate(lmanfun, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
+  
+  lalgolse <- logDensityTipsCauchy(tree, trait, 0, disp, method = "random.root")
+  
+  expect_equal(log(lmanRandomRoot), lalgolse)
+  
+})
+
+test_that("testLikelihoodContinuityTip", {
+  
+  ## Parameters
+  mu <- 0.8
+  disp <- 0.1
+  
+  ## tree with three tips
+  set.seed(1289)
+  n <- 100
+  tree <- rphylo(n, 0.1, 0)
+  tree_height <- max(diag(vcv(tree)))
+  tree$root.edge <- 10
+  
+  ## data
+  trait <- rTraitCont(tree, model = "BM", sigma = 1)
+  
+  ## likelihood
+  ll <- function(delta, method) {
+    trait2 <- trait
+    trait2[1] <- trait[1] + delta
+    return(logDensityTipsCauchy(tree, trait, mu, disp, method = method))
+  }
+  
+  ## Different tips
+  lalgolse <- sapply(seq(-0.1, 0.1, 0.01), function(delta) ll(delta, "fixed.root"))
+  expect_equal(mean(lalgolse), lalgolse[1])
+  lalgolse <- sapply(seq(-0.1, 0.1, 0.01), function(delta) ll(delta, "random.root"))
+  expect_equal(mean(lalgolse), lalgolse[1])
+  
+  ## Equal tips
+  trait[1] <- trait[2]
+  lalgolse <- sapply(seq(-0.1, 0.1, 0.01), function(delta) ll(delta, "fixed.root"))
+  expect_true(all(!is.na(lalgolse)))
+  expect_equal(mean(lalgolse), lalgolse[1])
+  lalgolse <- sapply(seq(-0.1, 0.1, 0.01), function(delta) ll(delta, "random.root"))
+  expect_true(all(!is.na(lalgolse)))
+  expect_equal(mean(lalgolse), lalgolse[1])
+  
+})
+
 test_that("testLikelihoodLSENormalisation", {
 
   ## Parameters
