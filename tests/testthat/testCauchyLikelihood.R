@@ -163,6 +163,9 @@ test_that("testLikelihoodLSENormalisation", {
   ## equal ?
   expect_equal(lalgolsenorm, lalgolse, tolerance = 1e-7)
   expect_equal(lalgolsenorm2, lalgolse, tolerance = 1e-7)
+  
+  ## fixed value
+  expect_equal(lalgolse, -271.3922, tolerance = 1e-7)
 
   # ## Plot
   # s <- seq(0.01, 0.5, 0.01)
