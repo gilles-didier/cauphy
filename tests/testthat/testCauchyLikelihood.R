@@ -211,23 +211,33 @@ test_that("testLikelihoodContinuityTip", {
   ll <- function(delta, method) {
     trait2 <- trait
     trait2[1] <- trait[1] + delta
-    return(logDensityTipsCauchy(tree, trait, mu, disp, method = method))
+    return(logDensityTipsCauchy(tree, trait2, mu, disp, method = method))
+  }
+  reml <- function(delta) {
+    trait2 <- trait
+    trait2[1] <- trait[1] + delta
+    return(logDensityTipsCauchy(tree, trait2, NULL, disp, method = "reml"))
   }
   
   ## Different tips
   lalgolse <- sapply(seq(-0.1, 0.1, 0.01), function(delta) ll(delta, "fixed.root"))
-  expect_equal(mean(lalgolse), lalgolse[1])
+  expect_equal(mean(lalgolse), lalgolse[1], tolerance = 1e-3)
   lalgolse <- sapply(seq(-0.1, 0.1, 0.01), function(delta) ll(delta, "random.root"))
-  expect_equal(mean(lalgolse), lalgolse[1])
+  expect_equal(mean(lalgolse), lalgolse[1], tolerance = 1e-3)
+  lalgolse <- sapply(seq(-0.1, 0.1, 0.01), reml)
+  expect_equal(mean(lalgolse), lalgolse[1], tolerance = 1e-3)
   
   ## Equal tips
   trait[1] <- trait[2]
   lalgolse <- sapply(seq(-0.1, 0.1, 0.01), function(delta) ll(delta, "fixed.root"))
   expect_true(all(!is.na(lalgolse)))
-  expect_equal(mean(lalgolse), lalgolse[1])
+  expect_equal(mean(lalgolse), lalgolse[1], tolerance = 1e-3)
   lalgolse <- sapply(seq(-0.1, 0.1, 0.01), function(delta) ll(delta, "random.root"))
   expect_true(all(!is.na(lalgolse)))
-  expect_equal(mean(lalgolse), lalgolse[1])
+  expect_equal(mean(lalgolse), lalgolse[1], tolerance = 1e-3)
+  lalgolse <- sapply(seq(-0.1, 0.1, 0.01), reml)
+  expect_true(all(!is.na(lalgolse)))
+  expect_equal(mean(lalgolse), lalgolse[1], tolerance = 1e-3)
   
 })
 
