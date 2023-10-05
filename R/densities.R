@@ -87,7 +87,7 @@ logDensityTipsCauchy <- function(tree, tipTrait, root.value = NULL, disp, method
   return(res)
 }
 
-#' @importFrom foreach %dopar% %do%
+#' @importFrom foreach %dopar% %do% %:%
 NULL
 
 #' @title Posterior density of a node
@@ -250,18 +250,53 @@ ancestral.cauphyfit <- function(x, node, values, n_values = 100, n_cores = 1, ..
   } else {
     if (any(sapply(node, function(nn) !is.wholenumber(nn)))) stop("The 'node' must be whole numbers.")
   }
-  if (missing(values)) {
-    values <- seq(ifelse(min(x$y) < 0, 1.5 * min(x$y), 0.5 * min(x$y)),
-                  ifelse(max(x$y) > 0, 1.5 * max(x$y), 0.5 * max(x$y)),
-                  length.out = n_values)
+
+  if (ncol(x$y) == 1) { # univariate
+    if (missing(values)) {
+      values <- get_extended_range_values(x$y, n_values)
+    }
+    anc_fun <- function(x, nn, values) posteriorDensityAncestral(node = nn, vals = values,
+                                                                 tree = x$phy, tipTrait = x$trait,
+                                                                 root.value = x$x0, disp = x$disp, method = x$method, ...)
+    anc <- parallel_construction(anc_fun, x, node, values, n_cores, progress_bar = FALSE)
+    class(anc) <- "ancestralCauchy"
+  } else if (ncol(x$y) == 2) { # bivariate
+    # transform trait
+    basisMatr <- sapply(x$angle, function(x) c(cos(x), sin(x)))
+    transTrait <- solve(basisMatr, t(x$y))
+    root.value <- x$x0
+    if (!is.null(root.value)) root.value <- solve(basisMatr, root.value)
+    if (missing(values)) {
+      values <- cbind(get_extended_range_values(x$y[, 1], n_values),
+                      get_extended_range_values(x$y[, 2], n_values))
+    }
+    if (ncol(values) != ncol(x$y)) stop("The grid of values should be a matrix with two columns, each column a grid of values in each coordinate.")
+    transValues <- solve(basisMatr, t(values))
+    # Independent reconstructions likelihoods
+    anc_fun <- function(x, nn, transValues, transTrait, root.value, k) {
+      posteriorDensityAncestral(node = nn, vals = transValues[k, ],
+                                tree = x$phy,
+                                tipTrait = transTrait[k, ],
+                                root.value = root.value[k],
+                                disp = x$disp[k], method = x$method, ...)
+    }
+    anc <- parallel_construction_bi(anc_fun, x, node, transValues, transTrait, root.value, n_cores, progress_bar = FALSE)
+    names(anc) <- paste0("trans_", colnames(x$y))
+    class(anc) <- "ancestralCauchyBi"
+    attr(anc, "basisMatr") <- basisMatr
+    anc[[paste0("joint_", paste(colnames(x$y), collapse = "_"))]] <- get_joint_ancestral(anc)
+  } else {
+    stop("Dimension above 2 is not implemented.")
   }
-  anc_fun <- function(x, nn, values) posteriorDensityAncestral(node = nn, vals = values,
-                                                               tree = x$phy, tipTrait = x$trait,
-                                                               root.value = x$x0, disp = x$disp, method = x$method, ...)
-  anc <- parallel_construction(anc_fun, x, node, values, n_cores, progress_bar = FALSE)
-  class(anc) <- "ancestralCauchy"
   attr(anc, "edge") <- FALSE
   return(anc)
+}
+
+get_extended_range_values <- function(y, n_values) {
+  values <- seq(ifelse(min(y) < 0, 1.5 * min(y), 0.5 * min(y)),
+                ifelse(max(y) > 0, 1.5 * max(y), 0.5 * max(y)),
+                length.out = n_values)
+  return(values)
 }
 
 parallel_construction <- function(anc_fun, x, node, values, n_cores, progress_bar) {
@@ -293,6 +328,47 @@ parallel_construction <- function(anc_fun, x, node, values, n_cores, progress_ba
   
   rownames(anc) <- node
   colnames(anc) <- values
+  return(anc)
+}
+
+parallel_construction_bi <- function(anc_fun, x, node, transValues, transTrait, root.value, n_cores, progress_bar) {
+  
+  if (n_cores > 1) {
+    # combine_fun <- ifelse(progress_bar, rbindProgress(length(node)), rbind)
+    combine_fun <- rbind
+    
+    cl <- parallel::makeCluster(n_cores)
+    doParallel::registerDoParallel(cl)
+    on.exit(parallel::stopCluster(cl))
+    
+    nn <- NULL
+    anc <- foreach::foreach(k = c(1,2), .packages = "cauphy") %:%
+      foreach::foreach(nn = node, .packages = "cauphy", .combine = combine_fun) %dopar% {
+        anc_fun(x, nn, transValues, transTrait, root.value, k)
+      }
+    
+  } else {
+    combine_fun <- rbind
+
+    nn <- NULL
+    anc <- foreach::foreach(k = c(1,2), .packages = "cauphy") %:%
+      foreach::foreach(nn = node, .packages = "cauphy", .combine = combine_fun) %do% {
+        anc_fun(x, nn, transValues, transTrait, root.value, k)
+      }
+  }
+  
+  if (length(node) == 1) {
+    anc <- lapply(anc, function(aa) matrix(aa, ncol = length(aa)))
+  }
+  
+  anc <- lapply(anc, function(aa) {rownames(aa) <- node; return(aa)})
+  
+  for (k in c(1, 2)) {
+    colnames(anc[[k]]) <- transValues[k, ]
+    class(anc[[k]]) <- "ancestralCauchy"
+    attr(anc[[k]], "edge") <- FALSE
+  }
+  
   return(anc)
 }
 

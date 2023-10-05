@@ -128,3 +128,48 @@ logDensityCauchyBi <- function(values, center, disp, angle) {
   ll <- - determinant(basisMatr, logarithm = TRUE)$modulus + rowSums(ind_ll)
   return(as.vector(ll))
 }
+
+#' @title Joint density of two traits
+#'
+#' @description
+#' Compute the joint ancetral density of two traits from independet reconstructions
+#' in the transformed space.
+#' 
+#' @param anc a list with the ancestral reconstructions of the two independent traits
+#' in the transformed space, result of \code{ancestral}.
+#' 
+#' @return the joint density on the grid.
+#' 
+#' @keywords internal
+#' 
+get_joint_ancestral <- function(anc) {
+  ## Get independent densities
+  dens_1 <- anc_to_density(anc[[1]])
+  dens_2 <- anc_to_density(anc[[2]])
+  basisMatr <- attr(anc, "basisMatr")
+  factor_det <- 1 / determinant(basisMatr, logarithm = FALSE)$modulus
+  
+  dens_lat_long <- vector(mode = "list", length = length(dens_1)) # assumes that both traits are reconstructed for the same nodes
+  for (i in 1:length(dens_1)) {
+    transValues <- rbind(dens_1[[i]]$x, dens_2[[i]]$x)
+    # values <- get_original_values_grid(transValues, basisMatr)
+    dens_lat_long[[i]] <- list(transx = transValues[1, ],
+                               transy = transValues[2, ],
+                               # x = values[, , 1],
+                               # y = values[, , 2],
+                               transz = dens_1[[i]]$y %*% t(dens_2[[i]]$y))
+    dens_lat_long[[i]]$z <- dens_lat_long[[i]]$transz * factor_det
+  }
+  names(dens_lat_long) <- names(dens_1)
+  return(dens_lat_long)
+}
+
+get_original_values_grid <- function(transValues, basisMatr) {
+  values <- array(NA, dim = c(ncol(transValues), ncol(transValues), 2))
+  for (i in 1:ncol(values)) {
+    for (j in 1:ncol(values)) {
+      values[i, j, ] <- basisMatr %*% c(transValues[1, i], transValues[2, j])
+    }
+  }
+  return(values)
+}

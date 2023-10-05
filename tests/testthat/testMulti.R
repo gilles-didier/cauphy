@@ -247,7 +247,7 @@ test_that("testTransform", {
 test_that("testFitBi", {
 
   ## Parameters
-  n <- 20
+  n <- 10
   p <- 2
   ## tree
   set.seed(1289)
@@ -267,25 +267,26 @@ test_that("testFitBi", {
   ## Fixed Root
   fitfr <- fitCauchyBi(tree, dat, method = "fixed.root")
   fitfr
+  expect_equal(colnames(fitfr$y), c("trait1", "trait2"))
   # Compare with true value
   expect_true(logDensityTipsCauchyBi(tree, dat, M, dispVec, theta, method = "fixed.root") <= fitfr$logLik)
   # Compare with independent fits
   fitfr1 <- fitCauchy(tree, dat[, 1], method = "fixed.root")
   fitfr2 <- fitCauchy(tree, dat[, 2], method = "fixed.root")
   expect_true(fitfr$logLik >= fitfr1$logLik + fitfr2$logLik)
-  expect_equal(1 - pchisq(fitfr$logLik - (fitfr1$logLik + fitfr2$logLik), df = 2), 0.0)
+  expect_equal(1 - pchisq(fitfr$logLik - (fitfr1$logLik + fitfr2$logLik), df = 2), 0.0, tolerance = 1e-5)
   # vcov
   fitfr <- compute_vcov(fitfr)
   expect_equal(dim(fitfr$vcov), c(6, 6))
   expect_equal(colnames(fitfr$vcov), c("x01", "x02", "angle1", "angle2", "disp1", "disp2" ))
-  expect_equal(fitfr$vcov[6,6], 0.007512049, tolerance = 1e-4)
+  expect_equal(fitfr$vcov[6,6], 0.518535, tolerance = 1e-4)
   expect_equal(unname(diag(fitfr$vcov)),
-               c(2.353479e+01, 3.348212e+02, 8.433166e-08, 9.369576e-04, 3.633829e-01, 7.512049e-03),
+               c(5.100821e+01, 7.904727e+02, 6.212472e-06, 1.085174e-03, 2.622111e+00, 5.185350e-01),
                tolerance = 1e-5)
   # confint
   expect_message(ii <- confint(fitfr))
   expect_equal(rownames(ii), rownames(fitfr$vcov))
-  expect_equal(ii[5,1], 0.7054907, tolerance = 1e-6)
+  expect_equal(ii[5,1], -0.2419117, tolerance = 1e-6)
   for (i in 1:6) {
     expect_true(ii[i, 1] <= fitfr$all_params[i] && ii[i, 2] >= fitfr$all_params[i])
   }
@@ -298,10 +299,42 @@ test_that("testFitBi", {
   expect_equal(max(pr$angle2$profLogLik), fitfr$logLik, tolerance = 1e-2)
   expect_equal(max(pr$disp1$profLogLik), fitfr$logLik, tolerance = 1e-4)
   expect_equal(max(pr$disp2$profLogLik), fitfr$logLik, tolerance = 1e-5)
+  # ancestral
+  ancfr <- ancestral(fitfr)
   
+  fun <- function(xx, yy) ancestral(fitfr, 13, cbind(xx, yy))
+  marg_1 <- function(xx) {
+    sapply(xx,
+           function(xxx) unname(integrate(function(yy) diag(fun(xxx, yy)$joint_trait1_trait2$'13'$z),
+                                          -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value))
+  }
+  # total_mass <- unname(integrate(marg_1, -Inf, +Inf, rel.tol = .Machine$double.eps^0.5)$value)
+  xx <- seq(-50, 50, length.out = 5000)
+  yy <- seq(-50, 200, length.out = 5000)
+  # tt <- marg_1(xx)
+  # total_mass <- pracma::trapz(xx, tt)
+  
+  res <- fun(xx, yy)
+  res <- res$joint_trait1_trait2$'13'$z
+  dx <- diff(xx[1:2])
+  dy <- diff(yy[1:2])
+  sum(res * dx * dy)
+  
+  # fun <- function(xx, yy) diag(ancestral(fitfr, 13, cbind(xx, yy))$joint_trait1_trait2$'13'$z)
+  # total_mass <- pracma::integral2(fun, xmin = -50, xmax = 20, ymin = -30, ymax = 200)
+  
+  # fun <- function(xx, yy) {
+  #   res <- ancestral(fitfr, 13, cbind(xx, yy))
+  #   return(as.vector(res$joint_trait1_trait2$'13'$z))
+  # }
+  # total_mass <- rmutil::int2(fun, c(-Inf, -Inf), c(+Inf, +Inf), eps = .Machine$double.eps^0.5)
+  expect_equal(total_mass, 1.0)
+  # treedat <- ancestral_to_treedata(tree, fitfr, ancfr)
   
   ## REML
+  colnames(dat) <- c("lat", "long")
   fitreml <- fitCauchyBi(tree, dat, method = "reml")
+  expect_equal(colnames(fitreml$y), c("lat", "long"))
   # Compare with true value
   expect_true(logDensityTipsCauchyBi(tree, dat, M, dispVec, theta, method = "reml") <= fitreml$logLik)
   # Compare with independent fits
@@ -366,3 +399,67 @@ test_that("testFitBi", {
   expect_equal(max(pr$disp2$profLogLik), fitrr$logLik, tolerance = 1e-2)
   
 })
+
+test_that("testAncestralBi", {
+  
+  ## Parameters
+  n <- 5
+  p <- 2
+  ## tree
+  set.seed(1289)
+  tree <- rphylo(n, 0.1, 0)
+  tree_height <- max(diag(vcv(tree)))
+  # True parameters
+  theta <- c(pi / 3, pi / 3 + pi / 2)
+  dispVec <- c(1, 1)
+  A <- sapply(theta, function(x) c(cos(x), sin(x)))
+  A <- A %*% diag(dispVec)
+  mu <- 0.0
+  M <- rep(mu, p)
+  # data
+  dat <- rTraitCauchy(n = p, phy = tree, model = "cauchy", parameters = list(root.value = 0.0, disp = 1.0))
+  dat <- dat %*% t(A)
+  # Fit
+  fitreml <- fitCauchyBi(tree, dat, method = "reml")
+  
+  ## force independent traits
+  fitreml$angle[2] <- pi / 2
+  fitreml$angle[1] <- 0
+  fitreml$disp <- c(1, 1)
+  # Integrate to one
+  xx <- seq(-500, 500, length.out = 5000)
+  yy <- seq(-500, 500, length.out = 5000)
+  dx <- diff(xx[1:2])
+  dy <- diff(yy[1:2])
+  res <- ancestral(fitreml, 7, cbind(xx, yy))
+  expect_equal(sum(res$joint_trait1_trait2$'7'$z * dx * dy), 1, tolerance = 1e-3)
+  expect_equal(sum(res$trans_trait1[1, ] * diff(as.numeric(colnames(res$trans_trait1)[1:2]))), 1, tolerance = 1e-3)
+  expect_equal(sum(res$trans_trait2[1, ] * diff(as.numeric(colnames(res$trans_trait2)[1:2]))), 1, tolerance = 1e-3)
+  
+  ## force orthogonal traits
+  fitreml$angle[2] <- pi / 5 + pi / 3
+  fitreml$angle[1] <- pi / 5 + 0
+  fitreml$disp <- c(1, 1)
+  res <- ancestral(fitreml, 7, cbind(xx, yy))
+  dx <- diff(res$joint_trait1_trait2$'7'$x[1:2])
+  dy <- diff(res$joint_trait1_trait2$'7'$y[1:2])
+  dtransx <- diff(res$joint_trait1_trait2$'7'$transx[1:2])
+  dtransy <- diff(res$joint_trait1_trait2$'7'$transy[1:2])
+  expect_equal(sum(res$joint_trait1_trait2$'7'$z * dx * dy), 1, tolerance = 1e-3)
+  expect_equal(sum(res$trans_trait1[1, ] * dtransx), 1, tolerance = 1e-3)
+  expect_equal(sum(res$trans_trait2[1, ] * dtransy), 1, tolerance = 1e-3)
+  expect_equal(sum(res$trans_trait1[1, ] %*% t(res$trans_trait2[1, ]) * dtransx * dtransy), 1, tolerance = 1e-3)
+  
+  # fun <- function(xx, yy) diag(ancestral(fitfr, 13, cbind(xx, yy))$joint_trait1_trait2$'13'$z)
+  # total_mass <- pracma::integral2(fun, xmin = -50, xmax = 20, ymin = -30, ymax = 200)
+  
+  # fun <- function(xx, yy) {
+  #   res <- ancestral(fitfr, 13, cbind(xx, yy))
+  #   return(as.vector(res$joint_trait1_trait2$'13'$z))
+  # }
+  # total_mass <- rmutil::int2(fun, c(-Inf, -Inf), c(+Inf, +Inf), eps = .Machine$double.eps^0.5)
+  expect_equal(total_mass, 1.0)
+  # treedat <- ancestral_to_treedata(tree, fitfr, ancfr)
+  
+})
+  

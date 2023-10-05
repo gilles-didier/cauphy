@@ -39,6 +39,7 @@ fitCauchy.internal <- function(phy, X, y,
                                method.init.disp = "Qn", ...) {
   # Checks
   check_binary_tree(phy)
+  if (any(phy$edge.length < 0)) stop("The tree must have non negative branch lengths.")
   
   if (is.null(dim(y))) y <- as.matrix(y) # y is always a matrix with as many rows as the number of species
   y <- checkTraitTree(y, phy)
@@ -980,5 +981,5 @@ do_optim <- function(minus_like, start.values, lower.values, upper.values,
 #' @keywords internal
 #'
 checkDuplicates <- function(trait, tree) {
-  if (anyDuplicated(trait + diag(vcv(tree)))) stop("The trait vector has duplicated entries on tips that are equidistant from the root. The algorithm cannot currently handle this case. Please consider adding some noise to the tip trait values.")
+  if (any(duplicated(trait) & duplicated(diag(vcv(tree))))) stop("The trait vector has duplicated entries on tips that are equidistant from the root. The algorithm cannot currently handle this case. Please consider adding some noise to the tip trait values.")
 }

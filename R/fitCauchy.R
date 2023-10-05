@@ -625,6 +625,9 @@ fitCauchyBi <- function(phy, trait,
                             optim = optim,
                             method.init.disp = method.init.disp)
   
+  if (!is.null(ncol(trait)) && is.null(colnames(trait))) colnames(trait) <- paste0("trait", c(1:ncol(trait)))
+  trait <- as.matrix(trait)
+  
   res <- list(x0 = safe_get(res$param, "coef"),
               angle = safe_get(res$param, "angle"),
               disp = safe_get(res$param, "disp"),
@@ -632,8 +635,8 @@ fitCauchyBi <- function(phy, trait,
               logLik = res$logLikelihood,
               p = length(res$param),
               aic = 2 * length(res$param) - 2 * res$logLikelihood,
-              trait = as.matrix(trait),
-              y = as.matrix(trait),
+              trait = trait,
+              y = trait,
               n = Ntip(phy),
               d = ncol(trait),
               call = match.call(),

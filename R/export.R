@@ -20,10 +20,107 @@
 #' @keywords internal
 #' 
 #'
-ancestral_to_treedata <- function(tree, 
-                                  fit_lat, fit_long, 
-                                  anc_lat, anc_long,
-                                  level = 0.95) {
+ancestral_to_treedata <- function(tree, fit, anc, level = 0.95) {
+  
+  if (!requireNamespace("matrixStats", quietly = TRUE) || 
+      !requireNamespace("treeio", quietly = TRUE) || 
+      !requireNamespace("tidytree", quietly = TRUE)) {
+    stop(
+      "Packages \"treeio\", \"tidytree\" and \"HDInterval\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+  
+  ## TODO: check entries
+  if (!is(anc, "ancestralCauchyBi")) stop("'anc' must by of S3 class 'ancestralCauchyBi'.")
+  
+  n_nodes <- tree$Nnode
+  n_tips <- length(tree$tip.label)
+  
+  ## Construct HPD intervals
+  trait_names <- colnames(fit$y)
+  dens_lat <- anc_to_density(anc[[grep(paste0("trans_", trait_names[1]), names(anc))]])
+  dens_long <- anc_to_density(anc[[grep(paste0("trans_", trait_names[2]), names(anc))]])
+  basisMatr <- attr(anc, "basisMatr")
+
+  dens_lat_long <- anc[[grep("joint", names(anc))]]
+  dens_lat_long <- lapply(dens_lat_long, order_dens)
+  names(dens_lat_long) <- names(dens_long)
+  basisMatr <- attr(anc, "basisMatr")
+  contours_hpd <- lapply(dens_lat_long, function(dd) get_contour(dd, level, basisMatr))
+  
+  ## Create data list object
+  rec_table <- list(node = seq_len(n_tips + n_nodes))
+  
+  max_comp <- max(sapply(contours_hpd, length))
+  trait_name_lat <- paste0("location1_", level * 100, "%HPD")
+  trait_name_long <- paste0("location2_", level * 100, "%HPD")
+  
+  for (i in seq_len(max_comp)) {
+    rec_table[[paste0(trait_name_lat, "_", i)]] <- c(rep(NA, n_tips), lapply(contours_hpd, function(x) get_entry_safe(x, i, "x")))
+    rec_table[[paste0(trait_name_long, "_", i)]] <- c(rep(NA, n_tips), lapply(contours_hpd,function(x) get_entry_safe(x, i, "y")))
+  }
+  
+  mean_anc <- rbind(sapply(dens_lat, function(dd) stats::weighted.mean(dd$x, dd$y)),
+                    sapply(dens_long, function(dd) stats::weighted.mean(dd$x, dd$y)))
+  mean_anc <- basisMatr %*% mean_anc
+  
+  rec_table[["location1"]] <- c(fit$y[, 1], mean_anc[1, ])
+  rec_table[["location2"]] <- c(fit$y[, 2], mean_anc[2, ])
+  
+  med_anc <- rbind(sapply(dens_lat, function(dd) matrixStats::weightedMedian(dd$x, dd$y)),
+                   sapply(dens_long, function(dd) matrixStats::weightedMedian(dd$x, dd$y)))
+  med_anc <- basisMatr %*% med_anc
+  
+  rec_table[["location1_median"]] <- c(rep(NA, n_tips), med_anc[1, ])
+  rec_table[["location2_median"]] <- c(rep(NA, n_tips), med_anc[2, ])
+  
+  rec_table <- treeio::as_tibble(rec_table)
+  
+  ## Create treedata object
+  tree_tibble <- treeio::as_tibble(tree)
+  # tree_tibble$label <- rec_table$label
+  
+  tree_data <- treeio::full_join(tree_tibble, rec_table, by = 'node')
+  
+  return(treeio::as.treedata(tree_data))
+  
+}
+
+order_dens <- function(den) {
+  ox <- order(den$transx)
+  oy <- order(den$transy)
+  return(list(transx = den$transx[ox],
+              transy = den$transy[oy],
+              transz = den$z[ox, oy]))
+}
+
+#' @title Posterior density of a node
+#'
+#' @description
+#' Compute the posterior density of a set of node values under a Cauchy process on a phylogenetic tree.
+#' 
+#' @param tree the phylogenetic tree.
+#' @param fit_lat a \code{\link{fitCauchy}} object for the latitude trait.
+#' @param fit_long a \code{\link{fitCauchy}} object for the longitude trait.
+#' @param anc_lat an object of class \code{ancestralCauchy}, obtained with \code{\link{ancestral}} on \code{fit_lat}.
+#' @param anc_long an object of class \code{ancestralCauchy}, obtained with \code{\link{ancestral}} on \code{fit_long}.
+#' @param level the level for the HPD intervals
+#' 
+#' @return An object of class \code{\link[tidytree]{treedata-class}}, that can
+#' be exported with function \code{\link[treeio]{write.beast}}.
+#' 
+#' @seealso \code{\link{ancestral}}, \code{\link{fitCauchy}}
+#' 
+#' @author Paul Bastide \email{paul.bastide@m4x.org} and Gilles Didier \email{gilles.didier@free.fr}
+#' 
+#' @keywords internal
+#' 
+#'
+ancestral_to_treedata_ind <- function(tree, 
+                                      fit_lat, fit_long, 
+                                      anc_lat, anc_long,
+                                      level = 0.95) {
   
   if (!requireNamespace("matrixStats", quietly = TRUE) || 
       !requireNamespace("treeio", quietly = TRUE) || 
@@ -51,7 +148,7 @@ ancestral_to_treedata <- function(tree,
   }
   names(dens_lat_long) <- names(dens_long)
   
-  contours_hpd <- lapply(dens_lat_long, function(dd) get_contour(dd, level))
+  contours_hpd <- lapply(dens_lat_long, function(dd) get_contour_ind(dd, level))
   
   ## Create data list object
   rec_table <- list(node = seq_len(n_tips + n_nodes))
@@ -108,12 +205,46 @@ get_entry_safe <- function(x, i, nn) {
 #' 
 #' @param den a two dimensional density object
 #' @param prob the probability level
+#' @param basisMatr the transformation matrix
 #' 
 #' @return contour plot coordinates
 #' 
 #' @keywords internal
 #' 
-get_contour <- function(den, prob) {
+get_contour <- function(den, prob, basisMatr) {
+  dx <- diff(den$transx[1:2])
+  dy <- diff(den$transy[1:2])
+  sz <- sort(den$transz)
+  c1 <- cumsum(sz) * dx * dy
+  levels <- sapply(prob, function(x) {
+    stats::approx(c1, sz, xout = 1 - x)$y
+  })
+  cl <- grDevices::contourLines(den$transx, den$transy, den$transz, levels = levels)
+  cl <- lapply(cl, function(cll) tranform_back_contour(cll, basisMatr))
+  return(cl)
+}
+
+tranform_back_contour <- function(cll, basisMatr) {
+  transValues <- rbind(cll$x, cll$y)
+  values <- basisMatr %*% transValues
+  cll$x <- values[1, ]
+  cll$y <- values[2, ]
+  return(cll)
+}
+
+#' @title Get Contour
+#'
+#' @description
+#' See \code{\link[emdbook]{HPDregionplot}}
+#' 
+#' @param den a two dimensional density object
+#' @param prob the probability level
+#' 
+#' @return contour plot coordinates
+#' 
+#' @keywords internal
+#' 
+get_contour_ind <- function(den, prob, basisMatr) {
   dx <- diff(den$x[1:2])
   dy <- diff(den$y[1:2])
   sz <- sort(den$z)
