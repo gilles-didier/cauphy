@@ -237,14 +237,14 @@ SEXP getLogDensityTipsCauchy(SEXP treeR, SEXP tipTraitR, SEXP tipNamesR, SEXP st
 		case 0:
 			cinf = (TypeCauchyInfo*) malloc(tree->size*sizeof(TypeCauchyInfo));
 			fillCauchyInfo(tree->root, tree, asReal(dispR), cinf);
-			dens = getCauchyLogDensityStem(cinf[tree->root], trait, asReal(startR));
+			dens = getCauchyLogDensityStem(cinf[tree->root], asReal(startR));
 			freeCauchyInfo(tree->root, tree, cinf);
 			free((void*)cinf);
 			break;
 		case 1:
 			cinf = (TypeCauchyInfo*) malloc(tree->size*sizeof(TypeCauchyInfo));
 			fillCauchyInfo(tree->root, tree, asReal(dispR), cinf);
-			dens = getCauchyLogDensityNoStem(cinf[tree->node[tree->root].child], cinf[tree->node[tree->node[tree->root].child].sibling], trait, asReal(startR));
+			dens = getCauchyLogDensityNoStem(cinf[tree->node[tree->root].child], cinf[tree->node[tree->node[tree->root].child].sibling], asReal(startR));
 			freeCauchyInfo(tree->root, tree, cinf);
 			free((void*)cinf);
 			break;
@@ -261,7 +261,7 @@ SEXP getLogDensityTipsCauchy(SEXP treeR, SEXP tipTraitR, SEXP tipNamesR, SEXP st
 			rerootedTree->info = tree->info;
 			cinf = (TypeCauchyInfo*) malloc(tree->size*sizeof(TypeCauchyInfo));
 			fillCauchyInfo(rerootedTree->root, rerootedTree, asReal(dispR), cinf);
-			dens = getCauchyLogDensityStem(cinf[rerootedTree->root], (double*) rerootedTree->info, ((double*) rerootedTree->info)[rerootedTree->root]);
+			dens = getCauchyLogDensityStem(cinf[rerootedTree->root], ((double*) rerootedTree->info)[rerootedTree->root]);
 			freeCauchyInfo(rerootedTree->root, rerootedTree, cinf);
 			free((void*)cinf);
 			rerootedTree->info = NULL;

@@ -6,6 +6,37 @@
 #include "Kahan.h"
 #include "Cauchy.h"
 
+#define Cauchy_MIN(x,y) ((x)<(y)?(x):(y))
+
+static int compare_child(double ta, double va, double tb, double vb);
+
+typedef struct CHILD_SINGLE_TMP {
+	int loc, gen;
+} TypeChildSingleTmp;
+
+typedef struct CHILD_IDENT_TMP {
+	int locl, locr, gen;
+} TypeChildIdentTmp;
+
+int compare_child(double ta, double va, double tb, double vb) {
+	if(ta > tb)
+		return 1;
+	else {
+		if(ta < tb)
+			return -1;
+		else {
+			if(va > vb)
+				return 1;
+			else {
+				if(va < vb)
+					return -1;
+				else 
+					return 0;
+			}
+		}
+	}
+}
+
 double getCauchyLogDensityStandard(double x,  double d) {
 	return log(d)-log(M_PI)-log(x*x+d*d);
 }
@@ -15,11 +46,11 @@ void freeCauchyInfo(int n, TypeTree *tree, TypeCauchyInfo *cinf) {
 		freeCauchyInfo(tree->node[n].child, tree, cinf);
 		freeCauchyInfo(tree->node[tree->node[n].child].sibling, tree, cinf);
 	}
-	free((void*)cinf[n].child);
+	free((void*)cinf[n].val);
 	free((void*)cinf[n].time);
 	free((void*)cinf[n].A);
 }
-
+		
 void fillCauchyInfo(int n, TypeTree *tree, double param, TypeCauchyInfo *cinf) {
   	if(tree->node[n].child == NOSUCH) {
 		if(isnan(((double*)tree->info)[n]) || !isfinite(((double*)tree->info)[n])) {
@@ -29,14 +60,16 @@ void fillCauchyInfo(int n, TypeTree *tree, double param, TypeCauchyInfo *cinf) {
 				error("Value of %s is not a valid number (%le).\n", n, ((double*)tree->info)[n]);
 		}
 		cinf[n].sizeChild = 1;
-		cinf[n].child = (int*) malloc(cinf[n].sizeChild*sizeof(int));
 		cinf[n].time = (double*) malloc(cinf[n].sizeChild*sizeof(double));
+		cinf[n].val = (double*) malloc(cinf[n].sizeChild*sizeof(double));
 		cinf[n].A = (TypeComplex*) malloc(cinf[n].sizeChild*sizeof(TypeComplex));
-		cinf[n].child[0] = n;
 		cinf[n].time[0] = param*tree->time[n];
+		cinf[n].val[0] = ((double*)tree->info)[n];
 		cinf[n].A[0] = getComplex(1., 0.);
 	} else {
-		int cl, cr, i, j;
+		int cl, cr, i, j, k, size, size_sr, size_sl, size_id;
+		TypeChildSingleTmp *sl, *sr;
+		TypeChildIdentTmp *id;
 		cl = tree->node[n].child;
 		cr = tree->node[tree->node[n].child].sibling;
 		if(cr == NOSUCH) {
@@ -47,43 +80,119 @@ void fillCauchyInfo(int n, TypeTree *tree, double param, TypeCauchyInfo *cinf) {
 		}
 		fillCauchyInfo(cl, tree, param, cinf);
 		fillCauchyInfo(cr, tree, param, cinf);
-		cinf[n].sizeChild = cinf[cl].sizeChild+cinf[cr].sizeChild;
-		cinf[n].child = (int*) malloc(cinf[n].sizeChild*sizeof(int));
+		sl = (TypeChildSingleTmp*) malloc(cinf[cl].sizeChild*sizeof(TypeChildSingleTmp));
+		sr = (TypeChildSingleTmp*) malloc(cinf[cr].sizeChild*sizeof(TypeChildSingleTmp));
+		id = (TypeChildIdentTmp*) malloc(Cauchy_MIN(cinf[cl].sizeChild, cinf[cr].sizeChild)*sizeof(TypeChildIdentTmp));
+		size = 0; size_sr = 0; size_sl = 0; size_id = 0;
+		i = 0; j = 0;
+		while(i<cinf[cl].sizeChild || j<cinf[cr].sizeChild) {
+			if(i>=cinf[cl].sizeChild) {
+				sr[size_sr].loc = j;
+				sr[size_sr].gen = size;
+				j++; size_sr++; size++;
+			} else {
+				if(j>=cinf[cr].sizeChild) {
+					sl[size_sl].loc = i;
+					sl[size_sl].gen = size;
+					i++; size_sl++; size++;
+				} else {
+					switch(compare_child(cinf[cl].time[i], cinf[cl].val[i], cinf[cr].time[j], cinf[cr].val[j])) {
+						case -1:
+							sl[size_sl].loc = i;
+							sl[size_sl].gen = size;
+							i++; size_sl++; size++;
+							break;
+						case 0:
+							id[size_id].locl = i;
+							id[size_id].locr = j;
+							id[size_id].gen = size;
+							i++, j++; size_id++; size++;
+							break;
+						case 1:
+							sr[size_sr].loc = j;
+							sr[size_sr].gen = size;
+							j++; size_sr++; size++;
+							break;
+						default:
+						;
+					}
+				}
+			}
+		}
+		cinf[n].sizeChild = size;
 		cinf[n].time = (double*) malloc(cinf[n].sizeChild*sizeof(double));
+		cinf[n].val = (double*) malloc(cinf[n].sizeChild*sizeof(double));
 		cinf[n].A = (TypeComplex*) malloc(cinf[n].sizeChild*sizeof(TypeComplex));
-		for(i=0; i<cinf[cl].sizeChild; i++) {
-			cinf[n].child[i] = cinf[cl].child[i];
-			cinf[n].time[i] = cinf[cl].time[i]+param*tree->time[n];
-			cinf[n].A[i] = getComplex(0., 0.);
+		for(i=0; i<size_sl; i++) {
+			cinf[n].val[sl[i].gen] = cinf[cl].val[sl[i].loc];
+			cinf[n].time[sl[i].gen] = cinf[cl].time[sl[i].loc]+param*tree->time[n];
+			cinf[n].A[sl[i].gen] = getComplex(0., 0.);
 			TypeComplexKahan ka;
 			initComplexKahan(&ka);
 			for(j=0; j<cinf[cr].sizeChild; j++) {
 				double x;
-				x = ((double*)tree->info)[cinf[cr].child[j]]-((double*)tree->info)[cinf[cl].child[i]];
-				sumComplexKahan(divComplex(conjComplex(cinf[cr].A[j]), getComplex(cinf[cr].time[j]+cinf[cl].time[i], -x)), &ka);
-				sumComplexKahan(divComplex(cinf[cr].A[j], getComplex(cinf[cr].time[j]-cinf[cl].time[i], x)), &ka);
+				x = cinf[cr].val[j]-cinf[n].val[sl[i].gen];
+				sumComplexKahan(divComplex(conjComplex(cinf[cr].A[j]), getComplex(cinf[cr].time[j]+cinf[cl].time[sl[i].loc], -x)), &ka);
+				sumComplexKahan(divComplex(cinf[cr].A[j], getComplex(cinf[cr].time[j]-cinf[cl].time[sl[i].loc], x)), &ka);
 			}
-			cinf[n].A[i] = prodComplex(totalComplexKahan(&ka), cinf[cl].A[i]);
+			cinf[n].A[sl[i].gen] = prodComplex(totalComplexKahan(&ka), cinf[cl].A[sl[i].loc]);
 		}
-		for(j=0; j<cinf[cr].sizeChild; j++) {
-			int ind = j+cinf[cl].sizeChild;
-			cinf[n].child[ind] = cinf[cr].child[j];
-			cinf[n].time[ind] = cinf[cr].time[j]+param*tree->time[n];
-			cinf[n].A[ind] = getComplex(0., 0.);
+		for(j=0; j<size_sr; j++) {
+			cinf[n].val[sr[j].gen] = cinf[cr].val[sr[j].loc];
+			cinf[n].time[sr[j].gen] = cinf[cr].time[sr[j].loc]+param*tree->time[n];
+			cinf[n].A[sr[j].gen] = getComplex(0., 0.);
 			TypeComplexKahan ka;
 			initComplexKahan(&ka);
 			for(i=0; i<cinf[cl].sizeChild; i++) {
 				double x;
-				x = ((double*)tree->info)[cinf[cl].child[i]]-((double*)tree->info)[cinf[cr].child[j]];
-				sumComplexKahan(divComplex(conjComplex(cinf[cl].A[i]), getComplex(cinf[cl].time[i]+cinf[cr].time[j], -x)), &ka);
-				sumComplexKahan(divComplex(cinf[cl].A[i], getComplex(cinf[cl].time[i]-cinf[cr].time[j], x)), &ka);
+				x = cinf[cl].val[i]-cinf[cr].val[sr[j].loc];
+				sumComplexKahan(divComplex(conjComplex(cinf[cl].A[i]), getComplex(cinf[cl].time[i]+cinf[cr].time[sr[j].loc], -x)), &ka);
+				sumComplexKahan(divComplex(cinf[cl].A[i], getComplex(cinf[cl].time[i]-cinf[cr].time[sr[j].loc], x)), &ka);
 			}
-			cinf[n].A[ind] = prodComplex(totalComplexKahan(&ka), cinf[cr].A[j]);
+			cinf[n].A[sr[j].gen] = prodComplex(totalComplexKahan(&ka), cinf[cr].A[sr[j].loc]);
 		}
+		for(k=0; k<size_id; k++) {
+			cinf[n].val[id[k].gen] = cinf[cr].val[id[k].locr];
+			cinf[n].time[id[k].gen] = cinf[cr].time[id[k].locr]+param*tree->time[n];
+			cinf[n].A[id[k].gen] = getComplex(0., 0.);
+			TypeComplexKahan ka;
+			initComplexKahan(&ka);
+			for(j=0; j<id[k].locr; j++) {
+				double x;
+				x = cinf[cr].val[j]-cinf[cl].val[id[k].locl];
+				sumComplexKahan(divComplex(conjComplex(cinf[cr].A[j]), getComplex(cinf[cr].time[j]+cinf[cl].time[id[k].locl], -x)), &ka);
+				sumComplexKahan(divComplex(cinf[cr].A[j], getComplex(cinf[cr].time[j]-cinf[cl].time[id[k].locl], x)), &ka);
+			}
+			for(j=id[k].locr+1; j<cinf[cr].sizeChild; j++) {
+				double x;
+				x = cinf[cr].val[j]-cinf[cl].val[id[k].locl];
+				sumComplexKahan(divComplex(conjComplex(cinf[cr].A[j]), getComplex(cinf[cr].time[j]+cinf[cl].time[id[k].locl], -x)), &ka);
+				sumComplexKahan(divComplex(cinf[cr].A[j], getComplex(cinf[cr].time[j]-cinf[cl].time[id[k].locl], x)), &ka);
+			}
+			cinf[n].A[id[k].gen] = prodComplex(totalComplexKahan(&ka), cinf[cl].A[id[k].locl]);
+			initComplexKahan(&ka);
+			for(i=0; i<id[k].locl; i++) {
+				double x;
+				x = cinf[cl].val[i]-cinf[cr].val[id[k].locr];
+				sumComplexKahan(divComplex(conjComplex(cinf[cl].A[i]), getComplex(cinf[cl].time[i]+cinf[cr].time[id[k].locr], -x)), &ka);
+				sumComplexKahan(divComplex(cinf[cl].A[i], getComplex(cinf[cl].time[i]-cinf[cr].time[id[k].locr], x)), &ka);
+			}
+			for(i=id[k].locl+1; i<cinf[cl].sizeChild; i++) {
+				double x;
+				x = cinf[cl].val[i]-cinf[cr].val[id[k].locr];
+				sumComplexKahan(divComplex(conjComplex(cinf[cl].A[i]), getComplex(cinf[cl].time[i]+cinf[cr].time[id[k].locr], -x)), &ka);
+				sumComplexKahan(divComplex(cinf[cl].A[i], getComplex(cinf[cl].time[i]-cinf[cr].time[id[k].locr], x)), &ka);
+			}
+			cinf[n].A[id[k].gen] = addComplex(cinf[n].A[id[k].gen], prodComplex(totalComplexKahan(&ka), cinf[cr].A[id[k].locr]));
+			cinf[n].A[id[k].gen] = addComplex(cinf[n].A[id[k].gen], getComplex((getRealComplex(cinf[cl].A[id[k].locl])*getRealComplex(cinf[cr].A[id[k].locr])-getImagComplex(cinf[cl].A[id[k].locl])*getImagComplex(cinf[cr].A[id[k].locr]))/cinf[cl].time[id[k].locl], 0.));
+		}
+		free((void*) sl);
+		free((void*) sr);
+		free((void*) id);
 	}
 }
 
-double getCauchyLogDensityStem(TypeCauchyInfo cinf, double *val, double start) {
+double getCauchyLogDensityStem(TypeCauchyInfo cinf, double start) {
 	int i, *signA;
 	double res, *allLogA;
 	signA = (int*) malloc(cinf.sizeChild*sizeof(int));
@@ -93,7 +202,7 @@ double getCauchyLogDensityStem(TypeCauchyInfo cinf, double *val, double start) {
 	for(i=0; i<cinf.sizeChild; i++) {
 		double costheta;
 		TypeComplex logd1;
-		logd1 = getComplex(cinf.time[i], val[cinf.child[i]]-start);
+		logd1 = getComplex(cinf.time[i], cinf.val[i]-start);
 		costheta = cos(getImagLogComplex(cinf.A[i])-getImagLogComplex(logd1));
 		signA[i] = sign(costheta);
 		allLogA[i] = getRealLogComplex(cinf.A[i])-getRealLogComplex(logd1)+log(fabs(costheta));
@@ -104,8 +213,8 @@ double getCauchyLogDensityStem(TypeCauchyInfo cinf, double *val, double start) {
 	return res;
 }
 
-double getCauchyLogDensityNoStem(TypeCauchyInfo cinfL, TypeCauchyInfo cinfR, double *val, double start) {
-	return getCauchyLogDensityStem(cinfL, val, start)+getCauchyLogDensityStem(cinfR, val, start);
+double getCauchyLogDensityNoStem(TypeCauchyInfo cinfL, TypeCauchyInfo cinfR, double start) {
+	return getCauchyLogDensityStem(cinfL, start)+getCauchyLogDensityStem(cinfR, start);
 }
 
 void fillCauchyAncestralPosteriorLogDensityStem(int node, double *dens, double *tabVal, int nVal, TypeTree *tree, double disp, double start) {
@@ -122,11 +231,11 @@ void fillCauchyAncestralPosteriorLogDensityStem(int node, double *dens, double *
 		double densRef;
 		cinf = (TypeCauchyInfo*) malloc(tree->sizeBuf*sizeof(TypeCauchyInfo));
 		fillCauchyInfo(tree->root, tree, disp, cinf);
-		densRef = getCauchyLogDensityStem(cinf[tree->root], ((double*)tree->info), start);
+		densRef = getCauchyLogDensityStem(cinf[tree->root], start);
 		if(node == tree->root) {
 			for(j=0; j<nVal; j++)
-				dens[j] = getCauchyLogDensityStem(cinf[tree->node[node].child], ((double*)tree->info), tabVal[j])
-				+getCauchyLogDensityStem(cinf[tree->node[tree->node[node].child].sibling], ((double*)tree->info), tabVal[j])
+				dens[j] = getCauchyLogDensityStem(cinf[tree->node[node].child], tabVal[j])
+				+getCauchyLogDensityStem(cinf[tree->node[tree->node[node].child].sibling], tabVal[j])
 				+getCauchyLogDensityStandard(tabVal[j]-start, tree->time[node]*disp)
 				-densRef;		
 			freeCauchyInfo(tree->root, tree, cinf);
@@ -144,9 +253,9 @@ void fillCauchyAncestralPosteriorLogDensityStem(int node, double *dens, double *
 			fillCauchyInfo(tree->node[tree->node[node].child].sibling, tree, disp, cinf);
 			fillCauchyInfo(treeC->root, treeC, disp, cinf);
 			for(j=0; j<nVal; j++) {
-				dens[j] = getCauchyLogDensityStem(cinf[tree->node[node].child], ((double*)tree->info), tabVal[j])
-				+getCauchyLogDensityStem(cinf[tree->node[tree->node[node].child].sibling], ((double*)tree->info), tabVal[j])
-				+getCauchyLogDensityStem(cinf[treeC->root], ((double*)tree->info), tabVal[j])
+				dens[j] = getCauchyLogDensityStem(cinf[tree->node[node].child], tabVal[j])
+				+getCauchyLogDensityStem(cinf[tree->node[tree->node[node].child].sibling], tabVal[j])
+				+getCauchyLogDensityStem(cinf[treeC->root], tabVal[j])
 				-densRef;
 			}
 			freeCauchyInfo(tree->node[node].child, tree, cinf);
@@ -206,11 +315,11 @@ void fillCauchyAncestralPosteriorLogDensityREML(int node, double *dens, double *
 		TypeCauchyInfo *cinf;
 		cinf = (TypeCauchyInfo*) malloc(tree->size*sizeof(TypeCauchyInfo));
 		fillCauchyInfo(rerootedTree->root, rerootedTree, disp, cinf);
-		densRef = getCauchyLogDensityStem(cinf[rerootedTree->root], (double*)rerootedTree->info,  start);
+		densRef = getCauchyLogDensityStem(cinf[rerootedTree->root],  start);
 		freeCauchyInfo(rerootedTree->root, rerootedTree, cinf);
 		fillCauchyInfo(tree->root, tree, disp, cinf);
 		for(i=0; i<nVal; i++)
-			dens[i] = getCauchyLogDensityNoStem(cinf[tree->node[tree->root].child], cinf[tree->node[tree->node[tree->root].child].sibling], (double*) tree->info, tabVal[i])-densRef;
+			dens[i] = getCauchyLogDensityNoStem(cinf[tree->node[tree->root].child], cinf[tree->node[tree->node[tree->root].child].sibling], tabVal[i])-densRef;
 		freeCauchyInfo(tree->root, tree, cinf);
 		free((void*)cinf);		
 	}
@@ -238,10 +347,10 @@ void fillCauchyIncrementPosteriorLogDensityStem(int node, double *dens, double *
 				start = ((double*)tree->info)[node];
 				cinf = (TypeCauchyInfo*) malloc(rerootedTree->sizeBuf*sizeof(TypeCauchyInfo));
 				fillCauchyInfo(rerootedTree->root, rerootedTree, disp, cinf);
-				densRef = getCauchyLogDensityStem(cinf[rerootedTree->root], ((double*)tree->info), start);
+				densRef = getCauchyLogDensityStem(cinf[rerootedTree->root], start);
 				for(j=0; j<nVal; j++)
-					dens[j] = getCauchyLogDensityStem(cinf[rerootedTree->node[rerootedTree->root].child], (double*)rerootedTree->info, start-tabVal[j]) +
-						getCauchyLogDensityStem(cinf[rerootedTree->node[rerootedTree->node[rerootedTree->root].child].sibling], (double*)rerootedTree->info, start-tabVal[j])+
+					dens[j] = getCauchyLogDensityStem(cinf[rerootedTree->node[rerootedTree->root].child], start-tabVal[j]) +
+						getCauchyLogDensityStem(cinf[rerootedTree->node[rerootedTree->node[rerootedTree->root].child].sibling], start-tabVal[j])+
 						getCauchyLogDensityStandard(tabVal[j], disp*tree->time[node]) - densRef;
 				freeCauchyInfo(rerootedTree->root, rerootedTree, cinf);
 				free((void*)cinf);
@@ -250,10 +359,10 @@ void fillCauchyIncrementPosteriorLogDensityStem(int node, double *dens, double *
 			} else {
 				cinf = (TypeCauchyInfo*) malloc(tree->sizeBuf*sizeof(TypeCauchyInfo));
 				fillCauchyInfo(tree->root, tree, disp, cinf);
-				densRef = getCauchyLogDensityStem(cinf[tree->root], ((double*)tree->info), start);
+				densRef = getCauchyLogDensityStem(cinf[tree->root], start);
 				for(j=0; j<nVal; j++)
-					dens[j] = getCauchyLogDensityStem(cinf[tree->node[tree->root].child], (double*)tree->info, start+tabVal[j]) +
-						getCauchyLogDensityStem(cinf[tree->node[tree->node[tree->root].child].sibling], (double*)tree->info, start+tabVal[j])+
+					dens[j] = getCauchyLogDensityStem(cinf[tree->node[tree->root].child], start+tabVal[j]) +
+						getCauchyLogDensityStem(cinf[tree->node[tree->node[tree->root].child].sibling], start+tabVal[j])+
 						getCauchyLogDensityStandard(tabVal[j], disp*tree->time[node]) - densRef;
 				freeCauchyInfo(tree->root, tree, cinf);
 				free((void*)cinf);
@@ -268,7 +377,7 @@ void fillCauchyIncrementPosteriorLogDensityStem(int node, double *dens, double *
 		nTips = fillTips(node, tree, tips);
 		cinf = (TypeCauchyInfo*) malloc(tree->sizeBuf*sizeof(TypeCauchyInfo));
 		fillCauchyInfo(tree->root, tree, disp, cinf);
-		densRef = getCauchyLogDensityStem(cinf[tree->root], ((double*)tree->info), start);
+		densRef = getCauchyLogDensityStem(cinf[tree->root], start);
 		freeCauchyInfo(tree->root, tree, cinf);
 		infoSave = tree->info;
 		tree->info = (double*) malloc(tree->size*sizeof(double));
@@ -280,7 +389,7 @@ void fillCauchyIncrementPosteriorLogDensityStem(int node, double *dens, double *
 			for(i=0; i<nTips; i++)
 				((double*)tree->info)[tips[i]] = ((double*)infoSave)[tips[i]]-tabVal[j];
 			fillCauchyInfo(tree->root, tree, disp, cinf);
-			dens[j] = getCauchyLogDensityStem(cinf[tree->root], ((double*)tree->info), start) + getCauchyLogDensityStandard(tabVal[j], disp*timeSave) - densRef;
+			dens[j] = getCauchyLogDensityStem(cinf[tree->root], start) + getCauchyLogDensityStandard(tabVal[j], disp*timeSave) - densRef;
 			freeCauchyInfo(tree->root, tree, cinf);
 		}
 		free((void*)tips);
@@ -329,15 +438,15 @@ void fillCauchyIncrementPosteriorLogDensityREML(int node, double *dens, double *
 			rerootedTree->info = tree->info;
 			fillCauchyInfo(rerootedTree->root, rerootedTree, disp, cinf);
 			if(rerootedTree->size > 1)
-				densRef = getCauchyLogDensityStem(cinf[rerootedTree->root], ((double*)rerootedTree->info), ((double*)rerootedTree->info)[rerootedTree->root]);
+				densRef = getCauchyLogDensityStem(cinf[rerootedTree->root], ((double*)rerootedTree->info)[rerootedTree->root]);
 			else
-				densRef = getCauchyLogDensityStem(cinf[rerootedTree->root], ((double*)rerootedTree->info), ((double*)tree->info)[node]);				
+				densRef = getCauchyLogDensityStem(cinf[rerootedTree->root], ((double*)tree->info)[node]);				
 			freeCauchyInfo(rerootedTree->root, rerootedTree, cinf);
 			if(tree->node[node].child == NOSUCH) {
 				int j;
 				fillCauchyInfo(other, tree, disp, cinf);
 				for(j=0; j<nVal; j++)
-					dens[j] = getCauchyLogDensityStem(cinf[other], ((double*)tree->info), ((double*)tree->info)[node]-tabVal[j]) + getCauchyLogDensityStandard(tabVal[j], disp*tree->time[node]) - densRef;
+					dens[j] = getCauchyLogDensityStem(cinf[other], ((double*)tree->info)[node]-tabVal[j]) + getCauchyLogDensityStandard(tabVal[j], disp*tree->time[node]) - densRef;
 				freeCauchyInfo(other, tree, cinf);
 			} else {
 				int i, j, *tips, nTips;
@@ -354,7 +463,7 @@ void fillCauchyIncrementPosteriorLogDensityREML(int node, double *dens, double *
 					for(i=0; i<nTips; i++)
 						((double*)rerootedTree->info)[tips[i]] = ((double*)tree->info)[tips[i]]-tabVal[j];
 					fillCauchyInfo(rerootedTree->root, rerootedTree, disp, cinf);
-					dens[j] = getCauchyLogDensityStem(cinf[rerootedTree->root], ((double*)rerootedTree->info), ((double*)rerootedTree->info)[rerootedTree->root]) + getCauchyLogDensityStandard(tabVal[j], disp*time) - densRef;
+					dens[j] = getCauchyLogDensityStem(cinf[rerootedTree->root], ((double*)rerootedTree->info)[rerootedTree->root]) + getCauchyLogDensityStandard(tabVal[j], disp*time) - densRef;
 					freeCauchyInfo(rerootedTree->root, rerootedTree, cinf);
 				}
 				free((void*)tips);
