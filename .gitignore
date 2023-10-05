@@ -7,5 +7,6 @@ src/*.so
 src/*.dll
 docs
 inst/doc
+inst/tests
 .DS_Store
 rebuts
