@@ -14,7 +14,7 @@
 
 \item{allowSplit}{if FALSE and the proper HDI is discontinuous,
 a single credible interval is returned, but this is not HDI.
-See code{\link[HDInterval]{hdi}} for details. Default to \code{TRUE}.}
+See \code{\link[HDInterval]{hdi}} for details. Default to \code{TRUE}.}
 
 \item{node}{the vector of nodes where to plot the ancestral reconstruction.
 Can be missing, in which case all the nodes reconstructed in the \code{ancestralCauchy}}

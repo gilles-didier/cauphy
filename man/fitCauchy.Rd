@@ -81,13 +81,13 @@ follows a Cauchy distribution, with a dispersion proportional to the length \eqn
 \deqn{X_l - X_k \sim \mathcal{C}(0, \mbox{disp} \times t_l).}
 
 Unless specified by the user, the initial values for the parameters are taken according to the following heuristics:
-\itemize{
+\describe{
  \item{\code{x0}:}{ is the trimmed mean of the trait,
  keeping only 24\% of the observations, as advocated in Rothenberg et al. 1964
  (for \code{method="fixed.root"});}
  \item{\code{disp}:}{ is initialized from the trait centered and normalized 
  by tip heights, with one of the following statistics, taken from Rousseeuw & Croux 1993:}
- \itemize{
+ \describe{
  \item{\code{IQR}:}{ half of the inter-quartile range (see \code{\link{IQR}});}
  \item{\code{MAD}:}{ median absolute deviation with constant equal to 1 (see \code{\link{mad}});}
  \item{\code{Sn}:}{ Sn statistics with constant 0.7071 (see \code{\link[robustbase]{Sn}});}
@@ -99,7 +99,7 @@ Unless specified by the user, \code{x0} is taken to be unbounded,
 \code{disp} positive unbounded.
 
 The \code{method} argument specifies the method used for the fit:
-\itemize{
+\describe{
   \item{\code{method="reml"}:}{ 
   the dispersion parameter is fitted using the REML criterion,
   obtained by re-rooting the tree to one of the tips.

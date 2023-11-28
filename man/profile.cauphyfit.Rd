@@ -21,7 +21,7 @@
 An object of class \code{profile.cauphyfit}, 
 which is a list with an element for each parameter being profiled.
 The elements are data-frames with two variables:
-\itemize{
+\describe{
 \item{\code{par.vals}:}{ a matrix of parameter values for each fitted model.}
 \item{\code{profLogLik}:}{ the profile log likelihood.}
 }

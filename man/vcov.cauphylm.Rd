@@ -47,7 +47,7 @@
 }
 \value{
 Same value as the associated methods from the \code{stats} package:
-\itemize{
+\describe{
 \item{\code{\link[stats]{vcov}}}{ an estimated covariance matrix, see \code{\link{compute_vcov}};}
 \item{\code{\link[stats]{logLik}}}{ an object of class \code{\link[stats]{logLik}};}
 \item{\code{\link[stats]{AIC}}}{ a numeric value;}

@@ -63,7 +63,7 @@ covariables in \code{formula}.
 The corresponding regression model is:
 \deqn{Y = X \beta + E,}
 with:
-\itemize{
+\describe{
 \item{\eqn{Y}}{ the vector of traits at the tips of the tree;}
 \item{\eqn{X}}{ the regression matrix of covariables in \code{formula};}
 \item{\eqn{\beta}}{ the vector of coefficients;}
@@ -74,11 +74,11 @@ and with a dispersion \code{disp} (see \code{\link{fitCauchy}}).}
 
 Unless specified by the user, the initial values for the parameters 
 are taken according to the following heuristics:
-\itemize{
+\describe{
  \item{\code{coefficients}:}{ \eqn{\beta} are obtained from a robust regression using \code{\link[robustbase]{lmrob.S}};}
  \item{\code{disp}:}{ is initialized from the trait centered and normalized 
  by tip heights, with one of the following statistics, taken from Rousseeuw & Croux 1993:}
- \itemize{
+ \describe{
  \item{\code{IQR}:}{ half of the inter-quartile range (see \code{\link{IQR}});}
  \item{\code{MAD}:}{ median absolute deviation with constant equal to 1 (see \code{\link{mad}});}
  \item{\code{Sn}:}{ Sn statistics with constant 0.7071 (see \code{\link[robustbase]{Sn}});}

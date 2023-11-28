@@ -16,7 +16,7 @@
 #' 
 #' @details
 #' The default choice of parameters is as follow:
-#' \itemize{
+#' \describe{
 #'   \item{\code{model = cauchy}}{ 
 #'   \code{root.value = 0}, \code{disp = 1}
 #'   }
