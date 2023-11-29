@@ -8,48 +8,29 @@
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
-
-Days since last update: 6
-
-This is a quickly released patch to fix additional issues that appeared on CRAN.
+0 errors | 0 warnings | 0 notes
 
 ## CRAN Check Results
 
 This patch should fix the two problems encountered with the CRAN check results:
 
-* LTO additional test:
+* WARN
+Check: whether package can be installed
+Result: WARN
+  Found the following significant warnings:
+    Cauchy.c:29:57: warning: format specifies type 'char *' but the argument has type 'int' [-Wformat]
+  See ‘/home/hornik/tmp/R.check/r-devel-clang/Work/PKGS/cauphy.Rcheck/00install.out’ for details.
+  * used C compiler: ‘Debian clang version 17.0.5 (1)’
 
-init.c:12:13: warning: type of 'getLogDensityTipsCauchy' does not match original declaration [-Wlto-type-mismatch]
-   12 | extern SEXP getLogDensityTipsCauchy(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-      |             ^
-Cauchy_R.c:210:6: note: type mismatch in parameter 8
-  210 | SEXP getLogDensityTipsCauchy(SEXP treeR, SEXP tipTraitR, SEXP tipNamesR, SEXP startR, SEXP dispR, SEXP typeR, SEXP rootTipR) {
-      |      ^
+We fixed the faulty format in src/cauchy.c
 
-We fixed the faulty definition of "getLogDensityTipsCauchy" in src/init.c
-
-* ERROR on r-oldrel-macos:
-
-Check: PDF version of manual
-Result: WARN 
-    LaTeX errors when creating PDF version.
-    This typically indicates Rd problems.
-    LaTeX errors found:
-    ! Undefined control sequence.
-    <argument> X_l - X_k \sim \mathcal {C}(0, \text
-     {disp} \times t_l).
-    l.422 ...mathcal{C}(0, \text{disp} \times t_l).}{}
+* NOTE:
+checkRd: (-1) cauphylm.Rd:67: Lost braces in \itemize; meant \describe ?
+checkRd: (-1) hdi.ancestralCauchy.Rd:17: Lost braces
+      17 | See code{\link[HDInterval]{hdi}} for details. Default to \code{TRUE}.}
+         |         ^
+checkRd: (-1) profile.cauphyfit.Rd:25: Lost braces in \itemize; \value handles \item{}{} directly
     
-    ! Undefined control sequence.
-    <argument> X_l - X_k \sim \mathcal {C}(0, \text
-     {disp} \times t_l).
-    l.817 ...mathcal{C}(0, \text{disp} \times t_l).}{} 
-Flavors: r-oldrel-macos-arm64, r-oldrel-macos-x86_64
-    
-We replaced the "\text" by the "\mbox" command to avoid the dependency on any LaTeX package.
-
-We note that such LaTeX errors on r-oldrel-macos came up in the CRAN check results 
-of several well established R packages (such as the "Matrix" package).
+We fixed incorrect usages of \itemize, and corrected a typo (\code).
 
 
