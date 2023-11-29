@@ -57,7 +57,7 @@ void fillCauchyInfo(int n, TypeTree *tree, double param, TypeCauchyInfo *cinf) {
 			if(tree->name && tree->name[n])
 				error("Value of %s is not a valid number (%le).\n", tree->name[n], ((double*)tree->info)[n]);
 			else
-				error("Value of %s is not a valid number (%le).\n", n, ((double*)tree->info)[n]);
+				error("Value of %d is not a valid number (%le).\n", n, ((double*)tree->info)[n]);
 		}
 		cinf[n].sizeChild = 1;
 		cinf[n].time = (double*) malloc(cinf[n].sizeChild*sizeof(double));
