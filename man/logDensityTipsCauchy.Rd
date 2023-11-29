@@ -52,7 +52,7 @@ follows a Cauchy distribution, with a dispersion proportional to the length \eqn
 \deqn{X_l - X_k \sim \mathcal{C}(0, \mbox{disp} \times t_l).}
 
 The \code{method} argument specifies the type of likelihood that is computed:
-\itemize{
+\describe{
   \item{\code{method="reml"}:}{ 
   the dispersion parameter is fitted using the REML criterion,
   obtained by re-rooting the tree to one of the tips.

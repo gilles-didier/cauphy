@@ -28,7 +28,7 @@
 #' \deqn{X_l - X_k \sim \mathcal{C}(0, \mbox{disp} \times t_l).}
 #' 
 #' The \code{method} argument specifies the type of likelihood that is computed:
-#' \itemize{
+#' \describe{
 #'   \item{\code{method="reml"}:}{ 
 #'   the dispersion parameter is fitted using the REML criterion,
 #'   obtained by re-rooting the tree to one of the tips.
@@ -591,7 +591,7 @@ plot.ancestralCauchy <- function(x, node, n_col, intervals = NULL, ...){
 #' @param credMass a scalar between 0 and 1 specifying the mass within the credible interval.
 #' @param allowSplit if FALSE and the proper HDI is discontinuous,
 #' a single credible interval is returned, but this is not HDI.
-#' See code{\link[HDInterval]{hdi}} for details. Default to \code{TRUE}.
+#' See \code{\link[HDInterval]{hdi}} for details. Default to \code{TRUE}.
 #' @param node the vector of nodes where to plot the ancestral reconstruction.
 #' Can be missing, in which case all the nodes reconstructed in the \code{ancestralCauchy}
 #' @param ... further arguments to be passed to \code{\link{plot}}.

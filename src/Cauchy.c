@@ -24,9 +24,9 @@ void fillCauchyInfo(int n, TypeTree *tree, double param, TypeCauchyInfo *cinf) {
   	if(tree->node[n].child == NOSUCH) {
 		if(isnan(((double*)tree->info)[n]) || !isfinite(((double*)tree->info)[n])) {
 			if(tree->name && tree->name[n])
-				error("Value of %s is not a valid number (%le).\n", tree->name[n], ((double*)tree->info)[n]);
+				error("Value of node %s is not a valid number (%le).\n", tree->name[n], ((double*)tree->info)[n]);
 			else
-				error("Value of %s is not a valid number (%le).\n", n, ((double*)tree->info)[n]);
+				error("Value of node %d is not a valid number (%le).\n", n, ((double*)tree->info)[n]);
 		}
 		cinf[n].sizeChild = 1;
 		cinf[n].child = (int*) malloc(cinf[n].sizeChild*sizeof(int));
@@ -43,7 +43,7 @@ void fillCauchyInfo(int n, TypeTree *tree, double param, TypeCauchyInfo *cinf) {
 			if(tree->name && tree->name[n])
 				error("Node %s has a single child\n", tree->name[n]);
 			else
-				error("Node n %d has a single child\n", n);
+				error("Node %d has a single child\n", n);
 		}
 		fillCauchyInfo(cl, tree, param, cinf);
 		fillCauchyInfo(cr, tree, param, cinf);
