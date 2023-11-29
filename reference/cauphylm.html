@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cauphy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -160,21 +160,37 @@ It further assumes that the root value <code>x0</code> is a linear combination o
 covariables in <code>formula</code>.
 The corresponding regression model is:
 $$Y = X \beta + E,$$
-with:</p><ul><li><p>\(Y\) the vector of traits at the tips of the tree;</p></li>
-<li><p>\(X\) the regression matrix of covariables in <code>formula</code>;</p></li>
-<li><p>\(\beta\) the vector of coefficients;</p></li>
-<li><p>\(E\) a centered error vector that is Cauchy distributed,
+with:</p><dl><dt>\(Y\)</dt>
+<dd><p>the vector of traits at the tips of the tree;</p></dd>
+
+<dt>\(X\)</dt>
+<dd><p>the regression matrix of covariables in <code>formula</code>;</p></dd>
+
+<dt>\(\beta\)</dt>
+<dd><p>the vector of coefficients;</p></dd>
+
+<dt>\(E\)</dt>
+<dd><p>a centered error vector that is Cauchy distributed,
 and can be seen as the result of a Cauchy process starting at 0 at the root,
-and with a dispersion <code>disp</code> (see <code><a href="fitCauchy.html">fitCauchy</a></code>).</p></li>
-</ul><p>Unless specified by the user, the initial values for the parameters 
-are taken according to the following heuristics:</p><ul><li><p><code>coefficients</code>: \(\beta\) are obtained from a robust regression using <code><a href="https://rdrr.io/pkg/robustbase/man/lmrob.S.html" class="external-link">lmrob.S</a></code>;</p></li>
-<li><p><code>disp</code>: is initialized from the trait centered and normalized 
- by tip heights, with one of the following statistics, taken from Rousseeuw &amp; Croux 1993:</p><ul><li><p><code>IQR</code>: half of the inter-quartile range (see <code><a href="https://rdrr.io/r/stats/IQR.html" class="external-link">IQR</a></code>);</p></li>
-<li><p><code>MAD</code>: median absolute deviation with constant equal to 1 (see <code><a href="https://rdrr.io/r/stats/mad.html" class="external-link">mad</a></code>);</p></li>
-<li><p><code>Sn</code>: Sn statistics with constant 0.7071 (see <code><a href="https://rdrr.io/pkg/robustbase/man/Sn.html" class="external-link">Sn</a></code>);</p></li>
-<li><p><code>Qn</code>: Qn statistics with constant 1.2071 (see <code><a href="https://rdrr.io/pkg/robustbase/man/Qn.html" class="external-link">Qn</a></code>).</p></li>
-</ul></li>
-</ul><p>Unless specified by the user, <code>disp</code> is taken positive unbounded.</p>
+and with a dispersion <code>disp</code> (see <code><a href="fitCauchy.html">fitCauchy</a></code>).</p></dd>
+
+
+</dl><p>Unless specified by the user, the initial values for the parameters 
+are taken according to the following heuristics:</p><dl><dt><code>coefficients</code>:</dt>
+<dd><p>\(\beta\) are obtained from a robust regression using <code><a href="https://rdrr.io/pkg/robustbase/man/lmrob.S.html" class="external-link">lmrob.S</a></code>;</p></dd>
+
+ <dt><code>disp</code>:</dt>
+<dd><p>is initialized from the trait centered and normalized 
+ by tip heights, with one of the following statistics, taken from Rousseeuw &amp; Croux 1993:</p></dd>
+
+ 
+ 
+ 
+ 
+ 
+
+
+</dl><p>Unless specified by the user, <code>disp</code> is taken positive unbounded.</p>
 <p>The function uses <code>nloptr</code> for the numerical optimization of the 
 (restricted) likelihood, computed with function <code><a href="logDensityTipsCauchy.html">logDensityTipsCauchy</a></code>.
 It uses algorithms <a href="https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#bobyqa" class="external-link"><code>BOBYQA</code></a>

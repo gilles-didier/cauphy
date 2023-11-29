@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cauphy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -85,9 +85,14 @@
 
 <p>An object of class <code>profile.cauphyfit</code>, 
 which is a list with an element for each parameter being profiled.
-The elements are data-frames with two variables:</p><ul><li><p><code>par.vals</code>: a matrix of parameter values for each fitted model.</p></li>
-<li><p><code>profLogLik</code>: the profile log likelihood.</p></li>
-</ul></div>
+The elements are data-frames with two variables:</p><dl><dt><code>par.vals</code>:</dt>
+<dd><p>a matrix of parameter values for each fitted model.</p></dd>
+
+<dt><code>profLogLik</code>:</dt>
+<dd><p>the profile log likelihood.</p></dd>
+
+
+</dl></div>
     <div id="details">
     <h2>Details</h2>
     <p>This function computes a confidence interval for the parameters using <code><a href="vcov.cauphyfit.html">confint.cauphyfit</a></code>,

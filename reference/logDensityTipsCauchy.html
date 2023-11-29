@@ -18,7 +18,7 @@ assuming a Cauchy process."><!-- mathjax --><script src="https://cdnjs.cloudflar
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cauphy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -116,19 +116,23 @@ and <code>root.value</code>, the starting value of the process at the root (for 
 <p>The model assumes that each increment of the trait \(X\) on a branch going from node \(k\) to \(l\) 
 follows a Cauchy distribution, with a dispersion proportional to the length \(t_l\) of the branch:
 $$X_l - X_k \sim \mathcal{C}(0, \mbox{disp} \times t_l).$$</p>
-<p>The <code>method</code> argument specifies the type of likelihood that is computed:</p><ul><li><p><code>method="reml"</code>: 
-  the dispersion parameter is fitted using the REML criterion,
+<p>The <code>method</code> argument specifies the type of likelihood that is computed:</p><dl><dt><code>method="reml"</code>:</dt>
+<dd><p>the dispersion parameter is fitted using the REML criterion,
   obtained by re-rooting the tree to one of the tips.
   The default tip used to reroot the tree is:
   <code>rootTip = which.min(colSums(cophenetic.phylo(tree)))</code>.
-  Any tip can be used, but this default empirically proved to be the most robust numerically;</p></li>
-<li><p><code>method="random.root"</code>: 
-  the root value is assumed to be a random Cauchy variable, centered at <code>root.value=0</code>,
-  and with a dispersion <code>disp_root = disp * root.edge</code>;</p></li>
-<li><p><code>method="fixed.root"</code>: 
-  the model is fitted conditionally on the root value <code>root.value</code>,
-  i.e. with a model where the root value is fixed and inferred from the data.</p></li>
-</ul></div>
+  Any tip can be used, but this default empirically proved to be the most robust numerically;</p></dd>
+
+  <dt><code>method="random.root"</code>:</dt>
+<dd><p>the root value is assumed to be a random Cauchy variable, centered at <code>root.value=0</code>,
+  and with a dispersion <code>disp_root = disp * root.edge</code>;</p></dd>
+
+  <dt><code>method="fixed.root"</code>:</dt>
+<dd><p>the model is fitted conditionally on the root value <code>root.value</code>,
+  i.e. with a model where the root value is fixed and inferred from the data.</p></dd>
+
+
+</dl></div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p><code><a href="fitCauchy.html">fitCauchy</a></code></p></div>

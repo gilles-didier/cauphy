@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cauphy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -186,28 +186,39 @@ and <code>x0</code>, the starting value of the process at the root (for <code>me
 <p>The model assumes that each increment of the trait \(X\) on a branch going from node \(k\) to \(l\) 
 follows a Cauchy distribution, with a dispersion proportional to the length \(t_l\) of the branch:
 $$X_l - X_k \sim \mathcal{C}(0, \mbox{disp} \times t_l).$$</p>
-<p>Unless specified by the user, the initial values for the parameters are taken according to the following heuristics:</p><ul><li><p><code>x0</code>: is the trimmed mean of the trait,
+<p>Unless specified by the user, the initial values for the parameters are taken according to the following heuristics:</p><dl><dt><code>x0</code>:</dt>
+<dd><p>is the trimmed mean of the trait,
  keeping only 24% of the observations, as advocated in Rothenberg et al. 1964
- (for <code>method="fixed.root"</code>);</p></li>
-<li><p><code>disp</code>: is initialized from the trait centered and normalized 
- by tip heights, with one of the following statistics, taken from Rousseeuw &amp; Croux 1993:</p><ul><li><p><code>IQR</code>: half of the inter-quartile range (see <code><a href="https://rdrr.io/r/stats/IQR.html" class="external-link">IQR</a></code>);</p></li>
-<li><p><code>MAD</code>: median absolute deviation with constant equal to 1 (see <code><a href="https://rdrr.io/r/stats/mad.html" class="external-link">mad</a></code>);</p></li>
-<li><p><code>Sn</code>: Sn statistics with constant 0.7071 (see <code><a href="https://rdrr.io/pkg/robustbase/man/Sn.html" class="external-link">Sn</a></code>);</p></li>
-<li><p><code>Qn</code>: (default) Qn statistics with constant 1.2071 (see <code><a href="https://rdrr.io/pkg/robustbase/man/Qn.html" class="external-link">Qn</a></code>).</p></li>
-</ul></li>
-</ul><p>Unless specified by the user, <code>x0</code> is taken to be unbounded,
+ (for <code>method="fixed.root"</code>);</p></dd>
+
+ <dt><code>disp</code>:</dt>
+<dd><p>is initialized from the trait centered and normalized 
+ by tip heights, with one of the following statistics, taken from Rousseeuw &amp; Croux 1993:</p></dd>
+
+ 
+ 
+ 
+ 
+ 
+
+
+</dl><p>Unless specified by the user, <code>x0</code> is taken to be unbounded,
 <code>disp</code> positive unbounded.</p>
-<p>The <code>method</code> argument specifies the method used for the fit:</p><ul><li><p><code>method="reml"</code>: 
-  the dispersion parameter is fitted using the REML criterion,
+<p>The <code>method</code> argument specifies the method used for the fit:</p><dl><dt><code>method="reml"</code>:</dt>
+<dd><p>the dispersion parameter is fitted using the REML criterion,
   obtained by re-rooting the tree to one of the tips.
-  See <code><a href="logDensityTipsCauchy.html">logDensityTipsCauchy</a></code> for the default choice of the re-rooting tip;</p></li>
-<li><p><code>method="random.root"</code>: 
-  the root value is assumed to be a random Cauchy variable, centered at <code>x0=0</code>,
-  and with a dispersion <code>disp_root = disp * root.edge</code>;</p></li>
-<li><p><code>method="fixed.root"</code>: 
-  the model is fitted conditionally on the root value <code>x0</code>,
-  i.e. with a model where the root value is fixed and inferred from the data.</p></li>
-</ul><p>In the first two cases, the optimization is done on the dispersion only,
+  See <code><a href="logDensityTipsCauchy.html">logDensityTipsCauchy</a></code> for the default choice of the re-rooting tip;</p></dd>
+
+  <dt><code>method="random.root"</code>:</dt>
+<dd><p>the root value is assumed to be a random Cauchy variable, centered at <code>x0=0</code>,
+  and with a dispersion <code>disp_root = disp * root.edge</code>;</p></dd>
+
+  <dt><code>method="fixed.root"</code>:</dt>
+<dd><p>the model is fitted conditionally on the root value <code>x0</code>,
+  i.e. with a model where the root value is fixed and inferred from the data.</p></dd>
+
+
+</dl><p>In the first two cases, the optimization is done on the dispersion only,
 while in the last case the optimization is on the root value and the dispersion.</p>
 <p>The function uses <code>nloptr</code> for the numerical optimization of the 
 (restricted) likelihood, computed with function <code><a href="logDensityTipsCauchy.html">logDensityTipsCauchy</a></code>.
