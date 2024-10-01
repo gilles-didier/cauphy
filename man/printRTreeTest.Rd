@@ -7,7 +7,7 @@
 printRTreeTest(tree)
 }
 \arguments{
-\item{tree}{a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.}
+\item{tree}{a phylogeny in \code{\link[ape]{ape}} \code{\link[ape]{phylo}} format.}
 }
 \value{
 No value returned.

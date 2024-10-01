@@ -88,7 +88,7 @@ are taken according to the following heuristics:
 
 Unless specified by the user, \code{disp} is taken positive unbounded.
 
-The function uses \code{\link{nloptr}} for the numerical optimization of the 
+The function uses \code{\link[nloptr]{nloptr}} for the numerical optimization of the 
 (restricted) likelihood, computed with function \code{\link{logDensityTipsCauchy}}.
 It uses algorithms \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#bobyqa}{\code{BOBYQA}}
 and \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#mlsl-multi-level-single-linkage}{\code{MLSL_LDS}}

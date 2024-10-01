@@ -7,7 +7,7 @@
 simulateTipsCauchy(tree, root.value, disp)
 }
 \arguments{
-\item{tree}{a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.}
+\item{tree}{a phylogeny in \code{\link[ape]{ape}} \code{\link[ape]{phylo}} format.}
 
 \item{root.value}{the initial root trait value.}
 

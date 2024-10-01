@@ -42,7 +42,7 @@ The default initial values are computed from standard statistics used on (indepe
 \item{hessian}{if \code{TRUE}, then the numerical hessian is computed, for confidence interval computations. See \code{\link{compute_vcov}}.}
 
 \item{optim}{if "local", only a local optimization around the initial parameter values is performed (the default).
-If "global", a global maximization is attempted using the "MLSL" approach (see \code{\link{nloptr}}).}
+If "global", a global maximization is attempted using the "MLSL" approach (see \code{\link[nloptr]{nloptr}}).}
 
 \item{method.init.disp}{the initialization method for the dispersion.
 One of "Qn", "Sn", "MAD", "IQR". Default to the "Qn" statistics.
@@ -117,7 +117,7 @@ The \code{method} argument specifies the method used for the fit:
 In the first two cases, the optimization is done on the dispersion only,
 while in the last case the optimization is on the root value and the dispersion.
 
-The function uses \code{\link{nloptr}} for the numerical optimization of the 
+The function uses \code{\link[nloptr]{nloptr}} for the numerical optimization of the 
 (restricted) likelihood, computed with function \code{\link{logDensityTipsCauchy}}.
 It uses algorithms \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#bobyqa}{\code{BOBYQA}}
 and \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#mlsl-multi-level-single-linkage}{\code{MLSL_LDS}}

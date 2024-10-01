@@ -25,7 +25,7 @@ fit_function(
 \item{model}{a model for the trait evolution. One of \code{"cauchy"} or \code{"lambda"} (see Details).}
 
 \item{optim}{if "local", only a local optimization around the initial parameter values is performed (the default).
-If "global", a global maximization is attempted using the "MLSL" approach (see \code{\link{nloptr}}).}
+If "global", a global maximization is attempted using the "MLSL" approach (see \code{\link[nloptr]{nloptr}}).}
 
 \item{rootTip}{root tip for the reml.}
 }
