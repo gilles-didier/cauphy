@@ -1,5 +1,5 @@
 Package: cauphy
-Version: 1.0.2
+Version: 1.0.3
 Title: Trait Evolution on Phylogenies Using the Cauchy Process
 Description: The Cauchy Process can model pulsed continuous trait evolution
     on phylogenies. The likelihood is tractable, and is used for parameter
@@ -14,7 +14,7 @@ Depends:
 Imports:
     methods,
     robustbase,
-    phylolm,
+    phylolm (>= 2.6.5),
     nloptr,
     pracma,
     foreach,
@@ -29,7 +29,7 @@ Suggests:
     testthat (>= 3.0.0)
 License: GPL (>= 3)
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Config/testthat/edition: 3
 LazyData: true
 VignetteBuilder: knitr

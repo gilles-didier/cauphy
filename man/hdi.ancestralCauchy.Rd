@@ -35,11 +35,11 @@ It has an additional attribute "height" giving the probability density at the li
 This function takes an object of class \code{ancestralCauchy}, result of function
 \code{\link{ancestral}} or \code{\link{increment}}, and find the Highest (Posterior) Density Interval 
 of reconstructed states for given nodes.
-It relies on function \code{\link[HDInterval]{hdi}} from package \code{\link{HDInterval}}.
+It relies on function \code{\link[HDInterval]{hdi}} from package \code{\link[HDInterval]{HDInterval}}.
 }
 \details{
 The function relies on the \code{density} method of the \code{\link[HDInterval]{hdi}} function.
-Package \code{\link{HDInterval}} must be loaded in the workspace for this
+Package \code{\link[HDInterval]{HDInterval}} must be loaded in the workspace for this
 function to work.
 See documentation of this functions for more details on the definition and
 computation of the HDI.

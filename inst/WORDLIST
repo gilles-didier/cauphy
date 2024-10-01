@@ -1,13 +1,13 @@
 Anolis
 CMD
 Codecov
+credMass
 Croux
 EB
 Ecomorph
 HDI
 Liam
 Losos
-LTO
 MLSL
 NLOPT
 Newick
@@ -15,6 +15,7 @@ OU
 Pagel's
 Phylogenies
 Qn
+quartile
 Revell
 Rothenberg
 Rousseeuw
@@ -26,7 +27,6 @@ cauphylm
 chronogram
 clade
 colours
-credMass
 doi
 et
 fi
@@ -39,7 +39,7 @@ macroevolutionary
 pagel
 parallelization
 phylogenies
-quartile
+phylolm
 reml
 reroot
 stackoverflow

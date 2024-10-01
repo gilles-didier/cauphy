@@ -321,11 +321,12 @@ test_that("cauphylm helper functions", {
   ## Functions
   reslmdat
   logLik(reslmdat)
-  expect_equal(logLik(reslmdat)$logLik, 13.296526)
+  expect_equal(logLik(reslmdat), 13.296526, ignore_attr = TRUE)
   expect_equal(AIC(reslmdat), -20.5930517)
   # expect_equal(extractAIC(reslmdat)[2], -20.5930517)
   # expect_equal(nobs(reslmdat), ntips)
   expect_equal(unique(predict(reslmdat)), unname(reslmdat$coefficients))
+  expect_error(predict(reslmdat, se.fit = TRUE))
   expect_equal(unname(sqrt(diag(vcov(reslmdat)))), c(0.04988679, 0.06517500, 0.18057543), tolerance = 1e-2)
   expect_message(cc <- confint(reslmdat, level = 0.9), "Approximated asymptotic confidence interval using the Hessian")
   expect_true(cc[1, 1] <= mu && cc[1, 2] >= mu)
@@ -346,7 +347,7 @@ test_that("cauphylm helper functions", {
   
   ## Functions fitCauchy
   resfitcau
-  expect_equal(logLik(resfitcau)$logLik, logLik(reslmdat)$logLik)
+  expect_equal(logLik(resfitcau), logLik(reslmdat), ignore_attr = TRUE)
   expect_equal(AIC(resfitcau), AIC(reslmdat))
   expect_equal(unname(sqrt(diag(vcov(resfitcau)))), unname(sqrt(diag(vcov(reslmdat)))), tolerance = 1e-2)
   expect_message(cc <- confint(resfitcau, level = 0.9), "Approximated asymptotic confidence interval using the Hessian")

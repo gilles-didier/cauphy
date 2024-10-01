@@ -14,7 +14,7 @@ rTraitCauchy(
 \arguments{
 \item{n}{number of independent replicates}
 
-\item{phy}{a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.}
+\item{phy}{a phylogeny in \code{\link[ape]{ape}} \code{\link[ape]{phylo}} format.}
 
 \item{model}{a phylogenetic model. Default is "cauchy", for the Cauchy process. Alternative are "lambda", "kappa", and "delta".}
 

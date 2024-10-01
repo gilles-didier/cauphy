@@ -6,7 +6,7 @@
 #' Simulate a continuous trait using the Cauchy Process
 #' 
 #' @param n number of independent replicates
-#' @param phy a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.
+#' @param phy a phylogeny in \code{\link[ape]{ape}} \code{\link[ape]{phylo}} format.
 #' @param model a phylogenetic model. Default is "cauchy", for the Cauchy process. Alternative are "lambda", "kappa", and "delta".
 #' @param parameters list of parameters for the model (see Details).
 #' 
@@ -103,7 +103,7 @@ rTraitCauchy <- function(n = 1, phy,
 #' @description
 #' Simulate tip values with a Cauchy process
 #' 
-#' @param tree a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.
+#' @param tree a phylogeny in \code{\link[ape]{ape}} \code{\link[ape]{phylo}} format.
 #' @param root.value the initial root trait value.
 #' @param disp the dispersion parameter of the Cauchy process.
 #' 

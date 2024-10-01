@@ -9,7 +9,7 @@ NULL
 #' @description
 #' \code{printRtree} prints a tree in Newick format
 #' 
-#' @param tree a phylogeny in \code{\link{ape}} \code{\link[ape]{phylo}} format.
+#' @param tree a phylogeny in \code{\link[ape]{ape}} \code{\link[ape]{phylo}} format.
 #' 
 #' @return No value returned.
 #' 

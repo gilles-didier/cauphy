@@ -43,7 +43,7 @@
 #' 
 #' Unless specified by the user, \code{disp} is taken positive unbounded.
 #' 
-#' The function uses \code{\link{nloptr}} for the numerical optimization of the 
+#' The function uses \code{\link[nloptr]{nloptr}} for the numerical optimization of the 
 #' (restricted) likelihood, computed with function \code{\link{logDensityTipsCauchy}}.
 #' It uses algorithms \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#bobyqa}{\code{BOBYQA}}
 #' and \href{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#mlsl-multi-level-single-linkage}{\code{MLSL_LDS}}
@@ -345,7 +345,10 @@ AIC.cauphylm <- phylolm::AIC.phylolm
 #' @inheritParams phylolm::predict.phylolm
 #' @method predict cauphylm
 #' @rdname vcov.cauphylm
-predict.cauphylm <- phylolm::predict.phylolm
+predict.cauphylm <- function(object, newdata=NULL, se.fit = FALSE, ...){
+  if (se.fit) stop("'se.fit' cannot be used in 'predict.cauphylm'. Please set to 'se.fit=FALSE'.")
+    return(phylolm::predict.phylolm(object, newdata, se.fit = FALSE, ...))
+}
 #' @export
 #' @inheritParams stats::confint
 #' @method confint cauphylm

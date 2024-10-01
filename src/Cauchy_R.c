@@ -37,41 +37,6 @@ SEXP getListElement(SEXP list, const char *str) {
         }
     return elmt;
 }
-
-SEXP Tree2Phylo(TypeTree *tree) {
-	SEXP phy;
-	int n, i, ind = 0;
-	SEXP tipLabel, edge, nNode, edgeLength, list_names;
-	int *edgeP;
-	double *edgeLengthP;
-	char *namesList[4] = {"edge", "Nnode", "tip.label", "edge.length"};
-	PROTECT(list_names = allocVector(STRSXP,4));
-	for(i=0; i<4; i++)
-		SET_STRING_ELT(list_names,i,mkChar(namesList[i]));
-	edge = PROTECT(allocMatrix(INTSXP, tree->size-1, 2));
-	edgeLength = PROTECT(allocVector(REALSXP, tree->size-1));
-	tipLabel = PROTECT(allocVector(STRSXP, tree->root));
-	edgeP = INTEGER(edge);
-	edgeLengthP = REAL(edgeLength);
-	for(n=0; n<tree->size; n++)
-		if(n != tree->root) {
-			edgeLengthP[ind] = tree->time[n];
-			edgeP[ind] = tree->parent[n]+1;
-			edgeP[ind+tree->size-1] = n+1;
-			ind++;
-		}
-	for(i=0; i<tree->root; i++)
-		SET_STRING_ELT(tipLabel,i,mkChar(tree->name[i]));
-	nNode = PROTECT(allocVector(INTSXP, 1));
-	INTEGER(nNode)[0] = tree->size-tree->root+1;
-	PROTECT(phy = allocVector(VECSXP, 4));
-	SET_VECTOR_ELT(phy, 0, edge);
-	SET_VECTOR_ELT(phy, 1, nNode);
-	SET_VECTOR_ELT(phy, 2, tipLabel);
-	SET_VECTOR_ELT(phy, 3, edgeLength);
-	SET_TYPEOF(phy, LANGSXP);
-	return phy;
-}	
 	
 void inspect(SEXP x) {
   SEXP inspectCall = PROTECT(Rf_lang2(Rf_install("inspect"), x));

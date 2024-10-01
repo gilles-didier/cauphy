@@ -39,7 +39,7 @@ The default initial values are computed from standard statistics used on (indepe
 \item{root.edge}{multiplicative factor for the root dispersion, equal to the length of the root edge. Ignored if \code{method!=random.root}.}
 
 \item{optim}{if "local", only a local optimization around the initial parameter values is performed (the default).
-If "global", a global maximization is attempted using the "MLSL" approach (see \code{\link{nloptr}}).}
+If "global", a global maximization is attempted using the "MLSL" approach (see \code{\link[nloptr]{nloptr}}).}
 
 \item{method.init.disp}{the initialization method for the dispersion.
 One of "Qn", "Sn", "MAD", "IQR". Default to the "Qn" statistics.
