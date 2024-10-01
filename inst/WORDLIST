@@ -7,7 +7,6 @@ Ecomorph
 HDI
 Liam
 Losos
-LTO
 MLSL
 NLOPT
 Newick
@@ -26,7 +25,6 @@ cauphylm
 chronogram
 clade
 colours
-credMass
 doi
 et
 fi
@@ -39,7 +37,7 @@ macroevolutionary
 pagel
 parallelization
 phylogenies
-quartile
+phylolm
 reml
 reroot
 stackoverflow

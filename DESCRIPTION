@@ -14,7 +14,7 @@ Depends:
 Imports:
     methods,
     robustbase,
-    phylolm,
+    phylolm (>= 2.6.5),
     nloptr,
     pracma,
     foreach,

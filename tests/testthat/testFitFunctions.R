@@ -326,6 +326,7 @@ test_that("cauphylm helper functions", {
   # expect_equal(extractAIC(reslmdat)[2], -20.5930517)
   # expect_equal(nobs(reslmdat), ntips)
   expect_equal(unique(predict(reslmdat)), unname(reslmdat$coefficients))
+  expect_error(predict(reslmdat, se.fit = TRUE))
   expect_equal(unname(sqrt(diag(vcov(reslmdat)))), c(0.04988679, 0.06517500, 0.18057543), tolerance = 1e-2)
   expect_message(cc <- confint(reslmdat, level = 0.9), "Approximated asymptotic confidence interval using the Hessian")
   expect_true(cc[1, 1] <= mu && cc[1, 2] >= mu)
