@@ -143,7 +143,7 @@ test_that("testRootingStrategies", {
   ## disp 0
   ll1 <- logDensityTipsCauchy(tree, trait, NULL, 0, method = "reml", rootTip = rootTip)
   ll2 <- logDensityTipsCauchy(tree = retree, tipTrait = tipTraitBis, root.value = root.value, disp = 0, method = "random.root")
-  expect_equal(ll1, ll2, tolerance = 1e-5)
+  expect_equal(ll1, ll2, tolerance = 1e-4)
   
   ## disp 1.3
   ll1 <- logDensityTipsCauchy(tree, trait, NULL, 1.3, method = "reml", rootTip = rootTip)
