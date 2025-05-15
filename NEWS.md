@@ -1,5 +1,7 @@
 # cauphy 1.0.3.9000
 
+* Update GHA test workflow
+
 # cauphy 1.0.3
 
 * Make 'predict.cauphylm' compatible with 'predict.phylolm' version 2.6.5.
